@@ -1,0 +1,295 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		412F8FA21CF4A663009ACBE2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412F8FA11CF4A663009ACBE2 /* AppDelegate.swift */; };
+		412F8FA41CF4A663009ACBE2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412F8FA31CF4A663009ACBE2 /* ViewController.swift */; };
+		412F8FA71CF4A663009ACBE2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA51CF4A663009ACBE2 /* Main.storyboard */; };
+		412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA81CF4A663009ACBE2 /* Assets.xcassets */; };
+		412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		412F8F9E1CF4A663009ACBE2 /* MonkeyChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonkeyChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		412F8FA11CF4A663009ACBE2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		412F8FA31CF4A663009ACBE2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		412F8FA61CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		412F8FA81CF4A663009ACBE2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		412F8FAB1CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		412F8FAD1CF4A663009ACBE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		412F8F9B1CF4A663009ACBE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		412F8F951CF4A663009ACBE2 = {
+			isa = PBXGroup;
+			children = (
+				412F8FA01CF4A663009ACBE2 /* MonkeyChat */,
+				412F8F9F1CF4A663009ACBE2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		412F8F9F1CF4A663009ACBE2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				412F8F9E1CF4A663009ACBE2 /* MonkeyChat.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		412F8FA01CF4A663009ACBE2 /* MonkeyChat */ = {
+			isa = PBXGroup;
+			children = (
+				412F8FA11CF4A663009ACBE2 /* AppDelegate.swift */,
+				412F8FA31CF4A663009ACBE2 /* ViewController.swift */,
+				412F8FA51CF4A663009ACBE2 /* Main.storyboard */,
+				412F8FA81CF4A663009ACBE2 /* Assets.xcassets */,
+				412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */,
+				412F8FAD1CF4A663009ACBE2 /* Info.plist */,
+			);
+			path = MonkeyChat;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		412F8F9D1CF4A663009ACBE2 /* MonkeyChat */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 412F8FB01CF4A663009ACBE2 /* Build configuration list for PBXNativeTarget "MonkeyChat" */;
+			buildPhases = (
+				412F8F9A1CF4A663009ACBE2 /* Sources */,
+				412F8F9B1CF4A663009ACBE2 /* Frameworks */,
+				412F8F9C1CF4A663009ACBE2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MonkeyChat;
+			productName = MonkeyChat;
+			productReference = 412F8F9E1CF4A663009ACBE2 /* MonkeyChat.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		412F8F961CF4A663009ACBE2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = Criptext;
+				TargetAttributes = {
+					412F8F9D1CF4A663009ACBE2 = {
+						CreatedOnToolsVersion = 7.3;
+					};
+				};
+			};
+			buildConfigurationList = 412F8F991CF4A663009ACBE2 /* Build configuration list for PBXProject "MonkeyChat" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 412F8F951CF4A663009ACBE2;
+			productRefGroup = 412F8F9F1CF4A663009ACBE2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				412F8F9D1CF4A663009ACBE2 /* MonkeyChat */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		412F8F9C1CF4A663009ACBE2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */,
+				412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */,
+				412F8FA71CF4A663009ACBE2 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		412F8F9A1CF4A663009ACBE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				412F8FA41CF4A663009ACBE2 /* ViewController.swift in Sources */,
+				412F8FA21CF4A663009ACBE2 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		412F8FA51CF4A663009ACBE2 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				412F8FA61CF4A663009ACBE2 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				412F8FAB1CF4A663009ACBE2 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		412F8FAE1CF4A663009ACBE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		412F8FAF1CF4A663009ACBE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		412F8FB11CF4A663009ACBE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = MonkeyChat/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat.MonkeyChat;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		412F8FB21CF4A663009ACBE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = MonkeyChat/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat.MonkeyChat;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		412F8F991CF4A663009ACBE2 /* Build configuration list for PBXProject "MonkeyChat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				412F8FAE1CF4A663009ACBE2 /* Debug */,
+				412F8FAF1CF4A663009ACBE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		412F8FB01CF4A663009ACBE2 /* Build configuration list for PBXNativeTarget "MonkeyChat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				412F8FB11CF4A663009ACBE2 /* Debug */,
+				412F8FB21CF4A663009ACBE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 412F8F961CF4A663009ACBE2 /* Project object */;
+}
