@@ -7,25 +7,68 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		412F8FA21CF4A663009ACBE2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412F8FA11CF4A663009ACBE2 /* AppDelegate.swift */; };
-		412F8FA41CF4A663009ACBE2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412F8FA31CF4A663009ACBE2 /* ViewController.swift */; };
-		412F8FA71CF4A663009ACBE2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA51CF4A663009ACBE2 /* Main.storyboard */; };
 		412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA81CF4A663009ACBE2 /* Assets.xcassets */; };
 		412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */; };
+		413BC2EC1D0E6A4A00314AE1 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BC2EB1D0E6A4A00314AE1 /* SettingsTableViewController.swift */; };
+		41A8200F1D063B280035A012 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 41A8200E1D063B280035A012 /* libz.1.2.5.dylib */; };
+		41AF84ED1CFD12A3006ED473 /* MonkeyChatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84EC1CFD12A3006ED473 /* MonkeyChatTests.swift */; };
+		41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F51CFD4963006ED473 /* AppDelegate.swift */; };
+		41AF84FD1CFD4963006ED473 /* DemoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F71CFD4963006ED473 /* DemoModel.swift */; };
+		41AF84FE1CFD4963006ED473 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F81CFD4963006ED473 /* Conversation.swift */; };
+		41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */; };
+		41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84FA1CFD4963006ED473 /* ChatViewController.swift */; };
+		41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 41AF85011CFD49F0006ED473 /* Main.storyboard */; };
+		41AF85051CFDE8F8006ED473 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85041CFDE8F8006ED473 /* User.swift */; };
+		41AF85081CFDE917006ED473 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85071CFDE917006ED473 /* DBManager.swift */; };
+		5CC071AF3AD7E379E17E98E5 /* Pods_MonkeyChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15C90BEB54151B20427A389D /* Pods_MonkeyChat.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		41AF84EF1CFD12A3006ED473 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 412F8F961CF4A663009ACBE2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 412F8F9D1CF4A663009ACBE2;
+			remoteInfo = MonkeyChat;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		15C90BEB54151B20427A389D /* Pods_MonkeyChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonkeyChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		412F8F9E1CF4A663009ACBE2 /* MonkeyChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonkeyChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		412F8FA11CF4A663009ACBE2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		412F8FA31CF4A663009ACBE2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		412F8FA61CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		412F8FA81CF4A663009ACBE2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		412F8FAB1CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		412F8FAD1CF4A663009ACBE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		413BC2EB1D0E6A4A00314AE1 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
+		41A820081D06331C0035A012 /* libz.1.2.5.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.1.2.5.tbd; path = usr/lib/libz.1.2.5.tbd; sourceTree = SDKROOT; };
+		41A8200A1D0633340035A012 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		41A8200E1D063B280035A012 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = ../../.Trash/libz.1.2.5.dylib; sourceTree = "<group>"; };
+		41AF84EA1CFD12A3006ED473 /* MonkeyChatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonkeyChatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		41AF84EC1CFD12A3006ED473 /* MonkeyChatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonkeyChatTests.swift; sourceTree = "<group>"; };
+		41AF84EE1CFD12A3006ED473 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		41AF84F51CFD4963006ED473 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		41AF84F71CFD4963006ED473 /* DemoModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoModel.swift; sourceTree = "<group>"; };
+		41AF84F81CFD4963006ED473 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationListViewController.swift; sourceTree = "<group>"; };
+		41AF84FA1CFD4963006ED473 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
+		41AF85011CFD49F0006ED473 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		41AF85041CFDE8F8006ED473 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		41AF85071CFDE917006ED473 /* DBManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
+		54BAE848AD63083227327E93 /* Pods-MonkeyChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.release.xcconfig"; sourceTree = "<group>"; };
+		9E843310D295E82F74648A91 /* Pods-MonkeyChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		412F8F9B1CF4A663009ACBE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CC071AF3AD7E379E17E98E5 /* Pods_MonkeyChat.framework in Frameworks */,
+				41A8200F1D063B280035A012 /* libz.1.2.5.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		41AF84E71CFD12A3006ED473 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -39,7 +82,10 @@
 			isa = PBXGroup;
 			children = (
 				412F8FA01CF4A663009ACBE2 /* MonkeyChat */,
+				41AF84EB1CFD12A3006ED473 /* MonkeyChatTests */,
 				412F8F9F1CF4A663009ACBE2 /* Products */,
+				4E09F1FFB60AB895C8B9EC85 /* Pods */,
+				61E176C5388A51D50FDB483D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -47,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				412F8F9E1CF4A663009ACBE2 /* MonkeyChat.app */,
+				41AF84EA1CFD12A3006ED473 /* MonkeyChatTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -54,14 +101,57 @@
 		412F8FA01CF4A663009ACBE2 /* MonkeyChat */ = {
 			isa = PBXGroup;
 			children = (
-				412F8FA11CF4A663009ACBE2 /* AppDelegate.swift */,
-				412F8FA31CF4A663009ACBE2 /* ViewController.swift */,
-				412F8FA51CF4A663009ACBE2 /* Main.storyboard */,
+				41AF85061CFDE904006ED473 /* Model */,
+				41AF84F51CFD4963006ED473 /* AppDelegate.swift */,
+				413BC2EB1D0E6A4A00314AE1 /* SettingsTableViewController.swift */,
+				41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */,
+				41AF84FA1CFD4963006ED473 /* ChatViewController.swift */,
+				41AF85011CFD49F0006ED473 /* Main.storyboard */,
 				412F8FA81CF4A663009ACBE2 /* Assets.xcassets */,
 				412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */,
 				412F8FAD1CF4A663009ACBE2 /* Info.plist */,
 			);
 			path = MonkeyChat;
+			sourceTree = "<group>";
+		};
+		41AF84EB1CFD12A3006ED473 /* MonkeyChatTests */ = {
+			isa = PBXGroup;
+			children = (
+				41AF84EC1CFD12A3006ED473 /* MonkeyChatTests.swift */,
+				41AF84EE1CFD12A3006ED473 /* Info.plist */,
+			);
+			path = MonkeyChatTests;
+			sourceTree = "<group>";
+		};
+		41AF85061CFDE904006ED473 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				41AF85071CFDE917006ED473 /* DBManager.swift */,
+				41AF84F71CFD4963006ED473 /* DemoModel.swift */,
+				41AF84F81CFD4963006ED473 /* Conversation.swift */,
+				41AF85041CFDE8F8006ED473 /* User.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		4E09F1FFB60AB895C8B9EC85 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9E843310D295E82F74648A91 /* Pods-MonkeyChat.debug.xcconfig */,
+				54BAE848AD63083227327E93 /* Pods-MonkeyChat.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		61E176C5388A51D50FDB483D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				41A8200E1D063B280035A012 /* libz.1.2.5.dylib */,
+				41A8200A1D0633340035A012 /* libz.tbd */,
+				41A820081D06331C0035A012 /* libz.1.2.5.tbd */,
+				15C90BEB54151B20427A389D /* Pods_MonkeyChat.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -71,9 +161,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 412F8FB01CF4A663009ACBE2 /* Build configuration list for PBXNativeTarget "MonkeyChat" */;
 			buildPhases = (
+				EF55CEB5226673085F747D8A /* 📦 Check Pods Manifest.lock */,
 				412F8F9A1CF4A663009ACBE2 /* Sources */,
 				412F8F9B1CF4A663009ACBE2 /* Frameworks */,
 				412F8F9C1CF4A663009ACBE2 /* Resources */,
+				070F9CCAB1F9397812B71754 /* 📦 Embed Pods Frameworks */,
+				E0A5BF7B49817D82ED9A45AF /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -83,6 +176,24 @@
 			productName = MonkeyChat;
 			productReference = 412F8F9E1CF4A663009ACBE2 /* MonkeyChat.app */;
 			productType = "com.apple.product-type.application";
+		};
+		41AF84E91CFD12A3006ED473 /* MonkeyChatTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 41AF84F31CFD12A3006ED473 /* Build configuration list for PBXNativeTarget "MonkeyChatTests" */;
+			buildPhases = (
+				41AF84E61CFD12A3006ED473 /* Sources */,
+				41AF84E71CFD12A3006ED473 /* Frameworks */,
+				41AF84E81CFD12A3006ED473 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				41AF84F01CFD12A3006ED473 /* PBXTargetDependency */,
+			);
+			name = MonkeyChatTests;
+			productName = MonkeyChatTests;
+			productReference = 41AF84EA1CFD12A3006ED473 /* MonkeyChatTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -96,6 +207,10 @@
 				TargetAttributes = {
 					412F8F9D1CF4A663009ACBE2 = {
 						CreatedOnToolsVersion = 7.3;
+					};
+					41AF84E91CFD12A3006ED473 = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = 412F8F9D1CF4A663009ACBE2;
 					};
 				};
 			};
@@ -113,6 +228,7 @@
 			projectRoot = "";
 			targets = (
 				412F8F9D1CF4A663009ACBE2 /* MonkeyChat */,
+				41AF84E91CFD12A3006ED473 /* MonkeyChatTests */,
 			);
 		};
 /* End PBXProject section */
@@ -122,35 +238,104 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */,
 				412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */,
 				412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */,
-				412F8FA71CF4A663009ACBE2 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		41AF84E81CFD12A3006ED473 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		070F9CCAB1F9397812B71754 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E0A5BF7B49817D82ED9A45AF /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EF55CEB5226673085F747D8A /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		412F8F9A1CF4A663009ACBE2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				412F8FA41CF4A663009ACBE2 /* ViewController.swift in Sources */,
-				412F8FA21CF4A663009ACBE2 /* AppDelegate.swift in Sources */,
+				41AF84FE1CFD4963006ED473 /* Conversation.swift in Sources */,
+				41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */,
+				41AF85051CFDE8F8006ED473 /* User.swift in Sources */,
+				41AF84FD1CFD4963006ED473 /* DemoModel.swift in Sources */,
+				413BC2EC1D0E6A4A00314AE1 /* SettingsTableViewController.swift in Sources */,
+				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
+				41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */,
+				41AF85081CFDE917006ED473 /* DBManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		41AF84E61CFD12A3006ED473 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				41AF84ED1CFD12A3006ED473 /* MonkeyChatTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXVariantGroup section */
-		412F8FA51CF4A663009ACBE2 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				412F8FA61CF4A663009ACBE2 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
+/* Begin PBXTargetDependency section */
+		41AF84F01CFD12A3006ED473 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 412F8F9D1CF4A663009ACBE2 /* MonkeyChat */;
+			targetProxy = 41AF84EF1CFD12A3006ED473 /* PBXContainerItemProxy */;
 		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
 		412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -249,6 +434,7 @@
 		};
 		412F8FB11CF4A663009ACBE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E843310D295E82F74648A91 /* Pods-MonkeyChat.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = MonkeyChat/Info.plist;
@@ -260,12 +446,37 @@
 		};
 		412F8FB21CF4A663009ACBE2 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 54BAE848AD63083227327E93 /* Pods-MonkeyChat.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = MonkeyChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat.MonkeyChat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		41AF84F11CFD12A3006ED473 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = MonkeyChatTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.MonkeyChatTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MonkeyChat.app/MonkeyChat";
+			};
+			name = Debug;
+		};
+		41AF84F21CFD12A3006ED473 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = MonkeyChatTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.MonkeyChatTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MonkeyChat.app/MonkeyChat";
 			};
 			name = Release;
 		};
@@ -288,6 +499,16 @@
 				412F8FB21CF4A663009ACBE2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		41AF84F31CFD12A3006ED473 /* Build configuration list for PBXNativeTarget "MonkeyChatTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				41AF84F11CFD12A3006ED473 /* Debug */,
+				41AF84F21CFD12A3006ED473 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -1,0 +1,55 @@
+PODS:
+  - AFNetworking (3.1.0):
+    - AFNetworking/NSURLSession (= 3.1.0)
+    - AFNetworking/Reachability (= 3.1.0)
+    - AFNetworking/Security (= 3.1.0)
+    - AFNetworking/Serialization (= 3.1.0)
+    - AFNetworking/UIKit (= 3.1.0)
+  - AFNetworking/NSURLSession (3.1.0):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.1.0)
+  - AFNetworking/Security (3.1.0)
+  - AFNetworking/Serialization (3.1.0)
+  - AFNetworking/UIKit (3.1.0):
+    - AFNetworking/NSURLSession
+  - JSQMessagesViewController (7.3.1):
+    - JSQSystemSoundPlayer (~> 2.0.1)
+  - JSQSystemSoundPlayer (2.0.1)
+  - MonkeyKit (0.9.0):
+    - AFNetworking
+    - UICKeyChainStore
+  - Realm (1.0.0):
+    - Realm/Headers (= 1.0.0)
+  - Realm/Headers (1.0.0)
+  - RealmSwift (1.0.0):
+    - Realm (= 1.0.0)
+  - UICKeyChainStore (2.1.0)
+
+DEPENDENCIES:
+  - JSQMessagesViewController
+  - MonkeyKit (from `https://github.com/Criptext/iOS-MonkeySDK.git`)
+  - RealmSwift
+
+EXTERNAL SOURCES:
+  MonkeyKit:
+    :git: https://github.com/Criptext/iOS-MonkeySDK.git
+
+CHECKOUT OPTIONS:
+  MonkeyKit:
+    :commit: 1ea5bf241a862cbe596ce63e2462d604a6effc70
+    :git: https://github.com/Criptext/iOS-MonkeySDK.git
+
+SPEC CHECKSUMS:
+  AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
+  JSQMessagesViewController: 3847120a97a7ab3bdc701f166c59f3955f7801c7
+  JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
+  MonkeyKit: ef9b85ce116c5f6262cc8dd880e4ada8c7bb3ca1
+  Realm: e15cd8e7c11d3e576f628ba0b7cb855269b4991c
+  RealmSwift: 3229306d020d96f83b335f87a0dcbf2cef0e6a2b
+  UICKeyChainStore: f1cbd42216a113f0165de1e733e62905b8823432
+
+PODFILE CHECKSUM: 222089450452a651f40c4841a8b832158711edb3
+
+COCOAPODS: 1.0.0

@@ -1,12 +1,13 @@
 //
 //  AppDelegate.swift
-//  MonkeyChat
+//  SwiftExample
 //
-//  Created by Gianni Carlo on 5/24/16.
-//  Copyright © 2016 Criptext. All rights reserved.
+//  Created by Dan Leonard on 5/8/16.
+//  Copyright © 2016 MacMeDan. All rights reserved.
 //
 
 import UIKit
+import MonkeyKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        Monkey.sharedInstance().initWithApp("",
+                                            secret: "",
+                                            user: ["name":"Example User"],
+                                            expireSession: false,
+                                            debugging: true,
+                                            autoSync: true,
+                                            lastTimestamp: nil)
+        
+        
         return true
     }
 
