@@ -9,7 +9,11 @@
 /* Begin PBXBuildFile section */
 		412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA81CF4A663009ACBE2 /* Assets.xcassets */; };
 		412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */; };
-		413BC2EC1D0E6A4A00314AE1 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BC2EB1D0E6A4A00314AE1 /* SettingsTableViewController.swift */; };
+		419C36621D4FCEFA00B7F95D /* check-blue-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36601D4FCEFA00B7F95D /* check-blue-icon.png */; };
+		419C36631D4FCEFA00B7F95D /* check-grey-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36611D4FCEFA00B7F95D /* check-grey-icon.png */; };
+		419C36651D4FCF6700B7F95D /* Profile_imgDefault.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */; };
+		419C36671D4FCFAF00B7F95D /* icon_more_right.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36661D4FCFAF00B7F95D /* icon_more_right.png */; };
+		41A575651D52376500D26EAD /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A575641D52376500D26EAD /* Message.swift */; };
 		41A8200F1D063B280035A012 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 41A8200E1D063B280035A012 /* libz.1.2.5.dylib */; };
 		41AF84ED1CFD12A3006ED473 /* MonkeyChatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84EC1CFD12A3006ED473 /* MonkeyChatTests.swift */; };
 		41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F51CFD4963006ED473 /* AppDelegate.swift */; };
@@ -39,7 +43,11 @@
 		412F8FA81CF4A663009ACBE2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		412F8FAB1CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		412F8FAD1CF4A663009ACBE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		413BC2EB1D0E6A4A00314AE1 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
+		419C36601D4FCEFA00B7F95D /* check-blue-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check-blue-icon.png"; sourceTree = "<group>"; };
+		419C36611D4FCEFA00B7F95D /* check-grey-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check-grey-icon.png"; sourceTree = "<group>"; };
+		419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Profile_imgDefault.png; sourceTree = "<group>"; };
+		419C36661D4FCFAF00B7F95D /* icon_more_right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_more_right.png; sourceTree = "<group>"; };
+		41A575641D52376500D26EAD /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		41A820081D06331C0035A012 /* libz.1.2.5.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.1.2.5.tbd; path = usr/lib/libz.1.2.5.tbd; sourceTree = SDKROOT; };
 		41A8200A1D0633340035A012 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		41A8200E1D063B280035A012 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = ../../.Trash/libz.1.2.5.dylib; sourceTree = "<group>"; };
@@ -101,9 +109,12 @@
 		412F8FA01CF4A663009ACBE2 /* MonkeyChat */ = {
 			isa = PBXGroup;
 			children = (
+				419C36661D4FCFAF00B7F95D /* icon_more_right.png */,
+				419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */,
+				419C36601D4FCEFA00B7F95D /* check-blue-icon.png */,
+				419C36611D4FCEFA00B7F95D /* check-grey-icon.png */,
 				41AF85061CFDE904006ED473 /* Model */,
 				41AF84F51CFD4963006ED473 /* AppDelegate.swift */,
-				413BC2EB1D0E6A4A00314AE1 /* SettingsTableViewController.swift */,
 				41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */,
 				41AF84FA1CFD4963006ED473 /* ChatViewController.swift */,
 				41AF85011CFD49F0006ED473 /* Main.storyboard */,
@@ -130,6 +141,7 @@
 				41AF84F71CFD4963006ED473 /* DemoModel.swift */,
 				41AF84F81CFD4963006ED473 /* Conversation.swift */,
 				41AF85041CFDE8F8006ED473 /* User.swift */,
+				41A575641D52376500D26EAD /* Message.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -239,8 +251,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */,
+				419C36651D4FCF6700B7F95D /* Profile_imgDefault.png in Resources */,
 				412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */,
 				412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */,
+				419C36671D4FCFAF00B7F95D /* icon_more_right.png in Resources */,
+				419C36631D4FCEFA00B7F95D /* check-grey-icon.png in Resources */,
+				419C36621D4FCEFA00B7F95D /* check-blue-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,8 +326,8 @@
 				41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */,
 				41AF85051CFDE8F8006ED473 /* User.swift in Sources */,
 				41AF84FD1CFD4963006ED473 /* DemoModel.swift in Sources */,
-				413BC2EC1D0E6A4A00314AE1 /* SettingsTableViewController.swift in Sources */,
 				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
+				41A575651D52376500D26EAD /* Message.swift in Sources */,
 				41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */,
 				41AF85081CFDE917006ED473 /* DBManager.swift in Sources */,
 			);

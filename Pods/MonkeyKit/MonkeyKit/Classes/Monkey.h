@@ -85,16 +85,6 @@
  */
 -(void)getPendingMessagesWithGroups;
 
-/**
- *  Add listener that conforms to the `MOKMessageReceiver` protocol.
- *  This listener will receive all the incoming messages, notifications and acknowledges
- */
-- (void)addReceiver:(nonnull id <MOKMessageReceiver>)receiver;
-
-/**
- *  Remove a previously added listener
- */
-- (void)removeReceiver:(nonnull id <MOKMessageReceiver>)receiver;
 
 /**
  *  Send a text to a user
@@ -163,31 +153,19 @@
                    success:(nullable void (^)(NSData * _Nonnull data))success
                    failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
+/**
+ *  Get conversations for my Monkey Id.
+ */
+-(void)getConversationsSince:(NSInteger)timestamp
+                    quantity:(int)qty
+                     success:(nullable void (^)(NSData * _Nonnull data))success
+                     failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
+
 @end
 
 ///--------------------
 /// @name Notifications
 ///--------------------
-
-/**
- Posted when the socket connection status is changed.
- */
-FOUNDATION_EXPORT NSString * __nonnull const MonkeySocketStatusChangeNotification;
-
-/**
- Posted when the socket connection is successful.
- */
-FOUNDATION_EXPORT NSString * __nonnull const MonkeySocketDidConnectNotifications;
-
-/**
- Posted when the socket connection was closed.
- */
-FOUNDATION_EXPORT NSString * __nonnull const MonkeySocketDidDisconnectNotification;
-
-/**
- Posted when the socket connection is unavailable.
- */
-FOUNDATION_EXPORT NSString * __nonnull const MonkeySocketUnavailableNotification;
 
 /**
  Posted when the registration and secure handshake with the server is successful.
@@ -199,3 +177,68 @@ FOUNDATION_EXPORT NSString * __nonnull const MonkeyRegistrationDidCompleteNotifi
  Posted when the registration and secure handshake with the server failed.
  */
 FOUNDATION_EXPORT NSString * __nonnull const MonkeyRegistrationDidFailNotification;
+
+/**
+ Posted when the socket connection status is changed.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeySocketStatusChangeNotification;
+
+/**
+ Posted when a message arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyMessageNotification;
+
+/**
+ Posted when a notification arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyNotificationNotification;
+
+/**
+ Posted when an acknowledgement to a message I sent, arrives throught the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyAcknowledgeNotification;
+
+/**
+ Posted when a group creation notification arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyGroupCreateNotification;
+
+/**
+ Posted when a group member removal notification arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyGroupRemoveNotification;
+
+/**
+ Posted when a group add member notification arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyGroupAddNotification;
+
+/**
+ Posted when the list of group (ids) that I belong to, arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyGroupListNotification;
+
+/**
+ Posted when an open notification arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyOpenNotification;
+
+/**
+ Posted when a response to an open I did arrives through the socket.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyOpenResponseNotification;
+
+/**
+ Posted when someone closes a conversation with me.
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyCloseNotification;
+
+/**
+ Posted when the app should store the message
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyMessageStoreNotification;
+
+/**
+ Posted when the app should delete the message
+ */
+FOUNDATION_EXPORT NSString * __nonnull const MonkeyMessageDeleteNotification;

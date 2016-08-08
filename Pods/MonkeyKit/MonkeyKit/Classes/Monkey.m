@@ -17,16 +17,26 @@
 
 NSString * const MonkeyRegistrationDidCompleteNotification = @"com.criptext.networking.register.success";
 NSString * const MonkeyRegistrationDidFailNotification = @"com.criptext.networking.register.fail";
-NSString * const MonkeySocketDidConnectNotification = @"com.criptext.networking.socket.resume";
-NSString * const MonkeySocketDidDisconnectNotification = @"com.criptext.networking.socket.close";
-NSString * const MonkeySocketUnavailableNotification = @"com.criptext.networking.socket.unavailable";
+
 NSString * const MonkeySocketStatusChangeNotification = @"com.criptext.networking.socket.status";
-NSString * const MonkeyMessageStoreNotification = @"com.criptext.message.store";
-NSString * const MonkeyMessageDeleteNotification = @"com.criptext.message.delete";
-NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
+
+NSString * const MonkeyMessageNotification = @"com.criptext.networking.message.received";
+NSString * const MonkeyMessageDeleteNotification = @"com.criptext.networking.message.delete";
+NSString * const MonkeyNotificationNotification = @"com.criptext.networking.notification";
+NSString * const MonkeyAcknowledgeNotification = @"com.criptext.networking.acknowledge";
+
+NSString * const MonkeyGroupCreateNotification = @"com.criptext.networking.group.create";
+NSString * const MonkeyGroupRemoveNotification = @"com.criptext.networking.group.remove";
+NSString * const MonkeyGroupAddNotification = @"com.criptext.networking.group.add";
+NSString * const MonkeyGroupListNotification = @"com.criptext.group.list";
+
+NSString * const MonkeyOpenNotification = @"com.criptext.networking.open.received";
+NSString * const MonkeyOpenResponseNotification = @"com.criptext.networking.open.response";
+NSString * const MonkeyCloseNotification = @"com.criptext.networking.close";
+
+NSString * const MonkeyMessageStoreNotification = @"com.criptext.db.message.store";
 
 @interface Monkey () <MOKComServerConnectionDelegate>
-@property (nonatomic,strong) NSMutableArray *receivers;
 @property (nonatomic, strong) MOKSBJsonWriter *jsonWriter;
 @property (nonatomic, strong) MOKSBJsonParser *jsonParser;
 @end
@@ -57,7 +67,6 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     if (self) {
         _jsonWriter = [MOKSBJsonWriter new];
         _jsonParser = [MOKSBJsonParser new];
-        _receivers = [[NSMutableArray alloc]init];
         _appId = nil;
         _appKey = nil;
         _domain = @"monkey.criptext.com";
@@ -71,6 +80,10 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     return self;
 }
 
+- (void)checkSession{
+    NSAssert(![_session[@"monkeyId"] isEqualToString:@""], @"There's no session created, don't forget to call `initWithApp:secret:user:expireSession:debugging:autoSync:lastTimestamp:`");
+}
+
 -(void)initWithApp:(NSString *)appId
             secret:(NSString *)appKey
               user:(NSDictionary *)user
@@ -78,6 +91,9 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
          debugging:(BOOL)isDebugging
           autoSync:(BOOL)autoSync
      lastTimestamp:(NSNumber*)lastTimestamp{
+    
+    NSAssert(![appId isEqualToString:@""], @"App Id can't be an empty string");
+    NSAssert(![appKey isEqualToString:@""], @"App Key can't be an empty string");
     
     _appId = [appId copy];
     _appKey = [appKey copy];
@@ -94,7 +110,7 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     NSString *myKeys = nil;
     NSString *providedMonkeyId = user[@"monkeyId"];
     
-    if (providedMonkeyId != nil) {
+    if (providedMonkeyId != nil && ![providedMonkeyId isEqualToString:@""]) {
         _session[@"monkeyId"] = providedMonkeyId;
         myKeys = [[MOKSecurityManager sharedInstance]getAESbase64forUser:_session[@"monkeyId"]];
     }
@@ -146,12 +162,11 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
 -(void)connect {
     if([MOKComServerConnection sharedInstance].networkStatus == AFNetworkReachabilityStatusNotReachable) {
         NSLog(@"Monkey - Connection not available");
-        [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:nil];
-        [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketUnavailableNotification object:self userInfo:nil];
-        [MOKComServerConnection sharedInstance].connection.state = MOKSGSConnectionStateNoNetwork;
+        [MOKComServerConnection sharedInstance].connection.state = MOKConnectionStateNoNetwork;
+        [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:@{@"status": @(MOKConnectionStateNoNetwork)}];
     }
     else{
-        [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:nil];
+        [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:@{@"status": @(MOKConnectionStateConnecting)}];
         
         [[MOKComServerConnection sharedInstance] connect:_session[@"monkeyId"]
                                                    appId:self.appId
@@ -163,8 +178,6 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
 }
 
 -(void)loggedIn{
-    [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:nil];
-    
     NSString *lastMessageId = _session[@"lastTimestamp"];
     
     if (lastMessageId == (id)[NSNull null]) {
@@ -182,40 +195,38 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
         [MOKWatchdog sharedInstance].isUpdateFinished = true;
     }
     
-    [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketDidConnectNotification object:self userInfo:[_session copy]];
+    [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:@{@"status": @(MOKConnectionStateConnected)}];
 }
 
 - (void) disconnected{
     NSLog(@"Monkey - Disconnect");
-    [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:nil];
-    [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketDidDisconnectNotification object:self userInfo:nil];
+    [[NSNotificationCenter defaultCenter]postNotificationName:MonkeySocketStatusChangeNotification object:self userInfo:@{@"status": @(MOKConnectionStateDisconnected)}];
     [self connect];
 }
 
+#pragma mark - Conversation stuff
+-(void)getConversationsSince:(NSInteger)timestamp
+                    quantity:(int)qty
+                     success:(nullable void (^)(NSData * _Nonnull data))success
+                     failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure{
+    [self checkSession];
+    [[MOKAPIConnector sharedInstance] getConversationsOf:_session[@"monkeyId"] since:timestamp quantity:qty success:^(NSData * _Nonnull data) {
+        
+        success(data);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        
+        failure(task, error);
+    }];
+}
 
 
 #pragma mark - Messaging manager
-
-- (void)addReceiver:(id <MOKMessageReceiver>)receiver {
-    @synchronized (self) {
-        if (![self.receivers containsObject:receiver]) {
-            [self.receivers addObject:receiver];
-        }
-    }
-}
-
-- (void)removeReceiver:(id <MOKMessageReceiver>)receiver {
-    @synchronized (self) {
-        [self.receivers removeObject:receiver];
-    }
-}
 
 -(MOKMessage *)sendText:(NSString *)text toUser:(NSString *)monkeyId{
     return [self sendText:text encrypted:true toUser:monkeyId params:nil push:nil];
 }
 
 -(nonnull MOKMessage *)sendText:(nonnull NSString *)text encrypted:(BOOL)shouldEncrypt toUser:(nonnull NSString *)monkeyId params:(nullable NSDictionary *)params push:(nullable id)push{
-    
     
     MOKMessage *message = [[MOKMessage alloc] initTextMessage:text sender:_session[@"monkeyId"] recipient:monkeyId];
     if (shouldEncrypt) {
@@ -284,6 +295,7 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
                            push:(nullable id)push
                         success:(void (^)(MOKMessage * _Nonnull message))success
                         failure:(void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure{
+    [self checkSession];
     
     MOKMessage *fileMessage = [[MOKMessage alloc]initFileMessage:filename type:type sender:_session[@"monkeyId"] recipient:monkeyId];
     NSData *finalData = [data copy];
@@ -301,10 +313,10 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     }
     
     [[MOKAPIConnector sharedInstance] sendFile:finalData message:fileMessage success:^(NSDictionary * _Nonnull data) {
-        if([[data objectForKey:@"messageId"] isKindOfClass:[NSString class]]){
-            fileMessage.messageId = [data objectForKey:@"messageId"];
+        if([data[@"messageId"] isKindOfClass:[NSString class]]){
+            fileMessage.messageId = data[@"messageId"];
         }else{
-            fileMessage.messageId = [[data objectForKey:@"messageId"] stringValue];
+            fileMessage.messageId = [data[@"messageId"] stringValue];
         }
         success(fileMessage);
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
@@ -378,35 +390,242 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     [self sendCommand:MOKProtocolDelete WithArgs:@{@"id": messageId,
                                                    @"rid":monkeyId}];
 }
-- (void)notify:(MOKMessage *)message withCommand:(int)command {
+
+#pragma mark - Incoming stuff
+
+- (void)parseMessage:(NSDictionary *)message {
+    int cmd=[message[@"cmd"] intValue];
+    NSMutableDictionary *args=[message[@"args"] mutableCopy];
     
-    //Type of messages: invites, openConversation, isTyping.
-    switch (command) {
-        case MOKProtocolGet:
+    if (args[@"app_id"] == nil) {
+        args[@"app_id"] = self.appId;
+    }
+    
+    switch (cmd) {
+        case MOKProtocolMessage: case MOKProtocolPublish:{
+            if (![MOKWatchdog sharedInstance].isUpdateFinished) {
+                return;
+            }
+            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
+            msg.protocolCommand = MOKProtocolMessage;
             
-            [self.receivers makeObjectsPerformSelector:@selector(notificationReceived:) withObject:message];
-            return;
+            [self processMOKProtocolMessage:msg];
             break;
-        default: {
+        }
+        case MOKProtocolACK:{
+            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
+            msg.protocolCommand = MOKProtocolACK;
+            
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self processMOKProtocolACK:msg];
+            });
             
             break;
         }
-    }
-    
-    
-    if (message.timestampCreated > [_session[@"lastTimestamp"] intValue]) {
-        _session[@"lastTimestamp"] = [@(message.timestampCreated) stringValue];
-    }
-    
-    if([self.receivers count] > 0){
-        
-        if([message.userIdTo rangeOfString:@","].location!=NSNotFound){
-            message.userIdTo = _session[@"monkeyId"];
+        case MOKProtocolGet:{
+            [[MOKWatchdog sharedInstance] updateFinished];
+            
+            if([args[@"type"] intValue] == MOKGroupsString) {
+#ifdef DEBUG
+                NSLog(@"MONKEY - ******** GET Command Groups ********");
+#endif
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyGroupListNotification
+                                                                    object:self
+                                                                  userInfo:@{@"groups": [((NSString *)args[@"messages"]) componentsSeparatedByString:@","]}];
+                break;
+            }
+            
+            break;
         }
-        
-        [self.receivers makeObjectsPerformSelector:@selector(notificationReceived:) withObject:message];
+        case MOKProtocolSync:{
+            [[MOKWatchdog sharedInstance] updateFinished];
+            
+            NSDecimalNumber *type = args[@"type"];
+            
+            if([type intValue] == MOKMessagesHistory) {
+#ifdef DEBUG
+                NSLog(@"MONKEY - ******** SYNC Command Message History ********");
+#endif
+                NSArray *messages = args[@"messages"];
+                NSString *remaining = args[@"remaining_messages"];
+                [self processSyncMessages:messages withRemaining:remaining];
+            }
+            
+            break;
+        }
+        case MOKProtocolOpen:{
+#ifdef DEBUG
+            NSLog(@"MONKEY - ******** OPEN Command ********");
+#endif
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyOpenNotification
+                                                                object:self
+                                                              userInfo:@{@"senderId": args[@"sid"],
+                                                                         @"recipientId": args[@"rid"]}];
+            
+            break;
+        }
+        case MOKProtocolDelete:{
+#ifdef DEBUG
+            NSLog(@"MONKEY - ******** DELETE Command ********");
+#endif
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyMessageDeleteNotification
+                                                                object:self
+                                                              userInfo:@{@"id": ((NSDictionary *)args[@"props"])[@"message_id"],
+                                                                         @"senderId": args[@"sid"],
+                                                                         @"recipientId": args[@"rid"]}];
+            
+            break;
+        }
+        case MOKProtocolClose:{
+#ifdef DEBUG
+            NSLog(@"MONKEY - ******** CLOSE Command ********");
+#endif
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyCloseNotification
+                                                                object:self
+                                                              userInfo:@{@"senderId": args[@"sid"],
+                                                                         @"recipientId": args[@"rid"]}];
+            
+            break;
+        }
+        default:{
+            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyNotificationNotification
+                                                                object:self
+                                                              userInfo:@{@"notification": msg}];
+            
+            break;
+        }
     }
 }
+- (void)processSyncMessages:(NSArray *)messages withRemaining:(NSString *)numberOfRemaining{
+    for (NSDictionary *msgdict in messages) {
+        MOKMessage *msg = [[MOKMessage alloc] initWithArgs:msgdict];
+        msg.protocolCommand = MOKProtocolMessage;
+        [self processMOKProtocolMessage:msg];
+    }
+    //check if there are still pending messages
+    if (![numberOfRemaining isEqualToString:@"0"]) {
+        [self getPendingMessages];
+    }
+}
+- (void)processMOKProtocolMessage:(MOKMessage *)msg {
+#ifdef DEBUG
+    NSLog(@"MONKEY - Message in process: %@, %@, %d", msg.messageText,msg.messageId, msg.protocolType);
+#endif
+    switch (msg.protocolType) {
+        case MOKText:{
+            //Check if we have the user key
+            [self incomingMessage:msg];
+            
+            break;
+        }
+        case MOKFile:{
+            msg.text = msg.encryptedText;
+            [self fileReceivedNotification:msg];
+            break;
+        }
+        case MOKTempNote:{
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyNotificationNotification
+                                                                object:self
+                                                              userInfo:@{@"senderId": msg.userIdFrom,
+                                                                         @"recipientId": msg.userIdTo,
+                                                                         @"params": msg.params}];
+            break;
+        }
+        case MOKProtocolDelete:{
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyMessageDeleteNotification
+                                                                object:self
+                                                              userInfo:@{@"id": msg.props[@"message_id"],
+                                                                         @"senderId": msg.userIdFrom,
+                                                                         @"recipientId": msg.userIdTo}];
+            break;
+        }
+        default:
+            if (![msg.messageId isEqualToString:@"0"] && msg.timestampCreated > [_session[@"lastTimestamp"] longLongValue]) {
+                _session[@"lastTimestamp"] = [@(msg.timestampCreated) stringValue];
+            }
+            if(msg.props.count > 0 && msg.props[@"monkey_action"] != nil){
+                [self dispatchGroupNotification:msg];
+                return;
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyNotificationNotification
+                                                                object:self
+                                                              userInfo:@{@"senderId": msg.userIdFrom,
+                                                                         @"recipientId": msg.userIdTo,
+                                                                         @"params": msg.params}];
+            break;
+            
+    }
+}
+
+- (void)processMOKProtocolACK:(MOKMessage *)message {
+    
+    switch (message.protocolType) {
+        case MOKProtocolMessage: case MOKText:
+            [message updateMessageIdFromACK];
+            
+            break;
+        case MOKProtocolOpen:
+            
+            break;
+        default:
+            break;
+    }
+    
+    NSMutableDictionary *ackParams = [@{} mutableCopy];
+    
+    if (message.protocolType == MOKProtocolOpen) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyOpenResponseNotification
+                                                            object:self
+                                                          userInfo:@{@"lastOpenMe": message.props[@"last_open_me"],
+                                                                     @"lastSeen": message.props[@"last_seen"],
+                                                                     @"online": message.props[@"online"]}];
+        return;
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyAcknowledgeNotification
+                                                        object:self
+                                                      userInfo:@{@"newId": message.props[@"new_id"],
+                                                                 @"oldId": message.props[@"old_id"],
+                                                                 @"senderId": message.userIdFrom,
+                                                                 @"recipientId": message.userIdTo,
+                                                                 @"status": message.props[@"status"]}];
+}
+
+- (void)dispatchGroupNotification:(MOKMessage *)msg{
+    msg.props[@"group_id"];
+    [((NSString *)msg.props[@"members"]) componentsSeparatedByString:@","];
+    msg.props[@"info"];
+    switch ([msg.props[@"monkey_action"] intValue]) {
+        case MOKGroupCreate:
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyGroupCreateNotification
+                                                                object:self
+                                                              userInfo:@{@"id": msg.props[@"group_id"],
+                                                                         @"members": [((NSString *)msg.props[@"members"]) componentsSeparatedByString:@","],
+                                                                         @"info": msg.props[@"info"]}];
+            break;
+        case MOKGroupDelete:
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyGroupRemoveNotification
+                                                                object:self
+                                                              userInfo:@{@"id": msg.userIdTo,
+                                                                         @"member": msg.userIdFrom}];
+            break;
+        case MOKGroupNewMember:
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyGroupAddNotification
+                                                                object:self
+                                                              userInfo:@{@"id": msg.userIdTo,
+                                                                         @"member": msg.props[@"new_member"]}];
+            break;
+        default:
+            [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyNotificationNotification
+                                                                object:self
+                                                              userInfo:@{@"notification": msg}];
+            break;
+    }
+}
+
 - (void)incomingMessage:(MOKMessage *)message {
     
     //check if encrypted
@@ -419,33 +638,39 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
             [[MOKAPIConnector sharedInstance] keyExchange:_session[@"monkeyId"] with:message.userIdFrom withPendingMessage:message success:^(NSDictionary * _Nonnull data) {
                 [self incomingMessage:message];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [self incomingMessage:message];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self incomingMessage:message];
+                });
             }];
             return;
         }
         
-        if (message.text == nil) {
+        if (message.text == nil || [message.text isEqualToString:@""]) {
             NSLog(@"MONKEY - couldn't decrypt with current key, retrieving new keys");
             [[MOKAPIConnector sharedInstance] keyExchange:_session[@"monkeyId"] with:message.userIdFrom withPendingMessage:message success:^(NSDictionary * _Nonnull data) {
                 [self incomingMessage:message];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [self incomingMessage:message];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self incomingMessage:message];
+                });
             }];
             return;
         }
     }else{
         message.text = message.encryptedText;
+        
+        if (message.props[@"encoding"] != nil && ![message.props[@"encoding"] isEqualToString:@"utf8"]) {
+            message.text = [[MOKSecurityManager sharedInstance] decodeBase64:message.encryptedText];
+        }
     }
     
     if (![message.messageId isEqualToString:@"0"] && message.timestampCreated > [_session[@"lastTimestamp"] intValue]) {
         _session[@"lastTimestamp"] = [@(message.timestampCreated) stringValue];
     }
     
-    @synchronized (self) {
-        
-        [self.receivers makeObjectsPerformSelector:@selector(messageReceived:) withObject:message];
-        
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyMessageNotification
+                                                        object:self
+                                                      userInfo:@{@"message": message}];
 }
 
 - (void)fileReceivedNotification:(MOKMessage *)message {
@@ -454,6 +679,7 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
         _session[@"lastTimestamp"] = [@(message.timestampCreated) stringValue];
     }
     
+    //NOTE: check if it's necessary
     NSString *filename = [message.props objectForKey:@"filename"];
     if (filename != nil) {
         NSString *extension = filename.pathExtension;
@@ -466,40 +692,17 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     
     //    [[MOKAPIConnector sharedInstance]downloadFile:message withDelegate:self];
     
-    @synchronized (self) {
-        
-        [self.receivers makeObjectsPerformSelector:@selector(messageReceived:) withObject:message];
-        
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:MonkeyMessageNotification
+                                                        object:self
+                                                      userInfo:@{@"message": message}];
     
-}
--(void)acknowledgeNotification:(MOKMessage *)message{
-    
-    switch (message.protocolType) {
-        case MOKText: case 50: case 51: case 52:
-//            [[MOKDBManager sharedInstance]deleteMessageSent:message];
-//            [self sendMessagesAgain];
-            break;
-        case MOKFile:
-            message.messageId = [message.props objectForKey:@"new_id"];
-            message.oldMessageId = [message.props objectForKey:@"old_id"];
-            break;
-        default: {
-            
-            break;
-        }
-    }
-    
-    @synchronized (self) {
-        [self.receivers makeObjectsPerformSelector:@selector(acknowledgeReceived:) withObject:message];
-    }
 }
 
 -(void)downloadFileMessage:(MOKMessage *)message
            fileDestination:(NSString *)fileDestination
                    success:(void (^)(NSData * _Nonnull data))success
                    failure:(void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure{
-    
+    [self checkSession];
     NSString *finalDir = [fileDestination stringByAppendingPathComponent:[message.text lastPathComponent]];
     if([[NSFileManager defaultManager] fileExistsAtPath:finalDir]){
         //TODO: check if message was decrypted correctly
@@ -596,9 +799,6 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     [[MOKWatchdog sharedInstance] removeMediaInTransitWithId:message.oldMessageId];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager removeItemAtPath:message.encryptedText error:NULL];
-    if (self.receivers != NULL) {
-        [self.receivers makeObjectsPerformSelector:@selector(acknowledgeReceived:) withObject:message];
-    }
 }
 -(void)onUploadFileFail:(MOKMessage *)message{
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -636,19 +836,8 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
 //    
 }
 
--(void)getMessages:(NSString *)quantity sinceId:(NSString *)lastMessageId  andGetGroups:(BOOL)flag{
-    NSDictionary *args = flag?
-    //ask for groups
-    @{@"messages_since" : lastMessageId,
-      @"qty" : quantity,
-      @"groups" : @"1"} :
-    //don't ask for groups
-    @{@"messages_since" : lastMessageId,
-      @"qty" : quantity};
-    
-    [self sendCommand:MOKProtocolGet WithArgs:args];
-}
 -(void)getMessages:(NSString *)quantity sinceTimestamp:(NSString *)lastTimestamp andGetGroups:(BOOL)flag{
+    [self checkSession];
     NSDictionary *args = flag?
     //ask for groups
     @{@"since" : lastTimestamp,
@@ -671,11 +860,11 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
     [self sendCommand:MOKProtocolSet WithArgs:args];
 }
 - (void) sendMessageCommandFromMessage:(MOKMessage *)message{
+    [self checkSession];
     NSDictionary *args;
     
     if ([message.pushMessage isEqualToString:@""] || message.pushMessage == nil) {
         args = @{@"id": message.messageId,
-                 @"sid": message.userIdFrom,
                  @"rid": message.userIdTo,
                  @"msg": message.messageText,
                  @"type": [NSNumber numberWithInt:message.protocolType],
@@ -684,7 +873,6 @@ NSString * const MonkeyMessageNotification = @"com.criptext.message.delete";
                  };
     }else{
         args = @{@"id": message.messageId,
-                 @"sid": message.userIdFrom,
                  @"rid": message.userIdTo,
                  @"msg": message.messageText,
                  @"type": [NSNumber numberWithInt:message.protocolType],

@@ -55,7 +55,7 @@
         _delay = @"2";
         expectingDisconnect = NO;
         inRedirect = NO;
-        state = MOKSGSConnectionStateDisconnected;
+        state = MOKConnectionStateDisconnected;
         session = [[MOKSGSSession alloc] initWithConnection:self];
         
         // Create our io buffers
@@ -69,7 +69,7 @@
     NSLog(@"MONKEY - ???disconnect FUnction called por aca habian releases?");
     [self closeStreams];
     expectingDisconnect = NO;
-    state = MOKSGSConnectionStateDisconnected;
+    state = MOKConnectionStateDisconnected;
     
     if(inRedirect) {
         // Just reset the buffers if we are being redirected
@@ -82,11 +82,11 @@
     NSLog(@"MONKEY - login credentials, username: %@ password: %@, hostname: %@, port: %ld", username, password, context.hostname, (long)context.port);
 #endif
     
-    if(self.state==MOKSGSConnectionStateConnecting)
+    if(self.state==MOKConnectionStateConnecting)
         return;
     
     
-    self.state=MOKSGSConnectionStateConnecting;
+    self.state=MOKConnectionStateConnecting;
 
     CFStringRef hostname = CFStringCreateWithCString(kCFAllocatorDefault, [context.hostname UTF8String], kCFStringEncodingASCII);
     CFHostRef host = CFHostCreateWithName(kCFAllocatorDefault, hostname);
@@ -108,7 +108,7 @@
         
         [self openStreams];
         
-        self.state = MOKSGSConnectionStateConnecting;
+        self.state = MOKConnectionStateConnecting;
         
     }
 }
@@ -146,7 +146,7 @@
             if(stream == outputStream) {
                 // Output stream is connected
                 // Update our state on this
-                state = MOKSGSConnectionStateConnected;
+                state = MOKConnectionStateConnected;
             }
             break;
         }
@@ -289,7 +289,7 @@
 
 - (BOOL)isConnectionAvailable {
     
-    if((![outputStream hasSpaceAvailable] || state==MOKSGSConnectionStateDisconnected || !inputStream) && state!=MOKSGSConnectionStateConnecting) {
+    if((![outputStream hasSpaceAvailable] || state==MOKConnectionStateDisconnected || !inputStream) && state!=MOKConnectionStateConnecting) {
         return NO;
     }
     

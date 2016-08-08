@@ -22,7 +22,7 @@ pod "MonkeyKit"
 
 ## Author
 
-Gianni Carlo, gcarlo89@hotmail.com
+Criptext Inc, gianni@criptext.com
 
 ## License
 

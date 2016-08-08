@@ -47,5 +47,8 @@
 -(NSString *)getAESbase64forUser:(NSString *)userId;
 -(NSString *)getIVbase64forUser:(NSString *)userId;
 
+//base64
+-(NSString *)decodeBase64:(NSString *)encodedString;
+-(NSString *)encodeBase64:(NSString *)plainString;
 
 @end

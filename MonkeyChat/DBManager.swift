@@ -7,3 +7,13 @@
 //
 
 import Foundation
+import MonkeyKit
+
+class DBManager {
+    class func getConversations() -> [Conversation]{
+        return []
+    }
+    class func getMessages() -> [MOKMessage]{
+        return []
+    }
+}

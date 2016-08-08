@@ -16,6 +16,7 @@ typedef enum{
     MOKProtocolOpen = 203,
     MOKProtocolSet = 204,
     MOKProtocolACK = 205,
+    MOKProtocolPublish = 206,
     MOKProtocolDelete = 207,
     MOKProtocolClose = 208,
     MOKProtocolSync = 209
@@ -46,7 +47,7 @@ typedef enum{
     MOKGroupDelete = 2,
     MOKGroupNewMember = 3,
     MOKGroupRemoveMember = 4,
-    MOKGroupsJoined = 5
+    MOKGroupList = 5
 }MOKGroupActionType;
 
 @interface MOKMessage : MOKDictionaryBasedObject

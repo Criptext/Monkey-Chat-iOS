@@ -843,4 +843,15 @@ static NSData *base64_decode(NSString *str){
     
     return aesandiv;
 }
+
+#pragma mark - Base 64
+-(NSString *)decodeBase64:(NSString *)encodedString{
+    NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:encodedString options:0];
+    NSString *decodedString = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
+    
+    return decodedString;
+}
+-(NSString *)encodeBase64:(NSString *)plainString{
+    return [[plainString dataUsingEncoding:NSUTF8StringEncoding] mok_base64EncodedString];
+}
 @end

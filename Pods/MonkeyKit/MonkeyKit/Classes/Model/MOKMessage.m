@@ -267,7 +267,10 @@ NSString* mok_fileMIMEType(NSString * extension) {
 - (void)setCompression:(BOOL)shouldCompress{
     if (shouldCompress) {
         self.props[@"cmpr"] = @"gzip";
+        return;
     }
+    
+    [self.props removeObjectForKey:@"cmpr"];
 }
 - (BOOL)isCompressed{
     NSString *compressed = self.props[@"cmpr"];
@@ -309,6 +312,7 @@ NSString* mok_fileMIMEType(NSString * extension) {
     return false;
 }
 -(BOOL)isEqual:(id)object{
+    
     MOKMessage *otherMsg = object;
     if ([self.messageId isEqualToString:otherMsg.messageId]) {
         return true;

@@ -14,42 +14,44 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - JSQMessagesViewController (7.3.1):
+  - JSQMessagesViewController (7.3.4):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
-  - MonkeyKit (0.9.0):
+  - MonkeyKit (0.9.5):
     - AFNetworking
     - UICKeyChainStore
-  - Realm (1.0.0):
-    - Realm/Headers (= 1.0.0)
-  - Realm/Headers (1.0.0)
-  - RealmSwift (1.0.0):
-    - Realm (= 1.0.0)
+  - Realm (1.0.1):
+    - Realm/Headers (= 1.0.1)
+  - Realm/Headers (1.0.1)
+  - RealmSwift (1.0.1):
+    - Realm (= 1.0.1)
+  - SDWebImage (3.8.1):
+    - SDWebImage/Core (= 3.8.1)
+  - SDWebImage/Core (3.8.1)
   - UICKeyChainStore (2.1.0)
 
 DEPENDENCIES:
-  - JSQMessagesViewController
-  - MonkeyKit (from `https://github.com/Criptext/iOS-MonkeySDK.git`)
+  - JSQMessagesViewController (from `~/Workspace/JSQMessagesViewController`)
+  - MonkeyKit (from `~/Workspace/MonkeyKit-iOS`)
   - RealmSwift
+  - SDWebImage
 
 EXTERNAL SOURCES:
+  JSQMessagesViewController:
+    :path: ~/Workspace/JSQMessagesViewController
   MonkeyKit:
-    :git: https://github.com/Criptext/iOS-MonkeySDK.git
-
-CHECKOUT OPTIONS:
-  MonkeyKit:
-    :commit: 1ea5bf241a862cbe596ce63e2462d604a6effc70
-    :git: https://github.com/Criptext/iOS-MonkeySDK.git
+    :path: ~/Workspace/MonkeyKit-iOS
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  JSQMessagesViewController: 3847120a97a7ab3bdc701f166c59f3955f7801c7
+  JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
-  MonkeyKit: ef9b85ce116c5f6262cc8dd880e4ada8c7bb3ca1
-  Realm: e15cd8e7c11d3e576f628ba0b7cb855269b4991c
-  RealmSwift: 3229306d020d96f83b335f87a0dcbf2cef0e6a2b
+  MonkeyKit: 834b8ce03a7608129ec448d70991dbee853d04e3
+  Realm: 2e15e39d35b08abb529e212ed5d8af107b5236c8
+  RealmSwift: d73ea2af08c3676dbdd5e4b669651a0f492162a4
+  SDWebImage: 35f9627a3e44b4f292a8a8ce6a531fa488239b91
   UICKeyChainStore: f1cbd42216a113f0165de1e733e62905b8823432
 
-PODFILE CHECKSUM: 222089450452a651f40c4841a8b832158711edb3
+PODFILE CHECKSUM: d4258d0204173d3f7d1de91f53b80c6491e1d39d
 
 COCOAPODS: 1.0.0

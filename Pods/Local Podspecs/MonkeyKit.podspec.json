@@ -1,6 +1,6 @@
 {
   "name": "MonkeyKit",
-  "version": "0.9.0",
+  "version": "0.9.5",
   "summary": "iOS SDK to access Monkey secure channel",
   "description": "MonkeyKit makes encryption easier for developers.",
   "homepage": "https://criptext.com",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/Criptext/iOS-MonkeySDK.git",
-    "tag": "0.9.0"
+    "tag": "0.9.5"
   },
   "platforms": {
     "ios": "8.0"

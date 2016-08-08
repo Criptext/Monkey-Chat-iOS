@@ -68,7 +68,7 @@ static MOKWatchdog *watchdogInstance = nil;
 }
 
 -(void)resetConnectivity{
-    if (([MOKComServerConnection sharedInstance].connection.state != MOKSGSConnectionStateConnected || !self.isUpdateFinished) && !self.isLogout) {
+    if (([MOKComServerConnection sharedInstance].connection.state != MOKConnectionStateConnected || !self.isUpdateFinished) && !self.isLogout) {
         #ifdef DEBUG
         NSLog(@"MONKEY - reset conenctivity WOOF!");
 		#endif

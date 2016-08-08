@@ -110,7 +110,7 @@ static MOKComServerConnection* comServerConnectionInstance = nil;
     
 	if(connection)
 	{
-        if(connection.state!=MOKSGSConnectionStateDisconnected){
+        if(connection.state!=MOKConnectionStateDisconnected){
             [self logOut];
         }
 
@@ -135,7 +135,7 @@ static MOKComServerConnection* comServerConnectionInstance = nil;
 
 
 -(BOOL) isConnected{
-	if(connection.state== MOKSGSConnectionStateConnected || connection.state==MOKSGSConnectionStateConnecting)
+	if(connection.state== MOKConnectionStateConnected || connection.state==MOKConnectionStateConnecting)
 		return YES;
 	else
         return NO;
@@ -193,7 +193,7 @@ static MOKComServerConnection* comServerConnectionInstance = nil;
 //sending a session message not a group message
 -(BOOL)sendMessage:(NSString *)jsonMessage{
 
-	if (connection.state!= MOKSGSConnectionStateConnected) {
+	if (connection.state!= MOKConnectionStateConnected) {
         /// si pasa esto debes llamar afuera a funcion desconectado
 		return NO;
 	}
@@ -241,9 +241,7 @@ static MOKComServerConnection* comServerConnectionInstance = nil;
 
 	NSDictionary * parsedData = (NSDictionary *) ([substring mok_JSONValue]); //parse to NSDICtionary
     
-
-
-	[self parseMessage:parsedData];
+    [self.connectionDelegate parseMessage:parsedData];
 }
 
 - (void)sgsContext:(MOKSGSContext *)context messageReceived:(MOKSGSMessage *)msg forConnection:(MOKSGSConnection *)connection{
@@ -253,216 +251,8 @@ static MOKComServerConnection* comServerConnectionInstance = nil;
 
 	NSLog(@"MONKEY - Message received %@",stringMes);
 
-//    NSLog(@"MONKEY - json value: %@", [stringMes mok_JSONValue]);
 	NSDictionary * parsedData = (NSDictionary *) ([stringMes mok_JSONValue]); //parse to NSDICtionary
-	[self parseMessage:parsedData];
-	
-}
-
-
-- (void)parseMessage:(NSDictionary *)message {
-	int cmd=[[message objectForKey:@"cmd"] intValue];
-	NSDictionary *args=[message objectForKey:@"args"];
-    
-    switch (cmd) {
-        case MOKProtocolMessage:{
-            if (![MOKWatchdog sharedInstance].isUpdateFinished) {
-                return;
-            }
-            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
-            msg.protocolCommand = MOKProtocolMessage;
-            
-            [self processMOKProtocolMessage:msg];
-
-            if([self.connectionDelegate respondsToSelector:@selector(onLoadPendingMessages)]){
-                [self.connectionDelegate onLoadPendingMessages];
-            }
-            
-            break;
-        }
-        case MOKProtocolACK:{
-            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
-            msg.protocolCommand = MOKProtocolACK;
-            msg.monkeyType = [[msg.props objectForKey:@"status"] intValue];
-            
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [self processMOKProtocolACK:msg];
-            });
-            
-            break;
-        }
-        case MOKProtocolGet:{
-            [[MOKWatchdog sharedInstance] updateFinished];
-
-            if([self.connectionDelegate respondsToSelector:@selector(onLoadPendingMessages)]){
-                [self.connectionDelegate onLoadPendingMessages];
-            }
-            
-            NSDecimalNumber *type = [args objectForKey:@"type"];
-            
-            switch ([type intValue]) {
-                case MOKGroupsString:{
-                    #ifdef DEBUG
-                    NSLog(@"MONKEY - ******** GET Command Groups ********");
-					#endif
-                    MOKMessage *msg = [[MOKMessage alloc] init];
-                    msg.protocolCommand = MOKProtocolGet;
-                    msg.protocolType = MOKNotif;
-                    msg.monkeyType = MOKGroupsJoined;
-                    msg.text = [args objectForKey:@"messages"];
-                    
-                    [self.connectionDelegate notify:msg withCommand:msg.protocolCommand];
-                    
-                    break;
-                }
-                default:
-                    break;
-            }
-            
-            break;
-        }
-        case MOKProtocolSync:{
-            [[MOKWatchdog sharedInstance] updateFinished];
-            if([self.connectionDelegate respondsToSelector:@selector(onLoadPendingMessages)]){
-                [self.connectionDelegate onLoadPendingMessages];
-            }
-            
-            NSDecimalNumber *type = [args objectForKey:@"type"];
-            
-            switch ([type intValue]) {
-                case MOKMessagesHistory:{
-#ifdef DEBUG
-                    NSLog(@"MONKEY - ******** GET Command Message History ********");
-#endif
-                    NSArray *messages = [args objectForKey:@"messages"];
-                    NSString *remaining = [args objectForKey:@"remaining_messages"];
-                    [self processSyncMessages:messages withRemaining:remaining];
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-        case MOKProtocolSet:{
-            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
-            msg.protocolCommand = MOKProtocolSet;
-            #ifdef DEBUG
-            NSLog(@"MONKEY - ******** SET Command ********");
-			#endif
-            break;
-        }
-        case MOKProtocolOpen:{
-            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
-            msg.protocolCommand = MOKProtocolOpen;
-
-            [self.connectionDelegate notify:msg withCommand:cmd];
-            #ifdef DEBUG
-            NSLog(@"MONKEY - ******** OPEN Command ********");
-			#endif
-            break;
-        }
-        case MOKProtocolTransaction:{
-            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
-            msg.protocolCommand = MOKProtocolTransaction;
-            #ifdef DEBUG
-            NSLog(@"MONKEY - ******** TRANSACTION Command ********");
-			#endif
-            break;
-        }
-        default:{
-            MOKMessage *msg = [[MOKMessage alloc] initWithArgs:args];
-            [self.connectionDelegate notify:msg withCommand:cmd];
-            
-            break;
-        }
-    }
-}
-
-- (void)processSyncMessages:(NSArray *)messages withRemaining:(NSString *)numberOfRemaining{
-    for (NSDictionary *msgdict in messages) {
-        MOKMessage *msg = [[MOKMessage alloc] initWithArgs:msgdict];
-        msg.protocolCommand = MOKProtocolMessage;
-        [self processMOKProtocolMessage:msg];
-    }
-    //check if there are still pending messages
-    if (![numberOfRemaining isEqualToString:@"0"]) {
-        [self.connectionDelegate getPendingMessages];
-    }
-}
-- (void)processMOKProtocolMessage:(MOKMessage *)msg {
-    #ifdef DEBUG
-    NSLog(@"MONKEY - Message in process: %@, %@, %d", msg.messageText,msg.messageId, msg.protocolType);
-	#endif
-    switch (msg.protocolType) {
-        case MOKText:{
-            //Check if we have the user key
-            [self.connectionDelegate incomingMessage:msg];
-            
-            break;
-        }
-        case MOKFile:{
-            msg.text = msg.encryptedText;
-            [self.connectionDelegate fileReceivedNotification:msg];
-            break;
-        }
-        case MOKNotif:
-            #ifdef DEBUG
-            NSLog(@"MONKEY - monkey action: %d", msg.monkeyType);
-			#endif
-            [self.connectionDelegate notify:msg withCommand:msg.protocolType];
-            break;
-        case MOKProtocolDelete:{
-            msg.protocolType = MOKProtocolDelete;
-            [self.connectionDelegate notify:msg withCommand:msg.protocolType];
-            break;
-        }
-        default:
-            [self.connectionDelegate notify:msg withCommand:msg.protocolType];
-            break;
-            
-    }
-    
-    
-}
-
-- (void)processMOKProtocolGet:(MOKMessage *)message {
-
-}
-
-- (void)processMOKProtocolTransaction:(MOKMessage *)message {
-    
-}
-
-- (void)processMOKProtocolOpen:(MOKMessage *)message {
-    
-}
-
-- (void)processMOKProtocolSet:(MOKMessage *)message {
-    
-}
-
-- (void)processMOKProtocolACK:(MOKMessage *)message {
-    
-    switch (message.protocolType) {
-        case MOKProtocolMessage: case MOKText:
-            [message updateMessageIdFromACK];
-            
-            break;
-        case MOKProtocolOpen:
-            
-            break;
-        default:
-            break;
-    }
-    
-    [self.connectionDelegate acknowledgeNotification:message];
-}
-
--(void)onOpenConversationOK:(NSString *)key{
-    
-}
--(void)onOpenConversationWrong{
-
+	[self.connectionDelegate parseMessage:parsedData];
 }
 
 

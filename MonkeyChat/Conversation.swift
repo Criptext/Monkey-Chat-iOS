@@ -7,7 +7,7 @@
 //
 
 import JSQMessagesViewController
-
+import MonkeyKit
 
 /**
  *  The `Conversation` class is a concrete class for a proposed conversation model that represents a chat between members of the conversation
@@ -16,49 +16,57 @@ import JSQMessagesViewController
  *  The same applies for the name of the conversation. For groups you can have a special name, whereas for one-to-one conversations you can just use the recipient's name.
  */
 
-class Conversation {
+class Conversation: Hashable, Equatable {
     let id: String
-    let name: String
-    let members: [User]
-    var messages: [JSQMessage]
+    var info: [String:String]
+    var members: [String]
+    var lastMessage:MOKMessage? {
+        didSet {
+            if let lastMessage = lastMessage  {
+                self.lastModified = lastMessage.timestampCreated
+            }
+            
+        }
+    }
+    var lastSeen:Double
+    var lastModified:Double
+    var unread:UInt64
     
     var isGroup: Bool {
-        return self.members.count > 2
+        return self.id.containsString("G:")
     }
     
-    init(id:String, name:String, members: [User]) {
-        
+    init(id:String, info:[String:String]?, members: [String], lastMessage:MOKMessage?, lastSeen:Double, lastModified:Double, unread:UInt64) {
         self.id = id
-        self.name = name
+        self.info = info ?? [:]
         self.members = members
-        
-        guard let firstUser = members.first else{
-            self.messages = []
-            return
-        }
-        
-        /**
-         *  Load fake messages into conversation
-         */
-        
-        self.messages = [
-            JSQMessage(senderId: firstUser.id, senderDisplayName: firstUser.name, date: NSDate.distantPast(), text: "Welcome to JSQMessages: A messaging UI framework for iOS."),
-            JSQMessage(senderId: firstUser.id, senderDisplayName: firstUser.name, date: NSDate.distantPast(), text: "It is simple, elegant, and easy to use. There are super sweet default settings, but you can customize like crazy."),
-            JSQMessage(senderId: firstUser.id, senderDisplayName: firstUser.name, date: NSDate.distantPast(), text: "It even has data detectors. You can call me tonight. My cell number is 123-456-7890. My website is www.hexedbits.com."),
-            JSQMessage(senderId: firstUser.id, senderDisplayName: firstUser.name, date: NSDate.distantPast(), text: "JSQMessagesViewController is nearly an exact replica of the iOS Messages App. And perhaps, better."),
-            JSQMessage(senderId: firstUser.id, senderDisplayName: firstUser.name, date: NSDate.distantPast(), text: "It is unit-tested, free, open-source, and documented."),
-            JSQMessage(senderId: firstUser.id, senderDisplayName: firstUser.name, date: NSDate.distantPast(), text: "Now with media messages!")
-        ]
-        
-        /**
-         *  Have everyone say Hi!
-         */
-        for user in self.members {
-            self.messages.append(JSQMessage(senderId: user.id, senderDisplayName: user.name, date: NSDate.distantPast(), text: "Hi!"))
-        }
+        self.lastMessage = lastMessage
+        self.lastSeen = lastSeen
+        self.lastModified = lastModified
+        self.unread = unread
     }
     
-    func getUser(id: String) -> User? {
-        return self.members.filter({ $0.id == id }).first
+    convenience init(id:String, members:[String]){
+        self.init(id: id, info:[:],members: members, lastMessage: nil, lastSeen: 0, lastModified: 0, unread: 0)
     }
+    
+    func getUser(id: String) -> String? {
+        return self.members.filter({ $0 == id }).first
+    }
+    
+    func getAvatarURL() -> NSURL {
+        let path = self.info["avatar"] ?? "https://monkey.criptext.com/user/icon/default/\(self.id)"
+        
+        return NSURL(string: path)!
+    }
+    
+    var hashValue: Int {
+        get {
+            return "\(self.id)".hashValue
+        }
+    }
+}
+
+func ==(lhs: Conversation, rhs: Conversation) -> Bool {
+    return lhs.hashValue == rhs.hashValue
 }

@@ -13,15 +13,15 @@
 @class MOKSGSMessage;
 
 typedef enum {
-    MOKSGSConnectionStateDisconnected,
-    MOKSGSConnectionStateConnecting,
-    MOKSGSConnectionStateConnected,
-    MOKSGSConnectionStateNoNetwork,
-} MOKSGSConnectionState;
+    MOKConnectionStateDisconnected,
+    MOKConnectionStateConnecting,
+    MOKConnectionStateConnected,
+    MOKConnectionStateNoNetwork,
+} MOKConnectionState;
 
 @interface MOKSGSConnection : NSObject <NSStreamDelegate>{
     CFSocketRef socket;
-    MOKSGSConnectionState state;
+    MOKConnectionState state;
     MOKSGSContext *context;
     MOKSGSSession *session;
     NSMutableData *inBuf;
@@ -31,7 +31,7 @@ typedef enum {
     NSOutputStream *outputStream;
 }
 @property (nonatomic, readonly) CFSocketRef socket;
-@property (nonatomic, assign) MOKSGSConnectionState state;
+@property (nonatomic, assign) MOKConnectionState state;
 @property (nonatomic, retain) MOKSGSContext *context;
 @property (nonatomic, retain) MOKSGSSession *session;
 @property (nonatomic, readonly) NSMutableData *inBuf;

@@ -89,6 +89,20 @@ withPendingMessage:(nullable MOKMessage *)message
            failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
 /**
+ *  Request my conversations since a given timestamp
+ *  @param monkeyId	My Monkey Id
+ *  @param since	Timestamp from which the next badge of conversations will be pulled
+ *  @param quantity Number of conversations to bring
+ *  @param success	Completion block when the request was completed successfully
+ *  @param failure	Completion block when the request failed
+ */
+-(void)getConversationsOf:(NSString *)monkeyId
+                    since:(NSInteger)timestamp
+                 quantity:(int)qty
+                  success:(nullable void (^)(NSData * _Nonnull data))success
+                  failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
+
+/**
  *  Request message encrypted with the sender latest keys
  *  @param message	Pending message
  *  @param success	Completion block when the request was completed successfully

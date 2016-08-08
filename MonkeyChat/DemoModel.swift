@@ -45,14 +45,6 @@ let jobsUser = User(id: AvatarIdJobs, name: DisplayNameJobs, avatar: jobsImage)
 let wozUser = User(id: AvatarIdWoz, name: DisplayNameWoz, avatar: wozImage)
 
 
-let conv1 = Conversation(id: AvatarIDGroup, name: DisplayNamGroup, members: [squiresUser, leonardUser, carloUser, cookUser, jobsUser, wozUser])
-
-let conv2 = Conversation(id: AvatarIDCarlo, name: DisplayNameCarlo, members: [squiresUser, carloUser])
-
-func getConversations()->[Conversation]{
-    return [conv1, conv2]
-}
-
 //Convenience method
 extension Array {
     func randomItem() -> Element? {

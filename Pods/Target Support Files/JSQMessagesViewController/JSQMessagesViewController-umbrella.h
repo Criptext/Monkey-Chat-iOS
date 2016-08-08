@@ -9,6 +9,8 @@
 #import "UIView+JSQMessages.h"
 #import "JSQMessagesKeyboardController.h"
 #import "JSQMessagesViewController.h"
+#import "MOKPhotoMediaItem.h"
+#import "JSQMessagesActivityIndicatorHeaderView.h"
 #import "JSQMessagesAvatarImageFactory.h"
 #import "JSQMessagesBubbleImageFactory.h"
 #import "JSQMessagesMediaViewBubbleImageMasker.h"

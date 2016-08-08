@@ -181,6 +181,33 @@ withPendingMessage:(MOKMessage *)message
     
 }
 
+-(void)getConversationsOf:(NSString *)monkeyId
+                    since:(NSInteger)timestamp
+                    quantity:(int)qty
+                     success:(nullable void (^)(NSData * _Nonnull data))success
+                     failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure{
+    
+    NSDictionary *requestObject =@{@"monkeyId": monkeyId,
+                                   @"timestamp":[@(timestamp) stringValue],
+                                   @"qty":[@(qty) stringValue]};
+    
+    NSDictionary *parameters = @{@"data": [self.jsonWriter stringWithObject:requestObject]};
+#ifdef DEBUG
+    NSLog(@"MONKEY - parameters get conversations: %@", parameters);
+#endif
+    
+    [self POST:[self.baseurl stringByAppendingPathComponent:@"/user/conversations"] parameters:parameters progress:nil success:^(NSURLSessionDataTask *task, id responseObject) {
+
+        NSDictionary *responseDict = responseObject[@"data"];
+        
+        success(responseDict);
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        NSLog(@"MONKEY - Error: %@", error);
+        failure(task, error);
+    }];
+    
+}
+
 #pragma mark - Open message
 -(void)getEncryptedTextForMessage:(MOKMessage *)message
                           success:(void (^)(NSDictionary * _Nonnull data))success
@@ -211,6 +238,7 @@ withPendingMessage:(MOKMessage *)message
 }
 
 #pragma mark - Send File
+
 -(void)sendFile:(NSData *)data
         message:(MOKMessage *)message
         success:(void (^)(NSDictionary * _Nonnull data))success
@@ -230,8 +258,8 @@ withPendingMessage:(MOKMessage *)message
 
     [self POST:[self.baseurl stringByAppendingPathComponent:@"/file/new"] parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         
-//        NSURL *fileurl = [NSURL fileURLWithPath:message.encryptedText];
-        [formData appendPartWithFileData:data name:@"file" fileName:message.encryptedText mimeType:message.props[@"mime_type"]];
+        NSURL *fileurl = [NSURL fileURLWithPath:message.encryptedText];
+        [formData appendPartWithFileData:data name:@"file" fileName:[[fileurl lastPathComponent] stringByDeletingPathExtension] mimeType:message.props[@"mime_type"]];
 //        [formData appendPartWithFileURL:fileurl name:@"file" fileName:[[fileurl lastPathComponent] stringByDeletingPathExtension] mimeType:message.props[@"mime_type"] error:nil];
         
     } progress:nil success:^(NSURLSessionDataTask *task, id responseObject) {

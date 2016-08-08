@@ -2,7 +2,8 @@ platform :ios, '8.0'
 use_frameworks!
 
 target 'MonkeyChat' do
-  pod 'JSQMessagesViewController'
+  pod 'JSQMessagesViewController', :path => '~/Workspace/JSQMessagesViewController'
   pod 'RealmSwift'
-  pod 'MonkeyKit', :git => 'https://github.com/Criptext/iOS-MonkeySDK.git'
+  pod 'SDWebImage'
+  pod 'MonkeyKit', :path => '~/Workspace/MonkeyKit-iOS'
 end

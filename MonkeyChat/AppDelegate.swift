@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import MonkeyKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,14 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-        
-        Monkey.sharedInstance().initWithApp("",
-                                            secret: "",
-                                            user: ["name":"Example User"],
-                                            expireSession: false,
-                                            debugging: true,
-                                            autoSync: true,
-                                            lastTimestamp: nil)
         
         
         return true
