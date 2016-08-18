@@ -17,8 +17,6 @@
 		41A8200F1D063B280035A012 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 41A8200E1D063B280035A012 /* libz.1.2.5.dylib */; };
 		41AF84ED1CFD12A3006ED473 /* MonkeyChatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84EC1CFD12A3006ED473 /* MonkeyChatTests.swift */; };
 		41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F51CFD4963006ED473 /* AppDelegate.swift */; };
-		41AF84FD1CFD4963006ED473 /* DemoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F71CFD4963006ED473 /* DemoModel.swift */; };
-		41AF84FE1CFD4963006ED473 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F81CFD4963006ED473 /* Conversation.swift */; };
 		41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */; };
 		41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84FA1CFD4963006ED473 /* ChatViewController.swift */; };
 		41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 41AF85011CFD49F0006ED473 /* Main.storyboard */; };
@@ -55,8 +53,6 @@
 		41AF84EC1CFD12A3006ED473 /* MonkeyChatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonkeyChatTests.swift; sourceTree = "<group>"; };
 		41AF84EE1CFD12A3006ED473 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		41AF84F51CFD4963006ED473 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		41AF84F71CFD4963006ED473 /* DemoModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoModel.swift; sourceTree = "<group>"; };
-		41AF84F81CFD4963006ED473 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationListViewController.swift; sourceTree = "<group>"; };
 		41AF84FA1CFD4963006ED473 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		41AF85011CFD49F0006ED473 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -138,8 +134,6 @@
 			isa = PBXGroup;
 			children = (
 				41AF85071CFDE917006ED473 /* DBManager.swift */,
-				41AF84F71CFD4963006ED473 /* DemoModel.swift */,
-				41AF84F81CFD4963006ED473 /* Conversation.swift */,
 				41AF85041CFDE8F8006ED473 /* User.swift */,
 				41A575641D52376500D26EAD /* Message.swift */,
 			);
@@ -173,12 +167,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 412F8FB01CF4A663009ACBE2 /* Build configuration list for PBXNativeTarget "MonkeyChat" */;
 			buildPhases = (
-				EF55CEB5226673085F747D8A /* 📦 Check Pods Manifest.lock */,
+				EF55CEB5226673085F747D8A /* [CP] Check Pods Manifest.lock */,
 				412F8F9A1CF4A663009ACBE2 /* Sources */,
 				412F8F9B1CF4A663009ACBE2 /* Frameworks */,
 				412F8F9C1CF4A663009ACBE2 /* Resources */,
-				070F9CCAB1F9397812B71754 /* 📦 Embed Pods Frameworks */,
-				E0A5BF7B49817D82ED9A45AF /* 📦 Copy Pods Resources */,
+				070F9CCAB1F9397812B71754 /* [CP] Embed Pods Frameworks */,
+				E0A5BF7B49817D82ED9A45AF /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -270,14 +264,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		070F9CCAB1F9397812B71754 /* 📦 Embed Pods Frameworks */ = {
+		070F9CCAB1F9397812B71754 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Embed Pods Frameworks";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -285,14 +279,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E0A5BF7B49817D82ED9A45AF /* 📦 Copy Pods Resources */ = {
+		E0A5BF7B49817D82ED9A45AF /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Copy Pods Resources";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -300,14 +294,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		EF55CEB5226673085F747D8A /* 📦 Check Pods Manifest.lock */ = {
+		EF55CEB5226673085F747D8A /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -322,10 +316,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41AF84FE1CFD4963006ED473 /* Conversation.swift in Sources */,
 				41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */,
 				41AF85051CFDE8F8006ED473 /* User.swift in Sources */,
-				41AF84FD1CFD4963006ED473 /* DemoModel.swift in Sources */,
 				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
 				41A575651D52376500D26EAD /* Message.swift in Sources */,
 				41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */,
@@ -455,7 +447,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = MonkeyChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat.MonkeyChat;
+				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -467,7 +459,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = MonkeyChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat.MonkeyChat;
+				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

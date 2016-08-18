@@ -10,7 +10,7 @@ import Foundation
 import MonkeyKit
 
 class DBManager {
-    class func getConversations() -> [Conversation]{
+    class func getConversations() -> [MOKConversation]{
         return []
     }
     class func getMessages() -> [MOKMessage]{

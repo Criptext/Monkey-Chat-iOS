@@ -5,5 +5,6 @@ target 'MonkeyChat' do
   pod 'JSQMessagesViewController', :path => '~/Workspace/JSQMessagesViewController'
   pod 'RealmSwift'
   pod 'SDWebImage'
-  pod 'MonkeyKit', :path => '~/Workspace/MonkeyKit-iOS'
+  pod 'Whisper'
+  pod 'MonkeyKit', :path => '~/Workspace/Monkey-SDK-iOS'
 end

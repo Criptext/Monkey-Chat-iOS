@@ -16,6 +16,7 @@ import UIKit
 import JSQMessagesViewController
 import MonkeyKit
 import SDWebImage
+import Whisper
 
 /**
  *  ViewController that lists your conversations
@@ -25,10 +26,10 @@ import SDWebImage
 
 class ConversationsListViewController: UITableViewController {
     
-    var conversationHash = [String:Conversation]()
-    var conversationArray = [Conversation]()
+    var conversationHash = [String:MOKConversation]()
+    var conversationArray = [MOKConversation]()
     
-    var filteredConversationArray = [Conversation]()
+    var filteredConversationArray = [MOKConversation]()
     
     let searchController = UISearchController(searchResultsController: nil)
     let defaultAvatar = UIImage(named: "Profile_imgDefault.png")
@@ -37,12 +38,19 @@ class ConversationsListViewController: UITableViewController {
     
     let dateFormatter = NSDateFormatter()
     
+    //flags for requesting conversations
+    var isGettingConversations = false
+    var shouldRequestConversations = true
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         /**
          *  Hides empty cells
          */
         self.tableView.tableFooterView = UIView()
+        
+        //stop notifications from modifying tableview inset
+        Config.modifyInset = false
         
         //fixed tableview having strange offset
         self.edgesForExtendedLayout = UIRectEdge.None
@@ -81,11 +89,6 @@ class ConversationsListViewController: UITableViewController {
          *  Register event listeners before initializing monkey
          */
         
-        //register listener for initial regitration ok
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.monkeyRegisterOK(_:)), name: MonkeyRegistrationDidCompleteNotification, object: nil)
-        //register listener for initial registration fail
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.monkeyRegisterFail(_:)), name: MonkeyRegistrationDidFailNotification, object: nil)
-        
         //register listener for changes in the socket connection
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.handleConnectionChange(_:)), name: MonkeySocketStatusChangeNotification, object: nil)
         
@@ -123,11 +126,19 @@ class ConversationsListViewController: UITableViewController {
         Monkey.sharedInstance().initWithApp("idkgwf6ghcmyfvvrxqiwwmi",
                                             secret: "9da5bbc32210ed6501de82927056b8d2",
                                             user: ["name":"Gianni",
-                                                "monkeyId":"idkh61jqs9ia151u7edhd7vi"],
+                                                "monkeyId":"idkh61jqs9ia151u7edhd7vi",
+                                                "password": "53CR3TP455W0RD"],
+                                            ignoredParams: ["password"],
                                             expireSession: false,
                                             debugging: true,
                                             autoSync: true,
-                                            lastTimestamp: nil)
+                                            lastTimestamp: nil,
+                                            success: { (session) in
+                                                print(session)
+            },
+                                            failure: {(task, error) in
+                                                print(error.localizedDescription)
+        })
         
         /**
          *  Load conversations
@@ -145,6 +156,17 @@ class ConversationsListViewController: UITableViewController {
         super.viewWillAppear(animated)
         
         self.tableView?.reloadData()
+        
+        guard let index = self.tableView.indexPathsForVisibleRows?.first else {
+            //hide search bar on empty list
+            self.tableView.setContentOffset(CGPointMake(0, 44), animated: false)
+            return
+        }
+        
+        if (index.row == 0 && !self.searchController.active) {
+            //hide search bar if the first row is visible
+            self.tableView.setContentOffset(CGPointMake(0, 44), animated: false)
+        }
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -165,39 +187,26 @@ class ConversationsListViewController: UITableViewController {
     }
     
     func getConversations(from:Double) {
+        
+        if self.isGettingConversations {
+            return
+        }
+        
+        self.isGettingConversations = true
         Monkey.sharedInstance().getConversationsSince(from, quantity: 5, success: { (conversations) in
-            for conversation in conversations as! [[String:AnyObject]] {
-                
-                let idConv = conversation["id"] as! String
-                let info = conversation["info"] as? [String:String] ?? [:]
-                let members = conversation["members"] as? [String] ?? [idConv]
-                let message = conversation["last_message"] as! MOKMessage
-                let lastSeen = Double(conversation["last_seen"]?.integerValue ?? 0)
-                let lastModified = Double(conversation["last_modified"]?.integerValue ?? 0)
-                let unread = conversation["unread"]?.unsignedLongLongValue ?? 0
-                
-                var conv = self.conversationHash[idConv]
+            for conversation in conversations {
                 
                 //do not replace if the conversation already exists
-                if let conv = conv {
-                    conv.info = info
-                    conv.members = members
+                if let conv = self.conversationHash[conversation.conversationId] {
+                    conv.info = conversation.info
+                    conv.members = conversation.members
                 }else{
-                
-                    conv = Conversation(id: idConv,
-                        info: info,
-                        members: members,
-                        lastMessage: message,
-                        lastSeen: lastSeen,
-                        lastModified:  lastModified,
-                        unread: unread)
-                    
-                    self.conversationHash[conv!.id] = conv!
-                    self.conversationArray.append(conv!)
+                    self.conversationHash[conversation.conversationId] = conversation
+                    self.conversationArray.append(conversation)
                 }
-                
-                
             }
+            
+            self.isGettingConversations = false
             
             if conversations.count > 0 {
                 self.tableView?.reloadData()
@@ -205,6 +214,7 @@ class ConversationsListViewController: UITableViewController {
             
             self.refreshControl?.endRefreshing()
             }, failure: { (task, error) in
+                self.isGettingConversations = false
                 self.refreshControl?.endRefreshing()
                 print(error)
         })
@@ -229,7 +239,7 @@ class ConversationsListViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        var conversation:Conversation!
+        var conversation:MOKConversation!
         if self.searchController.active {
             conversation = self.filteredConversationArray[indexPath.row]
         }else{
@@ -259,7 +269,7 @@ class ConversationsListViewController: UITableViewController {
         
         //setting current values
         
-        cell.nameLabel.text = conversation.info["name"] ?? "Unknown"
+        cell.nameLabel.text = conversation.info.objectForKey("name") as? String ?? "Unknown"
         cell.avatarImageView.sd_setImageWithURL(conversation.getAvatarURL(), placeholderImage: self.defaultAvatar)
         
         if conversation.unread > 0 {
@@ -280,7 +290,7 @@ class ConversationsListViewController: UITableViewController {
         guard let lastMessage = conversation.lastMessage else {
             cell.dateLabel.text = ""
             cell.moreImageView.hidden = true
-            cell.previewLabel.text = conversation.isGroup ? "Write to this Group" : "Write to this Contact"
+            cell.previewLabel.text = conversation.isGroup() ? "Write to this Group" : "Write to this Contact"
             
             return cell
         }
@@ -317,7 +327,7 @@ class ConversationsListViewController: UITableViewController {
         
         let vc = ChatViewController()
         
-        var conversation:Conversation!
+        var conversation:MOKConversation!
         if self.searchController.active {
             conversation = self.filteredConversationArray[indexPath.row]
         }else{
@@ -372,21 +382,21 @@ class ConversationsListViewController: UITableViewController {
     override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let conversation = self.conversationArray[indexPath.row]
         
-        let title = conversation.isGroup ? "Exit Group" : "Delete"
+        let title = conversation.isGroup() ? "Exit Group" : "Delete"
         
         let deleteAction = UITableViewRowAction(style: .Default, title: title) { (action, indexPath) in
             
-            let sheetTitle = conversation.isGroup ? "Delete and exit group \(conversation.info["name"] ?? "Unknown")?" : "Delete conversation with \(conversation.info["name"] ?? "Unknown")?"
+            let sheetTitle = conversation.isGroup() ? "Delete and exit group \(conversation.info["name"] ?? "Unknown")?" : "Delete conversation with \(conversation.info["name"] ?? "Unknown")?"
             let alert = UIAlertController(title: sheetTitle, message: nil, preferredStyle: .ActionSheet)
             
             alert.addAction(UIAlertAction(title: "Cancelar", style: .Cancel, handler: { action in
                 tableView.setEditing(false, animated: true)
             }))
             
-            if conversation.isGroup {
+            if conversation.isGroup() {
                 alert.addAction(UIAlertAction(title:"Delete and Exit", style: .Destructive, handler: { action in
                     
-                    Monkey.sharedInstance().removeMember(Monkey.sharedInstance().monkeyId()!, group: conversation.id, success: { (data) in
+                    Monkey.sharedInstance().removeMember(Monkey.sharedInstance().monkeyId()!, group: conversation.conversationId, success: { (data) in
                         self.conversationArray.removeAtIndex(indexPath.row)
                         
                         tableView.beginUpdates()
@@ -404,7 +414,7 @@ class ConversationsListViewController: UITableViewController {
                 }))
             } else {
                 alert.addAction(UIAlertAction(title:"Delete", style: .Destructive, handler: { action in
-                    Monkey.sharedInstance().deleteConversation(conversation.id, success: { (data) in
+                    Monkey.sharedInstance().deleteConversation(conversation.conversationId, success: { (data) in
                         self.conversationArray.removeAtIndex(indexPath.row)
                         
                         tableView.beginUpdates()
@@ -439,7 +449,7 @@ extension ConversationsListViewController: UISearchResultsUpdating {
             self.filteredConversationArray = self.conversationArray.filter({ (conversation) -> Bool in
                 
                 let conversationName = conversation.info["name"] ?? "Unknown"
-                return conversationName.lowercaseString.containsString(text.lowercaseString)
+                return conversationName!.lowercaseString.containsString(text.lowercaseString)
             })
         }
         
@@ -467,34 +477,83 @@ extension ConversationsListViewController: UISearchControllerDelegate {
 
 //MARK: Connection delegate
 extension ConversationsListViewController {
-    func monkeyRegisterOK(notification:NSNotification) {
-        //here returns the session
-        print(notification.userInfo)
-    }
-    
-    func monkeyRegisterFail(notification:NSNotification) {
-        //handle error
-        print(notification.userInfo)
-    }
     
     func handleConnectionChange(notification:NSNotification){
+        
+        var text:String!
+        var color:UIColor!
+        var action:WhisperAction = .Present
+        
         //handle connection changes
         switch (notification.userInfo!["status"] as! NSNumber).unsignedIntValue{
         case MOKConnectionStateDisconnected.rawValue:
             print("disconnected")
-            break
-        case MOKConnectionStateConnected.rawValue:
-            print("connected")
+            
+            text = "Disconnected"
+            color = UIColor.redColor()
+            
             break
         case MOKConnectionStateConnecting.rawValue:
             print("connecting")
+            
+            text = "Connecting"
+            color = UIColor(red:1.00, green:0.60, blue:0.00, alpha:1.0)
+            
+            break
+        case MOKConnectionStateConnected.rawValue:
+            print("connected")
+            
+            text = "Connected"
+            color = UIColor(red:0.26, green:0.60, blue:0.22, alpha:1.0)
+            
+            action = .Show
+            
             break
         case MOKConnectionStateNoNetwork.rawValue:
             print("no network")
+            text = "No Network"
+            color = UIColor.blackColor()
+            
             break
         default:
             break
         }
+        
+        guard let whisper = self.getWhisper() else {
+            let notif = Message(title: text, textColor: UIColor.whiteColor(), backgroundColor: color, images: nil)
+            show(whisper: notif, to: self.navigationController!, action: action)
+            return
+        }
+        
+        self.update(whisper: whisper, text: text, color: color, action: action)
+    }
+    
+    func update(whisper whisper:WhisperView, text:String, color:UIColor, action:WhisperAction) {
+        UIView.animateWithDuration(0.5, animations: {
+            whisper.titleLabel.text = text
+            let heightOriginal = whisper.titleLabel.frame.size.height
+            whisper.titleLabel.sizeToFit()
+            whisper.titleLabel.frame.size.height = heightOriginal
+            whisper.backgroundColor = color
+        })
+        
+        if action == .Show {
+            hide(whisperFrom: self.navigationController!, after: 1.0)
+        }
+        
+    }
+    
+    func getWhisper() -> WhisperView? {
+        var whisperView:WhisperView!
+        
+        for subview in self.navigationController!.navigationBar.subviews {
+            if let whisper = subview as? WhisperView {
+                whisperView = whisper
+                break
+            }
+        }
+        
+        return whisperView
     }
 }
 
@@ -509,7 +568,14 @@ extension ConversationsListViewController {
         
         if conversation == nil {
             
-            conversation = Conversation(id: message.conversationId(), info: [:], members: [message.sender, message.recipient], lastMessage: message, lastSeen: 0, lastModified: message.timestampCreated, unread: 1)
+            conversation = MOKConversation(id: message.conversationId())
+            conversation!.info = NSMutableDictionary()
+            conversation!.members = [message.sender, message.recipient]
+            conversation!.lastMessage = message
+            conversation!.lastSeen = 0
+            conversation!.lastModified = message.timestampCreated
+            conversation!.unread = 1
+
             self.conversationArray.append(conversation!)
             self.conversationHash[message.conversationId()] = conversation
         }

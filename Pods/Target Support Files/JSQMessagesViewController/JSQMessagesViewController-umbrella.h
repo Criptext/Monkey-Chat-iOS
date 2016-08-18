@@ -11,6 +11,8 @@
 #import "JSQMessagesViewController.h"
 #import "MOKPhotoMediaItem.h"
 #import "JSQMessagesActivityIndicatorHeaderView.h"
+#import "JSQMessagesCollectionViewCellIncoming2.h"
+#import "JSQMessagesCollectionViewCellOutgoing2.h"
 #import "JSQMessagesAvatarImageFactory.h"
 #import "JSQMessagesBubbleImageFactory.h"
 #import "JSQMessagesMediaViewBubbleImageMasker.h"

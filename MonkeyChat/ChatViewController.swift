@@ -24,7 +24,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     let maxSize = 8500
     
-    var conversation: Conversation!
+    var conversation: MOKConversation!
     var messageHash = [String:MOKMessage]()
     var messageArray = [MOKMessage]()
     
@@ -34,6 +34,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     //identifier for header of collection view
     var headerViewIdentifier = JSQMessagesActivityIndicatorHeaderView.headerReuseIdentifier()
+    
     
     var outgoingBubbleImageData: JSQMessagesBubbleImage!
     var incomingBubbleImageData: JSQMessagesBubbleImage!
@@ -45,9 +46,23 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         super.viewDidLoad()
         
         //Start by opening the conversation in Monkey
-        Monkey.sharedInstance().openConversation(self.conversation.id)
+        Monkey.sharedInstance().openConversation(self.conversation.conversationId)
         
-        self.title = self.conversation.info["name"]
+        self.title = self.conversation.info.objectForKey("name") as? String
+        
+        //set your cell identifiers
+        self.outgoingCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.cellReuseIdentifier()
+        self.outgoingMediaCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.mediaCellReuseIdentifier()
+        
+        self.collectionView.registerNib(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingCellIdentifier)
+        self.collectionView.registerNib(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingMediaCellIdentifier)
+        
+        self.incomingCellIdentifier = JSQMessagesCollectionViewCellIncoming2.cellReuseIdentifier()
+        self.incomingMediaCellIdentifier = JSQMessagesCollectionViewCellIncoming2.mediaCellReuseIdentifier()
+        
+        self.collectionView.registerNib(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingCellIdentifier)
+        self.collectionView.registerNib(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingMediaCellIdentifier)
+        
         
         /**
          *  You MUST set your senderId and display name
@@ -316,7 +331,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
             textCopy += " \(wordArray.removeFirst())"
         }
         
-        let message = Monkey.sharedInstance().sendText(textCopy, toUser: self.conversation.id)
+        let message = Monkey.sharedInstance().sendText(textCopy, to: self.conversation.conversationId, params: nil, push: nil)
         
         self.messageArray.append(message)
         
@@ -336,7 +351,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         }
         
         self.isGettingMessages = true
-        Monkey.sharedInstance().getConversationMessages(self.conversation.id, since: Int(firstMessage.timestampCreated), quantity: 10, success: { (messages) in
+        Monkey.sharedInstance().getConversationMessages(self.conversation.conversationId, since: Int(firstMessage.timestampCreated), quantity: 10, success: { (messages) in
             
             if messages.count == 0 {
                 self.shouldRequestMessages = false
@@ -362,7 +377,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
             
             self.isGettingMessages = false
             }, failure: { (task, error) in
-                print(error)
+                print(error.localizedDescription)
                 self.isGettingMessages = false
                 self.collectionView.reloadData()
         })
@@ -513,52 +528,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         return nil
     }
     
-    override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForCellTopLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
-        /**
-         *  This logic should be consistent with what you return from `heightForCellTopLabelAtIndexPath:`
-         *  The other label text delegate methods should follow a similar pattern.
-         *
-         *  Show a timestamp for every 3rd message
-         */
-        let currentMessage = self.messageArray[indexPath.item]
-        
-        if indexPath.item == 0 {
-            return JSQMessagesTimestampFormatter.sharedFormatter().attributedTimestampForDate(currentMessage.date())
-        }
-        
-        let previousMessage = self.messageArray[indexPath.item - 1]
-        
-        if (currentMessage.timestampCreated - previousMessage.timestampCreated) > 7200 {
-            return JSQMessagesTimestampFormatter.sharedFormatter().attributedTimestampForDate(currentMessage.date())
-        }
-        
-        return nil;
-    }
-    
-    override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForMessageBubbleTopLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
-        let message = self.messageArray[indexPath.item]
-        
-        /**
-         *  iOS7-style sender name labels
-         */
-        if message.senderId() == self.senderId {
-            return nil;
-        }
-        
-        if (indexPath.item - 1) > 0 {
-            let previousMessage = self.messageArray[indexPath.item - 1]
-            if previousMessage.senderId() == message.senderId() {
-                return nil;
-            }
-        }
-        
-        /**
-         *  Don't specify attributes to use the defaults.
-         */
-//        return NSAttributedString(string: message.senderDisplayName)
-        return nil
-    }
-    
     override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForCellBottomLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
         return nil
     }
@@ -659,12 +628,11 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
          *  Show a timestamp for every 3rd message
          */
         
-        let currentMessage = self.messageArray[indexPath.item]
-        
         if indexPath.item == 0 {
             return kJSQMessagesCollectionViewCellLabelHeightDefault
         }
         
+        let currentMessage = self.messageArray[indexPath.item]
         let previousMessage = self.messageArray[indexPath.item - 1]
         
         if (currentMessage.timestampCreated - previousMessage.timestampCreated) > 7200 {
@@ -674,23 +642,79 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         return 0.0
     }
     
+    override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForCellTopLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
+        /**
+         *  This logic should be consistent with what you return from `heightForCellTopLabelAtIndexPath:`
+         *  The other label text delegate methods should follow a similar pattern.
+         *
+         *  Show a timestamp for every 3rd message
+         */
+        let currentMessage = self.messageArray[indexPath.item]
+        
+        if indexPath.item == 0 {
+            return JSQMessagesTimestampFormatter.sharedFormatter().attributedTimestampForDate(currentMessage.date())
+        }
+        
+        let previousMessage = self.messageArray[indexPath.item - 1]
+        
+        if (currentMessage.timestampCreated - previousMessage.timestampCreated) > 7200 {
+            return JSQMessagesTimestampFormatter.sharedFormatter().attributedTimestampForDate(currentMessage.date())
+        }
+        
+        return nil;
+    }
+    
     override func collectionView(collectionView: JSQMessagesCollectionView?, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout?, heightForMessageBubbleTopLabelAtIndexPath indexPath: NSIndexPath!) -> CGFloat {
         /**
          *  iOS7-style sender name labels
          */
+        
+        if !self.conversation.isGroup() {
+            return 0.0
+        }
+        
         let currentMessage = self.messageArray[indexPath.item]
         if currentMessage.senderId() == self.senderId {
             return 0.0
         }
         
-        if (indexPath.item - 1) > 0 {
+        if indexPath.item > 0 {
             let previousMessage = self.messageArray[indexPath.item - 1]
             if previousMessage.senderId() == currentMessage.senderId() {
                 return 0.0
             }
         }
         
-        return kJSQMessagesCollectionViewCellLabelHeightDefault;
+        return kJSQMessagesCollectionViewCellLabelHeightDefault
+    }
+    
+    override func collectionView(collectionView: JSQMessagesCollectionView!, attributedTextForMessageBubbleTopLabelAtIndexPath indexPath: NSIndexPath!) -> NSAttributedString! {
+        let currentMessage = self.messageArray[indexPath.item]
+        
+        /**
+         *  iOS7-style sender name labels
+         */
+        if currentMessage.senderId() == self.senderId {
+            return nil
+        }
+        
+        if indexPath.item > 0 {
+            let previousMessage = self.messageArray[indexPath.item - 1]
+            if previousMessage.senderId() == currentMessage.senderId() {
+                return nil
+            }
+        }
+        
+        if self.conversation.isGroup() {
+            currentMessage
+            return NSAttributedString(string: currentMessage.senderDisplayName())
+        }
+        
+        /**
+         *  Don't specify attributes to use the defaults.
+         */
+        //        return NSAttributedString(string: message.senderDisplayName)
+        return nil
     }
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForCellBottomLabelAtIndexPath indexPath: NSIndexPath!) -> CGFloat {
