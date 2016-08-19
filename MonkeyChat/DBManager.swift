@@ -16,4 +16,7 @@ class DBManager {
     class func getMessages() -> [MOKMessage]{
         return []
     }
+    class func getUser() -> MOKUser?{
+        return nil
+    }
 }

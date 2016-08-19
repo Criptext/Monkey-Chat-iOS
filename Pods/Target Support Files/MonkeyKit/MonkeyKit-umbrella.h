@@ -25,6 +25,7 @@
 #import "MOKConversation.h"
 #import "MOKDictionaryBasedObject.h"
 #import "MOKMessage.h"
+#import "MOKUser.h"
 #import "Monkey.h"
 #import "BBAES.h"
 #import "MOKSecurityManager.h"

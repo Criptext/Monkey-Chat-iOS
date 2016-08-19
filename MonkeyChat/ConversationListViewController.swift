@@ -24,6 +24,10 @@ import Whisper
  *  It shows the name of the conversation and its last message
  */
 
+protocol InAppNotification {
+    
+}
+
 class ConversationsListViewController: UITableViewController {
     
     var conversationHash = [String:MOKConversation]()
@@ -48,6 +52,11 @@ class ConversationsListViewController: UITableViewController {
          *  Hides empty cells
          */
         self.tableView.tableFooterView = UIView()
+        
+        //customize In-app
+        ColorList.Shout.background = UIColor.blackColor()
+        ColorList.Shout.title = UIColor.whiteColor()
+        ColorList.Shout.subtitle = UIColor.whiteColor()
         
         //stop notifications from modifying tableview inset
         Config.modifyInset = false
@@ -296,8 +305,24 @@ class ConversationsListViewController: UITableViewController {
         }
         
         cell.dateLabel.text = lastMessage.relativeDate()
-        cell.previewLabel.text = lastMessage.plainText
         
+        var previewText:String!
+        
+        if lastMessage.isMediaMessage() {
+            switch lastMessage.mediaType() {
+            case MOKAudio.rawValue:
+                previewText = "Audio"
+                break
+            case MOKPhoto.rawValue:
+                previewText = "Image"
+                break
+            default:
+                previewText = "Media"
+                break
+            }
+        }else{
+            previewText = lastMessage.plainText
+        }
         
         //message is outgoing
         if Monkey.sharedInstance().isMessageOutgoing(lastMessage) {
@@ -305,19 +330,17 @@ class ConversationsListViewController: UITableViewController {
                 cell.previewOffsetConstraint.constant = 18
                 cell.doveImageView.image = self.sentDove
             } else {
-                cell.previewLabel.text = "Sending"
+                previewText = "Sending: \(previewText)"
             }
         }
         
-        if !lastMessage.wasSent() && Monkey.sharedInstance().isMessageOutgoing(lastMessage) {
-            cell.previewLabel.text = "Sending"
-        }
-        
         if lastMessage.needsResend() {
-            cell.previewLabel.text = "Fail to send"
+            previewText = "Failed to send"
             cell.previewLabel.textColor = UIColor.redColor()
             cell.previewLabel.highlightedTextColor = UIColor.redColor()
         }
+        
+        cell.previewLabel.text = previewText
 
         return cell
     }
@@ -560,15 +583,18 @@ extension ConversationsListViewController {
 //MARK: Monkey socket messages
 extension ConversationsListViewController {
     func messageReceived(notification:NSNotification){
+        //do nothing if there's no valid message
         guard let userInfo = notification.userInfo, message = userInfo["message"] as? MOKMessage else {
             return
         }
         
-        var conversation = self.conversationHash[message.conversationId()]
+        //check if conversation is already created
+        let conversationId = message.conversationId(Monkey.sharedInstance().monkeyId())
+        var conversation = self.conversationHash[conversationId]
         
+        //create conversation if it doesn't exist
         if conversation == nil {
-            
-            conversation = MOKConversation(id: message.conversationId())
+            conversation = MOKConversation(id: conversationId)
             conversation!.info = NSMutableDictionary()
             conversation!.members = [message.sender, message.recipient]
             conversation!.lastMessage = message
@@ -577,14 +603,28 @@ extension ConversationsListViewController {
             conversation!.unread = 1
 
             self.conversationArray.append(conversation!)
-            self.conversationHash[message.conversationId()] = conversation
+            self.conversationHash[conversationId] = conversation
         }
         
         
         conversation!.lastMessage = message
         
+        
+        
         if !Monkey.sharedInstance().isMessageOutgoing(message) {
             conversation!.unread += 1
+            
+            if self.isViewLoaded() && (self.view.window != nil) {
+                let view = UIImageView()
+                view.sd_setImageWithURL(conversation?.getAvatarURL())
+                
+                let announcement = Announcement(title: "notificacion", subtitle: message.plainText, image: view.image, duration: 2.0, action: {
+                    print("finish presenting! \(message.plainText)")
+                })
+                
+                show(shout: announcement, to: self.navigationController!)
+            }
+            
         }
         
         self.sortConversations()
@@ -600,7 +640,23 @@ extension ConversationsListViewController {
             return
         }
         
-        print(acknowledge)
+        //update local message
+        
+        //update last message if necessary
+        guard let conversation = self.conversationHash[acknowledge["conversationId"] as! String],
+            let lastMessage = conversation.lastMessage,
+            let oldId = acknowledge["oldId"] as? String,
+            let newId = acknowledge["newId"] as? String
+            where lastMessage.messageId == oldId else {
+                //nothing to do
+                return
+        
+        }
+        
+        lastMessage.messageId = newId
+        lastMessage.oldMessageId = oldId
+        
+        self.tableView.reloadData()
     }
     
     func notificationReceived(notification:NSNotification){

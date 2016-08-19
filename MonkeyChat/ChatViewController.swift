@@ -9,6 +9,7 @@
 import UIKit
 import JSQMessagesViewController
 import MonkeyKit
+import Whisper
 
 /**
  *  Override point for customization.
@@ -44,6 +45,15 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        /**
+         *	Register monkey listeners
+         */
+        //register listener for incoming messages
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.messageReceived(_:)), name: MonkeyMessageNotification, object: nil)
+        
+        //register listener for message acknowledges
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.acknowledgeReceived(_:)), name: MonkeyAcknowledgeNotification, object: nil)
         
         //Start by opening the conversation in Monkey
         Monkey.sharedInstance().openConversation(self.conversation.conversationId)
@@ -142,10 +152,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         self.collectionView.reloadData()
     }
     
-    func test(){
-        self.loadMessages(false)
-    }
-    
     //MARK: Custom menu actions for cells
     
     override func didReceiveMenuWillShowNotification(notification: NSNotification!) {
@@ -157,167 +163,59 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         menu.menuItems = [UIMenuItem(title: "Custom Action", action: #selector(self.customAction(_:)))]
     }
     
-    //MARK: Actions
+}
+
+extension ChatViewController {
+    //MARK: Monkey Listeners
+    func messageReceived(notification:NSNotification){
+        //check that the message is for this conversation
+        
+        guard let userInfo = notification.userInfo, message = userInfo["message"] as? MOKMessage where message.conversationId(Monkey.sharedInstance().monkeyId()) == self.conversation.conversationId else {
+            
+            let view = UIImageView()
+            view.sd_setImageWithURL(conversation?.getAvatarURL())
+            
+            let announcement = Announcement(title: "notificacion", subtitle: (notification.userInfo!["message"] as! MOKMessage).plainText, image: view.image, duration: 2.0, action: {
+                print("finish presenting!")
+            })
+            
+            show(shout: announcement, to: self.navigationController!)
+            
+            return
+        }
+        
+        conversation!.lastMessage = message
+        
+        self.messageHash[message.messageId] = message
+        self.messageArray.append(message)
+        
+        self.finishReceivingMessage()
+    }
     
-//    func receiveMessagePressed(sender: UIBarButtonItem) {
-//        /**
-//         *  DEMO ONLY
-//         *
-//         *  The following is simply to simulate received messages for the demo.
-//         *  Do not actually do this.
-//         */
-//        
-//        
-//        /**
-//         *  Show the typing indicator to be shown
-//         */
-//        self.showTypingIndicator = !self.showTypingIndicator
-//        
-//        /**
-//         *  Scroll to actually view the indicator
-//         */
-//        self.scrollToBottomAnimated(true)
-//        
-//        /**
-//         *  Get random user that isn't me
-//         */
-//        let user = self.getRandomRecipient()
-//        
-//        /**
-//         *  Copy last sent message, this will be the new "received" message
-//         */
-//        var copyMessage = self.messageArray.last?.copy()
-//        
-//        if (copyMessage == nil) {
-//            copyMessage = JSQMessage(senderId: user.id, displayName: user.name, text: "First received!")
-//        }
-//        
-//        /**
-//         *  Allow typing indicator to show
-//         */
-//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-//            
-//            
-//            var newMessage:JSQMessage?
-//            var newMediaData:JSQMessageMediaData?
-//            var newMediaAttachmentCopy:AnyObject?
-//            
-//            if copyMessage!.isMediaMessage() {
-//                /**
-//                 *  Last message was a media message
-//                 */
-//                let copyMediaData = copyMessage!.media
-//                
-//                switch copyMediaData {
-//                case is JSQPhotoMediaItem:
-//                    let photoItemCopy = (copyMediaData as! JSQPhotoMediaItem).copy() as! JSQPhotoMediaItem
-//                    photoItemCopy.appliesMediaViewMaskAsOutgoing = false
-//                    
-//                    newMediaAttachmentCopy = UIImage(CGImage: photoItemCopy.image.CGImage!)
-//                    
-//                    /**
-//                     *  Set image to nil to simulate "downloading" the image
-//                     *  and show the placeholder view
-//                     */
-//                    photoItemCopy.image = nil;
-//                    
-//                    newMediaData = photoItemCopy
-//                case is JSQLocationMediaItem:
-//                    let locationItemCopy = (copyMediaData as! JSQLocationMediaItem).copy() as! JSQLocationMediaItem
-//                    locationItemCopy.appliesMediaViewMaskAsOutgoing = false
-//                    newMediaAttachmentCopy = locationItemCopy.location.copy()
-//                    
-//                    /**
-//                     *  Set location to nil to simulate "downloading" the location data
-//                     */
-//                    locationItemCopy.location = nil;
-//                    
-//                    newMediaData = locationItemCopy;
-//                case is JSQVideoMediaItem:
-//                    let videoItemCopy = (copyMediaData as! JSQVideoMediaItem).copy() as! JSQVideoMediaItem
-//                    videoItemCopy.appliesMediaViewMaskAsOutgoing = false
-//                    newMediaAttachmentCopy = videoItemCopy.fileURL.copy()
-//                    
-//                    /**
-//                     *  Reset video item to simulate "downloading" the video
-//                     */
-//                    videoItemCopy.fileURL = nil;
-//                    videoItemCopy.isReadyToPlay = false;
-//                    
-//                    newMediaData = videoItemCopy;
-//                case is JSQAudioMediaItem:
-//                    let audioItemCopy = (copyMediaData as! JSQAudioMediaItem).copy() as! JSQAudioMediaItem
-//                    audioItemCopy.appliesMediaViewMaskAsOutgoing = false
-//                    newMediaAttachmentCopy = audioItemCopy.audioData?.copy()
-//                    
-//                    /**
-//                     *  Reset audio item to simulate "downloading" the audio
-//                     */
-//                    audioItemCopy.audioData = nil;
-//                    
-//                    newMediaData = audioItemCopy;
-//                default:
-//                    print("error: unrecognized media item")
-//                }
-//                
-//                newMessage = JSQMessage(senderId: user.id, displayName: user.name, media: newMediaData)
-//            }
-//            else {
-//                /**
-//                 *  Last message was a text message
-//                 */
-//                
-//                newMessage = JSQMessage(senderId: user.id, displayName: user.name, text: copyMessage!.text)
-//            }
-//            
-//            /**
-//             *  Upon receiving a message, you should:
-//             *
-//             *  1. Play sound (optional)
-//             *  2. Add new JSQMessageData object to your data source
-//             *  3. Call `finishReceivingMessage`
-//             */
-//            
-//            JSQSystemSoundPlayer.jsq_playMessageReceivedSound()
-//            self.messageArray.append(newMessage!)
-//            self.finishReceivingMessageAnimated(true)
-//            
-//            if newMessage!.isMediaMessage {
-//                /**
-//                 *  Simulate "downloading" media
-//                 */
-//                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-//                    /**
-//                     *  Media is "finished downloading", re-display visible cells
-//                     *
-//                     *  If media cell is not visible, the next time it is dequeued the view controller will display its new attachment data
-//                     *
-//                     *  Reload the specific item, or simply call `reloadData`
-//                     */
-//                    
-//                    switch newMediaData {
-//                    case is JSQPhotoMediaItem:
-//                        (newMediaData as! JSQPhotoMediaItem).image = newMediaAttachmentCopy as! UIImage
-//                        self.collectionView.reloadData()
-//                    case is JSQLocationMediaItem:
-//                        (newMediaData as! JSQLocationMediaItem).setLocation(newMediaAttachmentCopy as! CLLocation, withCompletionHandler: {
-//                            self.collectionView.reloadData()
-//                        })
-//                    case is JSQVideoMediaItem:
-//                        (newMediaData as! JSQVideoMediaItem).fileURL = newMediaAttachmentCopy as! NSURL
-//                        (newMediaData as! JSQVideoMediaItem).isReadyToPlay = true
-//                        self.collectionView.reloadData()
-//                    case is JSQAudioMediaItem:
-//                        (newMediaData as! JSQAudioMediaItem).audioData = newMediaAttachmentCopy as? NSData
-//                        self.collectionView.reloadData()
-//                    default:
-//                        print("error: unrecognized media item")
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
+    func acknowledgeReceived(notification:NSNotification){
+        
+        guard let acknowledge = notification.userInfo else {
+            return
+        }
+        
+        //update last message if necessary
+        guard let oldId = acknowledge["oldId"] as? String,
+            let newId = acknowledge["newId"] as? String,
+            let message = self.messageHash[oldId]
+            where message.messageId == oldId || message.messageId == newId else {
+                //nothing to do
+                return
+        }
+        
+        message.messageId = newId
+        message.oldMessageId = oldId
+        
+        self.collectionView.reloadData()
+    }
+}
+
+extension ChatViewController {
+
     func send(text:String, size:Int) {
         
         guard !text.isEmpty else {
@@ -334,6 +232,8 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
         let message = Monkey.sharedInstance().sendText(textCopy, to: self.conversation.conversationId, params: nil, push: nil)
         
         self.messageArray.append(message)
+        self.messageHash[message.messageId] = message
+        self.conversation.lastMessage = message
         
         JSQSystemSoundPlayer.jsq_playMessageSentSound()
         
@@ -357,7 +257,13 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
                 self.shouldRequestMessages = false
             }
             
+            for message in messages {
+                self.messageHash[message.messageId] = message
+            }
+            
             self.messageArray = messages + self.messageArray
+            
+            
             
             let oldOffset = self.collectionView.contentOffset
             
@@ -381,9 +287,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
                 self.isGettingMessages = false
                 self.collectionView.reloadData()
         })
-    }
-    func messageReceived(){
-        
     }
     
     // MARK: JSQMessagesViewController method overrides
