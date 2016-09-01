@@ -6,11 +6,18 @@
 //  Copyright © 2016 Criptext. All rights reserved.
 //
 
-import JSQMessagesViewController
+import RealmSwift
 
-// Define User struct
-struct User {
-    let id: String
-    let name: String
-    let avatar: JSQMessagesAvatarImage
+class User: Object {
+    dynamic var monkeyId = ""
+    var info = List<SimpleInfo>()
+    
+    override static func primaryKey() -> String? {
+        return "monkeyId"
+    }
+}
+
+class SimpleInfo: Object {
+    dynamic var key = ""
+    dynamic var value = ""
 }

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA81CF4A663009ACBE2 /* Assets.xcassets */; };
 		412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */; };
+		413C3ECB1D6F606500333BF2 /* PreviewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413C3ECA1D6F606500333BF2 /* PreviewItem.swift */; };
 		419C36621D4FCEFA00B7F95D /* check-blue-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36601D4FCEFA00B7F95D /* check-blue-icon.png */; };
 		419C36631D4FCEFA00B7F95D /* check-grey-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36611D4FCEFA00B7F95D /* check-grey-icon.png */; };
 		419C36651D4FCF6700B7F95D /* Profile_imgDefault.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */; };
@@ -22,6 +23,7 @@
 		41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 41AF85011CFD49F0006ED473 /* Main.storyboard */; };
 		41AF85051CFDE8F8006ED473 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85041CFDE8F8006ED473 /* User.swift */; };
 		41AF85081CFDE917006ED473 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85071CFDE917006ED473 /* DBManager.swift */; };
+		41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BC05391D67A0F7005A1C89 /* Conversation.swift */; };
 		5CC071AF3AD7E379E17E98E5 /* Pods_MonkeyChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15C90BEB54151B20427A389D /* Pods_MonkeyChat.framework */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +43,7 @@
 		412F8FA81CF4A663009ACBE2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		412F8FAB1CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		412F8FAD1CF4A663009ACBE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		413C3ECA1D6F606500333BF2 /* PreviewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewItem.swift; sourceTree = "<group>"; };
 		419C36601D4FCEFA00B7F95D /* check-blue-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check-blue-icon.png"; sourceTree = "<group>"; };
 		419C36611D4FCEFA00B7F95D /* check-grey-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check-grey-icon.png"; sourceTree = "<group>"; };
 		419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Profile_imgDefault.png; sourceTree = "<group>"; };
@@ -58,6 +61,7 @@
 		41AF85011CFD49F0006ED473 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		41AF85041CFDE8F8006ED473 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		41AF85071CFDE917006ED473 /* DBManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
+		41BC05391D67A0F7005A1C89 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		54BAE848AD63083227327E93 /* Pods-MonkeyChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.release.xcconfig"; sourceTree = "<group>"; };
 		9E843310D295E82F74648A91 /* Pods-MonkeyChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -136,6 +140,8 @@
 				41AF85071CFDE917006ED473 /* DBManager.swift */,
 				41AF85041CFDE8F8006ED473 /* User.swift */,
 				41A575641D52376500D26EAD /* Message.swift */,
+				41BC05391D67A0F7005A1C89 /* Conversation.swift */,
+				413C3ECA1D6F606500333BF2 /* PreviewItem.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -320,6 +326,8 @@
 				41AF85051CFDE8F8006ED473 /* User.swift in Sources */,
 				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
 				41A575651D52376500D26EAD /* Message.swift in Sources */,
+				41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */,
+				413C3ECB1D6F606500333BF2 /* PreviewItem.swift in Sources */,
 				41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */,
 				41AF85081CFDE917006ED473 /* DBManager.swift in Sources */,
 			);

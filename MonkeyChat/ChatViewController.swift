@@ -10,6 +10,9 @@ import UIKit
 import JSQMessagesViewController
 import MonkeyKit
 import Whisper
+import RealmSwift
+import QuickLook
+import Photos
 
 /**
  *  Override point for customization.
@@ -29,6 +32,9 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     var messageHash = [String:MOKMessage]()
     var messageArray = [MOKMessage]()
     
+    //messageId : AFHTTPRequestOperation
+    var downloadOperations = [String:AnyObject]()
+    
     //flags for requesting messages
     var isGettingMessages = false
     var shouldRequestMessages = true
@@ -36,6 +42,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     //identifier for header of collection view
     var headerViewIdentifier = JSQMessagesActivityIndicatorHeaderView.headerReuseIdentifier()
     
+    var members = [String:MOKUser]()
     
     var outgoingBubbleImageData: JSQMessagesBubbleImage!
     var incomingBubbleImageData: JSQMessagesBubbleImage!
@@ -43,8 +50,28 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     let readDove = JSQMessagesAvatarImageFactory.avatarImageWithImage(UIImage(named: "check-blue-icon.png"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault))
     let sentDove = JSQMessagesAvatarImageFactory.avatarImageWithImage(UIImage(named: "check-grey-icon.png"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault))
     
+    //file destination folder
+    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first! + "/"
+    
+    //preview item
+    var previewItem:PreviewItem!
+    
+    //recorder
+    var recorder:AVAudioRecorder?
+    
+    //timer
+    let timerLabel = UILabel()
+    var timerRecording:NSTimer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //
+        self.timerLabel.text = "00:00"
+        self.timerLabel.hidden = true
+        self.inputToolbar.contentView.addSubview(self.timerLabel)
+        self.timerLabel.frame = CGRectMake(30, 0, self.inputToolbar.contentView.frame.size.width, self.inputToolbar.contentView.frame.size.height)
+        self.inputToolbar.contentView.bringSubviewToFront(self.timerLabel)
         
         /**
          *	Register monkey listeners
@@ -165,17 +192,29 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
 }
 
+//MARK: - Monkey Listeners
 extension ChatViewController {
-    //MARK: Monkey Listeners
+    
     func messageReceived(notification:NSNotification){
-        //check that the message is for this conversation
         
-        guard let userInfo = notification.userInfo, message = userInfo["message"] as? MOKMessage where message.conversationId(Monkey.sharedInstance().monkeyId()) == self.conversation.conversationId else {
+        
+        guard let userInfo = notification.userInfo, message = userInfo["message"] as? MOKMessage else{
+            return
+        }
+        //check that the message is for this conversation
+        if message.conversationId(Monkey.sharedInstance().monkeyId()) != self.conversation.conversationId {
             
             let view = UIImageView()
             view.sd_setImageWithURL(conversation?.getAvatarURL())
             
-            let announcement = Announcement(title: "notificacion", subtitle: (notification.userInfo!["message"] as! MOKMessage).plainText, image: view.image, duration: 2.0, action: {
+            var title = "Notification"
+            
+            if let user = DBManager.getUser(message.sender) {
+                title = (user.info!["name"] ?? "Notification") as! String
+                view.sd_setImageWithURL(user.getAvatarURL())
+            }
+            
+            let announcement = Announcement(title: title, subtitle: (notification.userInfo!["message"] as! MOKMessage).plainText, image: view.image, duration: 2.0, action: {
                 print("finish presenting!")
             })
             
@@ -212,37 +251,6 @@ extension ChatViewController {
         
         self.collectionView.reloadData()
     }
-}
-
-extension ChatViewController {
-
-    func send(text:String, size:Int) {
-        
-        guard !text.isEmpty else {
-            return
-        }
-        
-        var wordArray = text.componentsSeparatedByString(" ").filter({ !$0.isEmpty })
-        var textCopy = wordArray.removeFirst()
-        
-        while(!wordArray.isEmpty && textCopy.characters.count < size){
-            textCopy += " \(wordArray.removeFirst())"
-        }
-        
-        let message = Monkey.sharedInstance().sendText(textCopy, to: self.conversation.conversationId, params: nil, push: nil)
-        
-        self.messageArray.append(message)
-        self.messageHash[message.messageId] = message
-        self.conversation.lastMessage = message
-        
-        JSQSystemSoundPlayer.jsq_playMessageSentSound()
-        
-        self.finishSendingMessageAnimated(true)
-        
-        let remainingText = wordArray.joinWithSeparator(" ")
-        self.send(remainingText, size: size)
-        
-    }
     
     // MARK: Messaging stuff
     func loadMessages(animated:Bool) {
@@ -259,6 +267,7 @@ extension ChatViewController {
             
             for message in messages {
                 self.messageHash[message.messageId] = message
+                DBManager.store(message)
             }
             
             self.messageArray = messages + self.messageArray
@@ -288,8 +297,240 @@ extension ChatViewController {
                 self.collectionView.reloadData()
         })
     }
+}
+
+// MARK: - PreviewController Delegate
+extension ChatViewController: QLPreviewControllerDataSource, QLPreviewControllerDelegate {
+    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController) -> Int {
+        return 1
+    }
     
-    // MARK: JSQMessagesViewController method overrides
+    func previewController(controller: QLPreviewController, previewItemAtIndex index: Int) -> QLPreviewItem {
+        return self.previewItem
+    }
+}
+
+// MARK: - Input Delegate
+extension ChatViewController {
+    override func messagesInputToolbar(toolbar: JSQMessagesInputToolbar!, didOpenOptionButton sender: KSMManyOptionsButton!) {
+        if sender.currentManyOptionsButtonState != KSMManyOptionsButtonState.Closed {
+            self.inputToolbar.contentView.textView.hidden = true
+            self.inputToolbar.contentView.leftBarButtonItem.hidden = true
+            self.timerLabel.hidden = false
+            self.startRecording()
+        }
+    }
+    
+    override func messagesInputToolbar(toolbar: JSQMessagesInputToolbar!, didSelectOptionButton location: KSMManyOptionsButtonLocation) {
+        switch location {
+        case KSMManyOptionsButtonLocation.Top:
+            print("top")
+            break
+        case KSMManyOptionsButtonLocation.Right:
+            print("right")
+            break
+        case KSMManyOptionsButtonLocation.Bottom:
+            print("bottom")
+            break
+        case KSMManyOptionsButtonLocation.Left:
+            print("left")
+            self.stopRecording(send:false)
+            break
+        case KSMManyOptionsButtonLocation.None:
+            print("none")
+            self.stopRecording(send:true)
+            break
+        }
+    }
+    
+    override func messagesInputToolbar(toolbar: JSQMessagesInputToolbar!, didBeginClosingOptionButton sender: KSMManyOptionsButton!) {
+        self.timerLabel.hidden = true
+        self.inputToolbar.contentView.textView.hidden = false
+        self.inputToolbar.contentView.leftBarButtonItem.hidden = false
+    }
+}
+
+// MARK: - Audio delegate
+extension ChatViewController {
+    func startRecording(){
+    
+        AVAudioSession.sharedInstance().requestRecordPermission { (granted) in
+            dispatch_async(dispatch_get_main_queue(), { 
+                if !granted {
+                    let alertcontroller = UIAlertController(title: nil, message: "Maduro", preferredStyle: .Alert)
+                    alertcontroller.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) in
+                        UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
+                    }))
+                    alertcontroller.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
+                    
+                    alertcontroller.popoverPresentationController?.sourceView = self.view
+                    alertcontroller.popoverPresentationController?.sourceRect = CGRectMake(self.view.bounds.size.width / 2.0, self.view.bounds.size.height-45, 1.0, 1.0)
+                    self.presentViewController(alertcontroller, animated: true, completion: nil)
+                    return
+                }
+                
+                UIApplication.sharedApplication().statusBarHidden = true
+                
+                AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
+                try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+                
+                let filename = "audio\(UInt64(NSDate().timeIntervalSince1970)).aac"
+                let dirpath = self.documentsPath + filename
+
+                try! self.recorder = AVAudioRecorder(URL: NSURL(string: dirpath)!,
+                    settings: [
+                        AVFormatIDKey: NSNumber(unsignedInt: kAudioFormatMPEG4AAC),
+                        AVSampleRateKey: NSNumber(float: 1200),
+                        AVNumberOfChannelsKey: NSNumber(int: 1),
+                        AVEncoderAudioQualityKey: NSNumber(integer: AVAudioQuality.Min.rawValue)
+                    ])
+                
+                self.recorder!.record()
+                
+                if self.timerRecording != nil {
+                    self.timerRecording.invalidate()
+                }
+                
+                if self.timerRecording == nil || (self.timerRecording != nil && !self.timerRecording.valid) {
+                    self.timerRecording = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(self.updateTimer), userInfo: nil, repeats: true)
+                    NSRunLoop.mainRunLoop().addTimer(self.timerRecording, forMode: NSRunLoopCommonModes)
+                }
+                
+                UIApplication.sharedApplication().statusBarHidden = false
+            })
+        }
+    }
+    
+    func updateTimer() {
+        guard let recorder = self.recorder else {
+            return
+        }
+        let minutes = Int((recorder.currentTime % 3600) / 60)
+        let secs = Int((recorder.currentTime % 3600) % 60)
+        
+        
+        self.timerLabel.text = String(format: "%02d:%02d", minutes, secs)
+    }
+    
+    func stopRecording(send flag:Bool) {
+        
+        guard let recorder = self.recorder where recorder.recording else {
+            return
+        }
+
+        recorder.stop()
+        
+        if !flag {
+            return
+        }
+        
+        let audioAsset = AVURLAsset(URL: NSURL(fileURLWithPath: recorder.url.path!))
+        let duration = audioAsset.duration
+        let seconds = CMTimeGetSeconds(duration)
+        if seconds > 0.7 {
+            guard let data = NSData(contentsOfFile: recorder.url.path!) else {
+                return
+            }
+            
+//            let push = Monkey.sharedInstance()
+            let message = Monkey.sharedInstance().sendFile(data, type: MOKAudio, filename: recorder.url.lastPathComponent!, encrypted: true, compressed: true, to: self.conversation.conversationId, params: ["length":Int(seconds)], push: "You received an audio", success: { (message) in
+                
+                //refresh collectionView?
+                
+            }) { (task, error) in
+                //mark message as failed
+                
+            }
+            
+            DBManager.store(message)
+            self.messageHash[message.messageId] = message
+            self.messageArray.append(message)
+            self.conversation.lastMessage = message
+            self.finishSendingMessage()
+        }
+        
+        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+        try! AVAudioSession.sharedInstance().setActive(false, withOptions: AVAudioSessionSetActiveOptions.NotifyOthersOnDeactivation)
+        AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
+    }
+
+}
+
+// MARK: - Image delegate
+extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
+        print("image!")
+        
+        let filename = "photo\(UInt64(NSDate().timeIntervalSince1970)).png"
+        let dirpath = self.documentsPath + filename
+        
+        guard let representation = UIImageJPEGRepresentation(image, 0.6) else {
+            return
+        }
+        
+        let data = NSData.init(data: representation)
+        data.writeToFile(dirpath, atomically: true)
+        
+        self.dismissViewControllerAnimated(true, completion: nil)
+        
+//        let message = MOKMessage(fileMessage: dirpath, type: MOKPhoto, sender: self.senderId, recipient: self.conversation.conversationId)
+        
+        let message = Monkey.sharedInstance().sendFile(data, type: MOKPhoto, filename: filename, encrypted: true, compressed: true, to: self.conversation.conversationId, params: nil, push: nil, success: { (message) in
+            
+            //refresh collectionView?
+            
+            }) { (task, error) in
+                //mark message as failed
+                
+        }
+        
+        DBManager.store(message)
+        self.messageHash[message.messageId] = message
+        self.messageArray.append(message)
+        self.conversation.lastMessage = message
+        self.finishSendingMessage()
+        
+        
+    }
+
+    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+        print("cancel!")
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+}
+
+extension ChatViewController {
+
+    func send(text:String, size:Int) {
+        
+        guard !text.isEmpty else {
+            return
+        }
+        
+        var wordArray = text.componentsSeparatedByString(" ").filter({ !$0.isEmpty })
+        var textCopy = wordArray.removeFirst()
+        
+        while(!wordArray.isEmpty && textCopy.characters.count < size){
+            textCopy += " \(wordArray.removeFirst())"
+        }
+        
+        let message = Monkey.sharedInstance().sendText(textCopy, to: self.conversation.conversationId, params: nil, push: "You received a text")
+        
+        DBManager.store(message)
+        self.messageArray.append(message)
+        self.messageHash[message.messageId] = message
+        self.conversation.lastMessage = message
+        
+        JSQSystemSoundPlayer.jsq_playMessageSentSound()
+        
+        self.finishSendingMessageAnimated(true)
+        
+        let remainingText = wordArray.joinWithSeparator(" ")
+        self.send(remainingText, size: size)
+        
+    }
+    
+    // MARK: - JSQMessagesViewController method overrides
     override func didPressSendButton(button: UIButton?, withMessageText text: String?, senderId: String?, senderDisplayName: String?, date: NSDate?) {
         /**
          *  Sending a message. Your implementation of this method should do *at least* the following:
@@ -307,10 +548,63 @@ extension ChatViewController {
         
         let sheet = UIAlertController(title: "Media messages", message: nil, preferredStyle: .ActionSheet)
         
-        let photoButton = UIAlertAction(title: "Send photo", style: .Default) { (action) in
-            /**
-             *  Add fake photo into conversation messages
-             */
+        if UIImagePickerController.isSourceTypeAvailable(.Camera) {
+            sheet.addAction(
+                UIAlertAction(title: "Take Picture", style: .Default) { (action) in
+                    
+                    AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo, completionHandler: { (granted) in
+                        dispatch_async(dispatch_get_main_queue(), {
+                            if !granted {
+                                let alertcontroller = UIAlertController(title: nil, message: "Maduro", preferredStyle: .Alert)
+                                alertcontroller.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) in
+                                    UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
+                                }))
+                                alertcontroller.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
+                                
+                                alertcontroller.popoverPresentationController?.sourceView = self.view
+                                alertcontroller.popoverPresentationController?.sourceRect = CGRectMake(self.view.bounds.size.width / 2.0, self.view.bounds.size.height-45, 1.0, 1.0)
+                                self.presentViewController(alertcontroller, animated: true, completion: nil)
+                                return
+                            }
+                            
+                            let picker = UIImagePickerController()
+                            picker.delegate = self
+                            picker.sourceType = .Camera
+                            
+                            self.presentViewController(picker, animated: true, completion: nil)
+                        })
+                    })
+            })
+        }
+        
+        let photoButton = UIAlertAction(title: "Choose existing picture", style: .Default) { (action) in
+            
+            PHPhotoLibrary.requestAuthorization({ (status) in
+                dispatch_async(dispatch_get_main_queue(), { 
+                    switch status {
+                    case .Authorized:
+                        let picker = UIImagePickerController()
+                        picker.delegate = self
+                        picker.sourceType = .PhotoLibrary
+                        
+                        self.presentViewController(picker, animated: true, completion: nil)
+                        break
+                    case .Denied, .Restricted:
+                        fallthrough
+                    default:
+                        let alertcontroller = UIAlertController(title: nil, message: "Maduro", preferredStyle: .Alert)
+                        alertcontroller.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) in
+                            UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
+                        }))
+                        alertcontroller.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
+                        
+                        alertcontroller.popoverPresentationController?.sourceView = self.view
+                        alertcontroller.popoverPresentationController?.sourceRect = CGRectMake(self.view.bounds.size.width / 2.0, self.view.bounds.size.height-45, 1.0, 1.0)
+                        self.presentViewController(alertcontroller, animated: true, completion: nil)
+                        break
+                    }
+                })
+            })
 //            let photoItem = JSQPhotoMediaItem(image: UIImage(named: "goldengate"))
 //            let photoMessage = JSQMessage(senderId: self.senderId, displayName: self.senderDisplayName, media: photoItem)
 //            
@@ -320,47 +614,9 @@ extension ChatViewController {
 //            self.finishSendingMessageAnimated(true)
         }
         
-        let locationButton = UIAlertAction(title: "Send location", style: .Default) { (action) in
-            /**
-             *  Add fake location into conversation messages
-             */
-            
-//            let ferryBuildingInSF = CLLocation(latitude: 37.795313, longitude: -122.393757)
-//            
-//            let locationItem = JSQLocationMediaItem()
-//            locationItem.setLocation(ferryBuildingInSF) {
-//                self.collectionView.reloadData()
-//            }
-//            
-//            let locationMessage = JSQMessage(senderId: self.senderId, displayName: self.senderDisplayName, media: locationItem)
-//            
-//            self.messageArray.append(locationMessage)
-//            
-//            JSQSystemSoundPlayer.jsq_playMessageSentSound()
-//            self.finishSendingMessageAnimated(true)
-        }
-        
-        let audioButton = UIAlertAction(title: "Send audio", style: .Default) { (action) in
-            /**
-             *  Add fake audio into conversation messages
-             */
-//            let sample = NSBundle.mainBundle().pathForResource("jsq_messages_sample", ofType: "m4a")
-//            
-//            let audioData = NSData(contentsOfFile: sample!)
-//            let audioItem = JSQAudioMediaItem(data: audioData)
-//            let audioMessage = JSQMessage(senderId: self.senderId, displayName: self.senderDisplayName, media: audioItem)
-//            
-//            self.messageArray.append(audioMessage)
-//            
-//            JSQSystemSoundPlayer.jsq_playMessageSentSound()
-//            self.finishSendingMessageAnimated(true)
-        }
-        
         let cancelButton = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
         
         sheet.addAction(photoButton)
-        sheet.addAction(locationButton)
-        sheet.addAction(audioButton)
         sheet.addAction(cancelButton)
         
         self.presentViewController(sheet, animated: true, completion: nil)
@@ -473,26 +729,60 @@ extension ChatViewController {
          *  Instead, override the properties you want on `self.collectionView.collectionViewLayout` from `viewDidLoad`
          */
         
-        let msg = self.messageArray[indexPath.item]
+        let message = self.messageArray[indexPath.item]
         
-        if !msg.isMediaMessage() {
+        var isOutgoing = true
+        
+        if message.sender != self.senderId {
+            isOutgoing = false
+        }
+        
+        if !message.isMediaMessage() {
             
-            if msg.senderId() == self.senderId {
+            if isOutgoing {
                 cell.textView.textColor = UIColor.whiteColor()
-            }
-            else {
+            } else {
                 cell.textView.textColor = UIColor.blackColor()
             }
             
             let attributes : [String:AnyObject] = [NSForegroundColorAttributeName:cell.textView.textColor!, NSUnderlineStyleAttributeName: NSUnderlineStyle.StyleSingle.rawValue]
             cell.textView.linkTextAttributes = attributes
+            
+            return cell
         }
         
-        return cell;
+        //media stuff
+        message.maskAsOutgoing(isOutgoing)
+        
+        let media = message.media()
+        
+        if media.needsDownload!() {
+            print("Download!!!")
+            self.downloadFile(message)
+        }
+        
+        return cell
+    }
+    
+    func downloadFile(message:MOKMessage) {
+        Monkey.sharedInstance().downloadFileMessage(message, fileDestination: self.documentsPath, success: { (data) in
+            //reload collection
+            message.reloadMedia(data)
+            self.collectionView.reloadData()
+            
+            }) { (task, error) in
+                //if file download is on progress do nothing
+                if error.code == -60 {
+                    return
+                }
+                
+                //set fail status to message and reload collection
+                
+        }
     }
     
     
-    // MARK: UICollectionView Delegate
+    // MARK: - UICollectionView Delegate
     
     // MARK: Custom menu items
     
@@ -609,8 +899,8 @@ extension ChatViewController {
         }
         
         if self.conversation.isGroup() {
-            currentMessage
-            return NSAttributedString(string: currentMessage.senderDisplayName())
+            let user = self.members[currentMessage.sender]
+            return NSAttributedString(string: (user?.info!["name"] ?? "Unknown") as! String)
         }
         
         /**
@@ -636,6 +926,23 @@ extension ChatViewController {
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAtIndexPath indexPath: NSIndexPath!) {
         print("Tapped message bubble!")
+        
+        let message = self.messageArray[indexPath.item]
+        
+        if !message.isMediaMessage() {
+            return
+        }
+        
+        print(message.fileURL())
+        self.previewItem = PreviewItem(title: "", url: message.fileURL()!)
+        
+        let vc = QLPreviewController()
+        vc.currentPreviewItemIndex = 0
+        vc.dataSource = self
+        vc.reloadData()
+        
+        self.presentViewController(vc, animated: true, completion: nil)
+        
     }
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, didTapCellAtIndexPath indexPath: NSIndexPath!, touchLocation: CGPoint) {

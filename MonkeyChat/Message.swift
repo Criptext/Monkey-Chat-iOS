@@ -8,10 +8,32 @@
 
 import MonkeyKit
 import JSQMessagesViewController
+import RealmSwift
 
+class MessageItem: Object {
+    dynamic var messageId = ""
+    dynamic var oldMessageId = ""
+//    dynamic var message:MOKMessage?
+//    dynamic var plainText = ""
+//    dynamic var timestampCreated = Double()
+//    dynamic var timestampOrder = Double()
+//    dynamic var recipient = ""
+//    dynamic var sender = ""
+//    dynamic var props = NSMutableDictionary()
+//    dynamic var params = NSMutableDictionary()
+//    dynamic var readByUser = false
+    
+    override static func primaryKey() -> String? {
+        return "messageId"
+    }
+}
 
 
 extension MOKMessage: JSQMessageData {
+    
+    public func documentsPath() -> String {
+        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first! + "/"
+    }
     
     public func senderId() -> String! {
         return self.sender
@@ -19,6 +41,23 @@ extension MOKMessage: JSQMessageData {
     
     public func text() -> String! {
         return self.plainText
+    }
+    
+    public func maskAsOutgoing(flag:Bool) {
+        if !self.isMediaMessage() {
+            return
+        }
+        
+        let media = self.media()
+        
+        switch self.mediaType() {
+        case MOKPhoto.rawValue:
+            (media as! JSQPhotoMediaItem).appliesMediaViewMaskAsOutgoing = flag
+            break
+        default:
+            
+            break
+        }
     }
     
     public func messageHash() -> UInt {
@@ -35,16 +74,61 @@ extension MOKMessage: JSQMessageData {
             return self.cachedMedia as! JSQMessageMediaData
         }
         
+        let media:JSQMessageMediaData!
         switch self.mediaType() {
+        case MOKAudio.rawValue:
+            print("audio!: \(self.filePath())")
+            let audio = NSData(contentsOfFile: self.filePath()!)
+            media = BLAudioMedia(audio: audio)
+            (media as! BLAudioMedia).setFilePath(self.filePath())
+            let asset = AVURLAsset(URL: self.fileURL()!)
+            (media as! BLAudioMedia).setAudioDuration(CMTimeGetSeconds(asset.duration))
+            break
         case MOKPhoto.rawValue:
+            print("photo!: \(self.filePath())")
             
+            let image = UIImage(contentsOfFile: self.filePath()!)
+            media = JSQPhotoMediaItem(image: image)
             break
         default:
-            
+            media = JSQPhotoMediaItem()
             break
         }
         
-        return JSQPhotoMediaItem()
+        self.cachedMedia = media
+//        photo.appliesMediaViewMaskAsOutgoing = false
+        return media
+    }
+    
+    public func reloadMedia(data:NSData) {
+        print("photo!: \(self.documentsPath()+self.plainText)")
+        self.cachedMedia = nil
+        let media:JSQMessageMediaData!
+        switch self.mediaType() {
+        case MOKAudio.rawValue:
+            print("audio!")
+            
+            let audio = data
+            
+            media = BLAudioMedia(audio: audio)
+            
+            (media as! BLAudioMedia).setFilePath(self.filePath())
+            let asset = AVURLAsset(URL: self.fileURL()!)
+            (media as! BLAudioMedia).setAudioDuration(CMTimeGetSeconds(asset.duration))
+            break
+        case MOKPhoto.rawValue:
+            print("photo!")
+            
+            media = JSQPhotoMediaItem(image: UIImage(data: data))
+            (media.mediaView() as! UIImageView).contentMode = .ScaleAspectFill
+            
+            break
+        default:
+            media = JSQPhotoMediaItem()
+            break
+        }
+        
+        self.cachedMedia = media
     }
     
 }

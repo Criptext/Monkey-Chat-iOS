@@ -17,6 +17,7 @@ import JSQMessagesViewController
 import MonkeyKit
 import SDWebImage
 import Whisper
+import RealmSwift
 
 /**
  *  ViewController that lists your conversations
@@ -39,6 +40,9 @@ class ConversationsListViewController: UITableViewController {
     let defaultAvatar = UIImage(named: "Profile_imgDefault.png")
     let readDove = UIImage(named: "check-blue-icon.png")
     let sentDove = UIImage(named: "check-grey-icon.png")
+    
+    let appID = ""
+    let appSecret = ""
     
     let dateFormatter = NSDateFormatter()
     
@@ -132,33 +136,38 @@ class ConversationsListViewController: UITableViewController {
          *  Initialize Monkey
          */
         
-        Monkey.sharedInstance().initWithApp("idkgwf6ghcmyfvvrxqiwwmi",
-                                            secret: "9da5bbc32210ed6501de82927056b8d2",
-                                            user: ["name":"Gianni",
-                                                "monkeyId":"idkh61jqs9ia151u7edhd7vi",
-                                                "password": "53CR3TP455W0RD"],
-                                            ignoredParams: ["password"],
+        let user = ["name":"Gianni",
+                    "password": "53CR3TP455W0RD"]
+        
+        let ignoredParams = ["password"]
+        
+        Monkey.sharedInstance().initWithApp(self.appID,
+                                            secret: self.appSecret,
+                                            user: user,
+                                            ignoredParams: ignoredParams,
                                             expireSession: false,
                                             debugging: true,
                                             autoSync: true,
                                             lastTimestamp: nil,
                                             success: { (session) in
                                                 print(session)
+                                                /**
+                                                 *  Load conversations
+                                                 */
+                                                
+                                                self.conversationArray = DBManager.getConversations()
+                                                
+                                                //
+                                                if self.conversationArray.count == 0 {
+                                                    self.getConversations(0)
+                                                }
+                                                
             },
                                             failure: {(task, error) in
                                                 print(error.localizedDescription)
         })
         
-        /**
-         *  Load conversations
-         */
         
-        self.conversationArray = DBManager.getConversations()
-        
-        //
-        if self.conversationArray.count == 0 {
-            self.getConversations(0)
-        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -203,6 +212,8 @@ class ConversationsListViewController: UITableViewController {
         
         self.isGettingConversations = true
         Monkey.sharedInstance().getConversationsSince(from, quantity: 5, success: { (conversations) in
+            
+            var users = Set<String>()
             for conversation in conversations {
                 
                 //do not replace if the conversation already exists
@@ -213,6 +224,22 @@ class ConversationsListViewController: UITableViewController {
                     self.conversationHash[conversation.conversationId] = conversation
                     self.conversationArray.append(conversation)
                 }
+                
+                if let msg = conversation.lastMessage {
+                    DBManager.store(msg)
+                }
+                
+                users.unionInPlace(conversation.members as NSArray as! [String])
+            }
+            
+            let unknownUsers = DBManager.monkeyIdsNotStored(users)
+            
+            if unknownUsers.count > 0 {
+                Monkey.sharedInstance().getInfoByIds(unknownUsers, success: { (users) in
+                    DBManager.storeUsers(users)
+                    }, failure: { (task, error) in
+                        print(error)
+                })
             }
             
             self.isGettingConversations = false
@@ -355,6 +382,10 @@ class ConversationsListViewController: UITableViewController {
             conversation = self.filteredConversationArray[indexPath.row]
         }else{
             conversation = self.conversationArray[indexPath.row]
+        }
+        
+        for user in DBManager.getUsers(conversation.members as NSArray as! [String]) {
+            vc.members[user.monkeyId] = user
         }
         
         //set all messages to read
@@ -588,6 +619,8 @@ extension ConversationsListViewController {
             return
         }
         
+        DBManager.store(message)
+        
         //check if conversation is already created
         let conversationId = message.conversationId(Monkey.sharedInstance().monkeyId())
         var conversation = self.conversationHash[conversationId]
@@ -614,11 +647,18 @@ extension ConversationsListViewController {
         if !Monkey.sharedInstance().isMessageOutgoing(message) {
             conversation!.unread += 1
             
+            //Show In-app notification
             if self.isViewLoaded() && (self.view.window != nil) {
                 let view = UIImageView()
                 view.sd_setImageWithURL(conversation?.getAvatarURL())
                 
-                let announcement = Announcement(title: "notificacion", subtitle: message.plainText, image: view.image, duration: 2.0, action: {
+                var title = "Notification"
+                
+                if let user = DBManager.getUser(message.sender) {
+                    title = (user.info!["name"] ?? "Notification") as! String
+                }
+                
+                let announcement = Announcement(title: title, subtitle: message.plainText, image: view.image, duration: 2.0, action: {
                     print("finish presenting! \(message.plainText)")
                 })
                 
@@ -636,17 +676,25 @@ extension ConversationsListViewController {
     
     func acknowledgeReceived(notification:NSNotification){
         
-        guard let acknowledge = notification.userInfo else {
+        //unwrap Ids
+        guard let acknowledge = notification.userInfo,
+        let oldId = acknowledge["oldId"] as? String,
+        let newId = acknowledge["newId"] as? String
+        else {
             return
         }
         
+        //Multisession - Request pending messages if it's not cached
+        if !DBManager.existsMessage(newId, oldId: oldId){
+            Monkey.sharedInstance().getPendingMessages()
+        }
+        
         //update local message
+        DBManager.updateMessage(newId, oldId: oldId)
         
         //update last message if necessary
         guard let conversation = self.conversationHash[acknowledge["conversationId"] as! String],
-            let lastMessage = conversation.lastMessage,
-            let oldId = acknowledge["oldId"] as? String,
-            let newId = acknowledge["newId"] as? String
+            let lastMessage = conversation.lastMessage
             where lastMessage.messageId == oldId else {
                 //nothing to do
                 return
