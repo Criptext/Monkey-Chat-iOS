@@ -24,6 +24,7 @@
 		41AF85051CFDE8F8006ED473 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85041CFDE8F8006ED473 /* User.swift */; };
 		41AF85081CFDE917006ED473 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85071CFDE917006ED473 /* DBManager.swift */; };
 		41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BC05391D67A0F7005A1C89 /* Conversation.swift */; };
+		41CF6D1B1D870A0100900A2D /* RotationNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */; };
 		5CC071AF3AD7E379E17E98E5 /* Pods_MonkeyChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15C90BEB54151B20427A389D /* Pods_MonkeyChat.framework */; };
 /* End PBXBuildFile section */
 
@@ -62,6 +63,7 @@
 		41AF85041CFDE8F8006ED473 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		41AF85071CFDE917006ED473 /* DBManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
 		41BC05391D67A0F7005A1C89 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RotationNavigationController.swift; sourceTree = "<group>"; };
 		54BAE848AD63083227327E93 /* Pods-MonkeyChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.release.xcconfig"; sourceTree = "<group>"; };
 		9E843310D295E82F74648A91 /* Pods-MonkeyChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -115,6 +117,7 @@
 				419C36611D4FCEFA00B7F95D /* check-grey-icon.png */,
 				41AF85061CFDE904006ED473 /* Model */,
 				41AF84F51CFD4963006ED473 /* AppDelegate.swift */,
+				41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */,
 				41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */,
 				41AF84FA1CFD4963006ED473 /* ChatViewController.swift */,
 				41AF85011CFD49F0006ED473 /* Main.storyboard */,
@@ -322,6 +325,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41CF6D1B1D870A0100900A2D /* RotationNavigationController.swift in Sources */,
 				41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */,
 				41AF85051CFDE8F8006ED473 /* User.swift in Sources */,
 				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
