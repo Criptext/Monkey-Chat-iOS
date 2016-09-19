@@ -21,3 +21,7 @@ class SimpleInfo: Object {
     dynamic var key = ""
     dynamic var value = ""
 }
+
+class StringObject: Object {
+    dynamic var value: String?
+}

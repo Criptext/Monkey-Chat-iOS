@@ -13,15 +13,14 @@ import RealmSwift
 class MessageItem: Object {
     dynamic var messageId = ""
     dynamic var oldMessageId = ""
-//    dynamic var message:MOKMessage?
-//    dynamic var plainText = ""
-//    dynamic var timestampCreated = Double()
-//    dynamic var timestampOrder = Double()
-//    dynamic var recipient = ""
-//    dynamic var sender = ""
-//    dynamic var props = NSMutableDictionary()
-//    dynamic var params = NSMutableDictionary()
-//    dynamic var readByUser = false
+    dynamic var plainText = ""
+    dynamic var encryptedText:String?
+    dynamic var timestampCreated = Double()
+    dynamic var timestampOrder = Double()
+    dynamic var recipient = ""
+    dynamic var sender = ""
+    dynamic var props:NSData?
+    dynamic var params:NSData?
     
     override static func primaryKey() -> String? {
         return "messageId"
@@ -77,7 +76,6 @@ extension MOKMessage: JSQMessageData {
         let media:JSQMessageMediaData!
         switch self.mediaType() {
         case MOKAudio.rawValue:
-            print("audio!: \(self.filePath())")
             let audio = NSData(contentsOfFile: self.filePath()!)
             media = BLAudioMedia(audio: audio)
             (media as! BLAudioMedia).setFilePath(self.filePath())
@@ -85,8 +83,6 @@ extension MOKMessage: JSQMessageData {
             (media as! BLAudioMedia).setAudioDuration(CMTimeGetSeconds(asset.duration))
             break
         case MOKPhoto.rawValue:
-            print("photo!: \(self.filePath())")
-            
             let image = UIImage(contentsOfFile: self.filePath()!)
             media = JSQPhotoMediaItem(image: image)
             break
