@@ -170,12 +170,16 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
          *	Load messages for this conversation
          */
         
-        self.messageArray = DBManager.getMessages()
         guard let lastMessage = self.conversation.lastMessage else {
             return
         }
         
-        self.messageArray.append(lastMessage)
+        self.messageArray = DBManager.getMessages(self.senderId, recipient: self.conversation.conversationId, from: lastMessage, count: 10)
+        
+        if self.messageArray.indexOf(lastMessage) == nil {
+            self.messageArray.append(lastMessage)
+        }
+        
         self.collectionView.reloadData()
     }
     
@@ -259,6 +263,43 @@ extension ChatViewController {
         }
         
         self.isGettingMessages = true
+        
+        //try loading more from db
+        
+        let messages = DBManager.getMessages(self.senderId, recipient: self.conversation.conversationId, from: firstMessage, count: 10)
+        
+        if messages.count > 0 {
+            let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+            dispatch_after(delayTime, dispatch_get_main_queue()) {
+                for message in messages {
+                    self.messageHash[message.messageId] = message
+                }
+                
+                self.messageArray = messages + self.messageArray
+                
+                let oldOffset = self.collectionView.contentOffset
+                
+                self.collectionView.reloadData()
+                
+                if animated {
+                    self.scrollToBottomAnimated(true)
+                    self.isGettingMessages = false
+                    return
+                }
+                
+                let newIndex = self.messageArray.indexOf(firstMessage)!
+                self.collectionView.scrollToItemAtIndexPath(NSIndexPath(forItem: newIndex, inSection: 0), atScrollPosition: .Top, animated: false)
+                
+                let newoffset = CGPointMake(0, self.collectionView.contentOffset.y + oldOffset.y)
+                
+                self.collectionView.setContentOffset(newoffset, animated: false)
+                
+                self.isGettingMessages = false
+            }
+            
+            return
+        }
+        
         Monkey.sharedInstance().getConversationMessages(self.conversation.conversationId, since: Int(firstMessage.timestampCreated), quantity: 10, success: { (messages) in
             
             if messages.count == 0 {
@@ -280,6 +321,7 @@ extension ChatViewController {
             
             if animated {
                 self.scrollToBottomAnimated(true)
+                self.isGettingMessages = false
                 return
             }
             
@@ -369,6 +411,8 @@ extension ChatViewController {
                     return
                 }
                 
+                (self.navigationController as! RotationNavigationController).lockAutorotate = true
+                
                 UIApplication.sharedApplication().statusBarHidden = true
                 
                 AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
@@ -417,7 +461,8 @@ extension ChatViewController {
         guard let recorder = self.recorder where recorder.recording else {
             return
         }
-
+        (self.navigationController as! RotationNavigationController).lockAutorotate = false
+        
         recorder.stop()
         
         if !flag {
@@ -459,7 +504,6 @@ extension ChatViewController {
 // MARK: - Image delegate
 extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
-        print("image!")
         
         let filename = "photo\(UInt64(NSDate().timeIntervalSince1970)).png"
         let dirpath = self.documentsPath + filename
@@ -494,7 +538,6 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
     }
 
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        print("cancel!")
         self.dismissViewControllerAnimated(true, completion: nil)
     }
 }
@@ -692,7 +735,7 @@ extension ChatViewController {
     }
     
     override func collectionView(collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, atIndexPath indexPath: NSIndexPath) {
-            self.loadMessages(false)
+        self.loadMessages(false)
     }
     
     override func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
@@ -917,7 +960,6 @@ extension ChatViewController {
     // MARK: Responding to collection view tap events
     override func collectionView(collectionView: JSQMessagesCollectionView!, header headerView: JSQMessagesLoadEarlierHeaderView!, didTapLoadEarlierMessagesButton sender: UIButton!) {
         print("Load earlier messages!")
-        self.loadMessages(false)
     }
     
     override func collectionView(collectionView: JSQMessagesCollectionView!, didTapAvatarImageView avatarImageView: UIImageView!, atIndexPath indexPath: NSIndexPath!) {
