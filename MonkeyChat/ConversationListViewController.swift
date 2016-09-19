@@ -133,6 +133,11 @@ class ConversationsListViewController: UITableViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: MonkeyConversationStatusNotification, object: nil)
         
         /**
+         *  Load conversations
+         */
+        self.conversationArray = DBManager.getConversations(nil, count: 10)
+        
+        /**
          *  Initialize Monkey
          */
         
@@ -151,11 +156,6 @@ class ConversationsListViewController: UITableViewController {
                                             lastTimestamp: nil,
                                             success: { (session) in
                                                 print(session)
-                                                /**
-                                                 *  Load conversations
-                                                 */
-                                                
-                                                self.conversationArray = DBManager.getConversations()
                                                 
                                                 //
                                                 if self.conversationArray.count == 0 {
@@ -166,8 +166,6 @@ class ConversationsListViewController: UITableViewController {
                                             failure: {(task, error) in
                                                 print(error.localizedDescription)
         })
-        
-        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -206,11 +204,36 @@ class ConversationsListViewController: UITableViewController {
     
     func getConversations(from:Double) {
         
-        if self.isGettingConversations {
+        if self.isGettingConversations && !self.shouldRequestConversations {
             return
         }
         
         self.isGettingConversations = true
+        
+        
+        let conversations = DBManager.getConversations(self.conversationArray.last, count: 10)
+        
+        if conversations.count > 0 {
+            let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+            dispatch_after(delayTime, dispatch_get_main_queue()) {
+                for conversation in conversations {
+                    //do not replace if the conversation already exists
+                    if let conv = self.conversationHash[conversation.conversationId] {
+                        conv.info = conversation.info
+                        conv.members = conversation.members
+                    }else{
+                        self.conversationHash[conversation.conversationId] = conversation
+                        self.conversationArray.append(conversation)
+                    }
+                }
+                
+                self.tableView?.reloadData()
+                self.isGettingConversations = false
+            }
+            
+            return
+        }
+        
         Monkey.sharedInstance().getConversationsSince(from, quantity: 5, success: { (conversations) in
             
             var users = Set<String>()
@@ -230,6 +253,7 @@ class ConversationsListViewController: UITableViewController {
                 }
                 
                 users.unionInPlace(conversation.members as NSArray as! [String])
+                DBManager.store(conversation)
             }
             
             let unknownUsers = DBManager.monkeyIdsNotStored(users)
@@ -242,11 +266,11 @@ class ConversationsListViewController: UITableViewController {
                 })
             }
             
-            self.isGettingConversations = false
-            
             if conversations.count > 0 {
                 self.tableView?.reloadData()
             }
+            
+            self.isGettingConversations = false
             
             self.refreshControl?.endRefreshing()
             }, failure: { (task, error) in
@@ -413,11 +437,9 @@ class ConversationsListViewController: UITableViewController {
         
         if conv === lastConv {
             guard let lastMessage = lastConv.lastMessage where lastMessage.timestampCreated > 0 else {
-                print(lastConv.lastMessage!.timestampCreated)
                 self.getConversations(lastConv.lastModified)
                 return
             }
-            print(lastMessage.timestampCreated)
             self.getConversations(lastMessage.timestampCreated)
         }
     }
@@ -670,8 +692,6 @@ extension ConversationsListViewController {
         self.sortConversations()
         self.tableView.reloadData()
         
-        
-        print(message)
     }
     
     func acknowledgeReceived(notification:NSNotification){
