@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MOKSGSConnection.h"
 
-@class MOKSGSConnection;
 @class MOKSGSMessage;
 
 @interface MOKSGSSession : NSObject {

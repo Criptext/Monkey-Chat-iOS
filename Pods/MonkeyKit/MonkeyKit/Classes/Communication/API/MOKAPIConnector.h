@@ -8,37 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import <AFNetworking/AFHTTPSessionManager.h>
-#import "MOKutils.h"
+
 @class MOKMessage;
+@class MOKConversation;
 @class MOKSBJsonWriter;
-
-@protocol MOKAPIConnectorDelegate <NSObject>
-@optional
-/**
- * These callbacks must be
- * @callback
- */
-
--(void)onDownloadFileOK;
--(void)onDownloadFileDecryptionWrong;
--(void)onDownloadFileFail:( NSString * _Nullable)error;
-
--(void)onUploadFileOK:(MOKMessage * _Nullable)message;
--(void)onUploadFileFail:(MOKMessage * _Nullable)message;
-
--(void)onCreateGroupOK:(NSString * _Nullable)groupId;
--(void)onCreateGroupFail:(NSString * _Nullable)descriptionError;
-
--(void)onAddMemberToGroupOK:(NSString * _Nullable)newMemberId;
--(void)onAddMemberToGroupFail:(NSString * _Nullable)descriptionError;
-
--(void)onRemoveMemberFromGroupOK:(NSString * _Nullable)ok;
--(void)onRemoveMemberFromGroupFail:(NSString * _Nullable)descriptionError;
-
--(void)onGetGroupInfoOK:(NSDictionary * _Nullable)groupInfo andMembers:(NSArray * _Nullable)members;
--(void)onGetGroupInfoFail:(NSString * _Nullable)descriptionError;
-
-@end
 
 @interface MOKAPIConnector : AFHTTPSessionManager
 @property (nonatomic, strong) MOKSBJsonWriter * _Nullable jsonWriter;
@@ -70,6 +43,7 @@
 - (void)secureAuthenticationWithAppId:(NSString * _Nonnull)appID
                                appKey:(NSString * _Nonnull)appKey
                                  user:(NSDictionary * _Nullable)user
+                        ignoredParams:(nullable NSArray<NSString *> *)params
                         andExpiration:(BOOL)expires
                               success:(nullable void (^)(NSDictionary * _Nonnull data))success
                               failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nullable error))failure;
@@ -96,12 +70,27 @@ withPendingMessage:(nullable MOKMessage *)message
  *  @param success	Completion block when the request was completed successfully
  *  @param failure	Completion block when the request failed
  */
--(void)getConversationsOf:(NSString *)monkeyId
-                    since:(NSInteger)timestamp
+-(void)getConversationsOf:(nonnull NSString *)monkeyId
+                    since:(double)timestamp
                  quantity:(int)qty
-                  success:(nullable void (^)(NSData * _Nonnull data))success
+                  success:(nullable void (^)(NSArray<MOKConversation *> * _Nonnull conversations))success
                   failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
+/**
+ *  Request my conversation messages since a given timestamp
+ *  @param monkeyId1	My Monkey Id
+ *  @param monkeyId2	Recipient Monkey Id
+ *  @param since		Timestamp from which the next badge of messages will be pulled
+ *  @param quantity 	Number of messages to bring
+ *  @param success		Completion block when the request was completed successfully
+ *  @param failure		Completion block when the request failed
+ */
+-(void)getMessagesBetween:(nonnull NSString *)monkeyId1
+                      and:(nonnull NSString *)monkeyId2
+                    since:(NSInteger)timestamp
+                 quantity:(int)qty
+                  success:(nullable void (^)(NSMutableArray<MOKMessage *> * _Nonnull messages))success
+                  failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 /**
  *  Request message encrypted with the sender latest keys
  *  @param message	Pending message
@@ -136,22 +125,112 @@ withPendingMessage:(nullable MOKMessage *)message
                    success:(nullable void (^)(NSURL * _Nonnull filePath))success
                    failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
--(void)createGroupWithMe:(nonnull NSString *)me
-                 members:(nonnull NSArray *)members
-                  params:(nullable NSDictionary *)params
-                    push:(nullable NSString *)push
-                delegate:(nullable id<MOKAPIConnectorDelegate>)delegate;
+/**
+ *  Stop ongoing download operation
+ *
+ *  @param identifier	Id of the message which the file belongs to.
+ *	@param resumeData	Data to resume downloading at a later date
+ *
+ *	@discussion If there's no operation for the given identifier, nothing will happen
+ */
+-(void)stopDownload:(nonnull NSString *)identifier
+         resumeData:(nullable void (^)(NSData * _Nullable resumeData))resumeData;
 
-- (void)addMember:(nonnull NSString *)monkeyId
-             byMe:(nonnull NSString *)me
+
+/**
+ *  Resume previous download operation
+ *
+ *  @param resumeData      Data already downloaded
+ *  @param fileDestination NSURL pointing to folder destination
+ *  @param success         Completion block when the request was completed successfully
+ *  @param failure         Completion block when the request failed
+ */
+-(void)resumeDownload:(nonnull NSData *)resumeData
+      fileDestination:(nonnull NSString *)fileDestination
+              success:(nullable void (^)(NSURL * _Nonnull filePath))success
+              failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
+
+/**
+ *  Delete the conversation between two monkey ids or a group
+ *  @param monkeyId1	Dictionary containing the group metadata
+ *  @param monkeyId2	Dictionary or String containing the push info
+ *  @param success		Completion block when the request was completed successfully
+ *  @param failure		Completion block when the request failed
+ */
+-(void)deleteConversationBetween:(nonnull NSString *)monkeyId1
+                             and:(nonnull NSString *)monkeyId2
+                         success:(nullable void (^)(NSDictionary * _Nonnull data))success
+                         failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
+
+/**
+ *  Create a group or add members to existing group
+ *  @param optionalId	Optional group id
+ *  @param creator		String monkey id of the group's creator
+ *  @param members		Array of monkey ids
+ *  @param info			Dictionary containing the group metadata
+ *  @param push			Dictionary or String containing the push info
+ *  @param success		Completion block when the request was completed successfully
+ *  @param failure		Completion block when the request failed
+ */
+-(void)createGroup:(nullable NSString *)optionalId
+           creator:(nonnull NSString *)monkeyId
+           members:(nonnull NSArray *)members
+              info:(nullable NSDictionary *)params
+              push:(nullable id)push
+           success:(nullable void (^)(NSDictionary * _Nonnull groupData))success
+           failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
+
+/**
+ *  Add a member to a existing group
+ *  @param newMonkeyId		New member's Monkey Id
+ *  @param groupId			Group Id
+ *  @param monkeyId			Monkey Id of the user who added the new member
+ *  @param pushNewMember	Dictionary or String containing the push info for the new member
+ *  @param pushAllMembers	Dictionary or String containing the push info for existing members
+ *  @param success			Completion block when the request was completed successfully
+ *  @param failure			Completion block when the request failed
+ */
+- (void)addMember:(nonnull NSString *)newMonkeyId
           toGroup:(nonnull NSString *)groupId
+           byUser:(nonnull NSString *)monkeyId
 withPushToNewMember:(nullable NSString *)pushNewMember
 andPushToAllMembers:(nullable NSString *)pushAllMembers
-         delegate:(nullable id <MOKAPIConnectorDelegate>)delegate;
+          success:(nullable void (^)(NSDictionary * _Nonnull groupData))success
+          failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
-- (void)removeMember:(NSString * _Nonnull)sessionId fromGroup:(NSString * _Nonnull)groupId delegate:(id <MOKAPIConnectorDelegate> _Nullable)delegate;
+/**
+ *  Remove a member from a existing group
+ *  @param groupId		Id of the group
+ *  @param monkeyId		Monkey Id of the user to be removed from the group
+ *  @param success		Completion block when the request was completed successfully
+ *  @param failure		Completion block when the request failed
+ */
+- (void)removeMember:(nonnull NSString *)monkeyId
+           fromGroup:(nonnull NSString *)groupId
+             success:(nullable void (^)(NSDictionary * _Nonnull groupData))success
+             failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
--(void)getGroupInfo:(NSString * _Nonnull)groupId delegate:(id <MOKAPIConnectorDelegate> _Nullable)delegate;
+/**
+ *  Get the metadata of a group or a user
+ *
+ *  @param conversationId Monkey Id or a Group Id
+ *  @param success        Completion block when the request was completed successfully
+ *  @param failure        Completion block when the request failed
+ */
+- (void)getInfo:(nonnull NSString *)conversationId
+        success:(nullable void (^)(NSDictionary * _Nonnull info))success
+        failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
+
+/**
+ *  Get info of multiple users
+ *
+ *  @param idList  Array of monkey Ids
+ *  @param success Completion block when the request was completed successfully
+ *  @param failure Completion block when the request failed
+ */
+- (void)getInfoByIds:(nonnull NSArray *)idList
+             success:(nullable void (^)(NSDictionary * _Nonnull infos))success
+             failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure;
 
 - (NSString* _Nullable)postBodyForMethod:(NSString* _Nonnull)method data:(id _Nonnull)dataAsJsonComparableObject;
 

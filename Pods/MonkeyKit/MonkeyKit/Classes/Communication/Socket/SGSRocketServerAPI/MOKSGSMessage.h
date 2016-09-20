@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MOKSGSProtocol.h"
-
 @class MOKSGSChannel;
 
 @interface MOKSGSMessage : NSObject {

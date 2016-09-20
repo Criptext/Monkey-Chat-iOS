@@ -48,148 +48,157 @@ typedef enum{
     MOKGroupNewMember = 3,
     MOKGroupRemoveMember = 4,
     MOKGroupList = 5
-}MOKGroupActionType;
+}MOKActionType;
 
 @interface MOKMessage : MOKDictionaryBasedObject
 
 
-/*!
- @property messageId
- @abstract The string identifier that uniquely identifies the current message
- @discussion If the message is still sending, then the message will have a negative id,
- otherwise the message will have a positive id.
+/**
+ *	The string identifier that uniquely identifies the current message.
+ *	If the message is still sending, then the message will have the prefix `-`.
  */
-@property (nonatomic, copy) NSString *messageId;
+@property (nonnull, nonatomic, copy) NSString * messageId;
 
-/*!
- @property oldMessageId
- @discussion If the message is already sent, this field contains the old message Id, otherwise it's an empty string
+/**
+ *	If the message is already sent, this field contains the old message Id, otherwise it's an empty string
  */
-@property (nonatomic, copy) NSString *oldMessageId;
+@property (nullable, nonatomic, copy) NSString *oldMessageId;
 
-/*!
- @property text
- @abstract Returns the decrypted text of the message
+/**
+ *	Returns the encrypted text of the message
  */
-@property (nonatomic, copy) NSString *text;
+@property (nullable, nonatomic, copy) NSString *encryptedText;
 
-/*!
- @property encryptedText
- @abstract Returns the encrypted text of the message
+/**
+ *	Returns the plain text of the message
  */
-@property (nonatomic, copy) NSString *encryptedText;
+@property (nonnull, nonatomic, copy) NSString *plainText;
 
-/*!
- @property timestampCreated
- @abstract Timestamp that refers to when the message was created
- @discussion For outgoing messages, 'timestampCreated' will be the same to 'timestampOrder'
+/**
+ *	Timestamp that refers to when the message was created.
+ *	For outgoing messages, 'timestampCreated' will be the same to 'timestampOrder'
  */
 @property (nonatomic, assign) NSTimeInterval timestampCreated;
 
-/*!
- @property timestampOrder
- @abstract Timestamp that refers to when the message was sent/received
- @discussion For outgoing messages, 'timestampCreated' will be the same to 'timestampOrder'
+/**
+ *	Timestamp that refers to when the message was sent/received.
+ *	For outgoing messages, 'timestampCreated' will be the same to 'timestampOrder'
  */
 @property (nonatomic, assign) NSTimeInterval timestampOrder;
 
-/*!
- @property userIdTo
- @abstract Session id of the recipient
- @discussion This could be a string of session ids separated by commas (Broadcast)
+/**
+ *	Monkey id of the recipient.
+ *	This could be a string of monkey ids separated by commas (Broadcast) or a Group Id
  */
-@property (nonatomic, copy) NSString * userIdTo;
+@property (nonnull, nonatomic, copy) NSString * recipient;
 
-/*!
- @property userIdFrom
- @abstract Session id of the sender
+/**
+ *	Monkey id of the sender.
+ *	This could be a string of monkey ids separated by commas (Broadcast) or a Group Id
  */
-@property (nonatomic, copy) NSString * userIdFrom;
+@property (nonnull, nonatomic, copy) NSString * sender;
 
-/*!
- @property props
- @abstract Monkey-reserved parameters
+/**
+ *	Monkey-reserved parameters
  */
-@property (nonatomic, readonly) NSMutableDictionary *props;
+@property (nonnull, nonatomic, readonly) NSMutableDictionary *props;
 
-/*!
- @property params
- @abstract Dictionary for the use of developers
+/**
+ *	Dictionary for the use of developers
  */
-@property (nonatomic, strong) NSMutableDictionary * params;
+@property (nullable, nonatomic, strong) NSMutableDictionary * params;
 
-/*!
- @property readByUser
- @abstract Specifies whether the message has been read or not
+/**
+ *	Specifies whether the message has been read or not
  */
 @property (nonatomic, assign) BOOL readByUser;
 
-/*!
- @property protocolCommand
- @abstract Protocol command of the message
- @see MOKProtocolCommand
+/**
+ *	Protocol command of the message
+ *	@see MOKProtocolCommand
  */
 @property (nonatomic, assign) MOKProtocolCommand protocolCommand;
 
-/*!
- @property protocolType
- @abstract Protocol type of the message
+/**
+ *	Protocol type of the message
  */
-@property (nonatomic, assign) int protocolType;
+@property (nonatomic, assign) uint protocolType;
 
-/*!
- @property monkeyType
- @abstract Int reserved for some specific monkey actions
+/**
+ *	Int reserved for some specific monkey actions
+ *	@see MOKActionType
  */
-@property (nonatomic, assign) int monkeyType;
+@property (nonatomic, assign) MOKActionType monkeyType;
 
-/*!
- @property pushMessage
- @abstract JSON string
+/**
+ *	Push represented with a JSON string
  */
-@property (nonatomic, copy) NSString *pushMessage;
+@property (nullable, nonatomic, copy) NSString *pushMessage;
 
-/*!
- @property needsResend
- @abstract Specifies whether the message needs to be re-sent
+/**
+ *	List of users that have read the message
  */
-@property (nonatomic, assign) BOOL needsResend;
+@property (nullable, nonatomic, strong) NSMutableArray *readBy;
 
-/*!
- @property readBy
- @abstract List of users that have read the message
+/**
+ *	Used to maintain a reference to a media object.
  */
-@property (nonatomic, strong) NSMutableArray *readBy;
+@property (nullable, nonatomic, strong) id cachedMedia;
+
+/**
+ *	Returns date of the message
+ */
+- (nonnull NSDate *)date;
+
+/**
+ *	Returns the relative date of the message
+ */
+- (nonnull NSString *)relativeDate;
 
 /**
  *  Returns the encrypted text if it's encrypted, and plain text if it's not
  */
-- (NSString *)messageText;
+- (nonnull NSString *)messageText;
+
+/**
+ *  Returns the conversation Id of the message
+ */
+- (nonnull NSString *)conversationId:(nullable NSString *)myMonkeyId;
 
 /**
  *  Initialize a text message
  */
-- (MOKMessage *)initTextMessage:(NSString*)text sender:(NSString *)senderId recipient:(NSString *)recipientId;
+- (nonnull instancetype)initTextMessage:(nonnull NSString*)text sender:(nonnull NSString *)sender recipient:(nonnull NSString *)recipient;
 
 /**
  *  Initialize a file message
  */
-- (MOKMessage *)initFileMessage:(NSString *)filename type:(MOKFileType)type sender:(NSString *)senderId recipient:(NSString *)recipientId;
+- (nonnull instancetype)initFileMessage:(nonnull NSString *)filename type:(MOKFileType)type sender:(nonnull NSString *)sender recipient:(nonnull NSString *)recipient;
 
 /**
  *  Initialize message from the socket
  */
-- (id)initWithArgs:(NSDictionary*)dictionary;
+- (nonnull instancetype)initWithArgs:(nonnull NSDictionary*)dictionary;
 
 /**
  *  Set file size in message props
  */
-- (void)setFileSize:(NSString *)size;
+- (void)setFileSize:(nonnull NSString *)size;
 
 /**
  *  Set encrypted parameter in message props
  */
 - (void)setEncrypted:(BOOL)encrypted;
+
+/**
+ *  @return File path if it's a media, nil if it's not
+ */
+-(nullable NSString *)filePath;
+
+/**
+ *  @return File URL if it's a media, nil if it's not
+ */
+-(nullable NSURL *)fileURL;
 
 /**
  *  Boolean that determines whether or not the message is decrypted
@@ -200,6 +209,16 @@ typedef enum{
  *  Set encryption method in message props
  */
 - (void)setCompression:(BOOL)compressed;
+
+/**
+ *  Boolean that determines whether or not the message needs resending
+ */
+- (BOOL)needsResend;
+
+/**
+ *  Boolean that determines whether or not the message was already sent
+ */
+- (BOOL)wasSent;
 
 /**
  *  Boolean that determines whether or not the message is compressed
@@ -214,7 +233,12 @@ typedef enum{
 /**
  *  Boolean that determines whether or not the message is a file
  */
-- (BOOL)isMedia;
+- (BOOL)isMediaMessage;
+
+/**
+ *  int representing the media type
+ */
+- (uint)mediaType;
 
 /**
  *  Boolean that determines whether or not the message is in transit
@@ -223,29 +247,23 @@ typedef enum{
 
 - (void)updateMessageIdFromACK;
 
-/*
+/**
+ *	Boolean that determines if this is a group message
  */
 - (BOOL)isGroupMessage;
-/*
+
+/**
+ *	Boolean that determines if this is a broadcast message
  */
 - (BOOL)isBroadCastMessage;
 
--(id) mutableCopyWithZone: (NSZone *) zone;
 
-- (id)initWithMessage:(NSString*)messageText
-      protocolCommand:(MOKProtocolCommand)cmd
-         protocolType:(int)protocolType
-           monkeyType:(int)monkeyType
-            messageId:(NSString *)messageId
-         oldMessageId:(NSString *)oldMessageId
-     timestampCreated:(NSTimeInterval)timestampCreated
-       timestampOrder:(NSTimeInterval)timestampOrder
-             fromUser:(NSString *)sessionIdFrom
-               toUser:(NSString *)sessionIdTo
-         mkProperties:(NSMutableDictionary *)mkprops
-               params:(NSMutableDictionary *)params;
++(nonnull NSString *)generatePushFrom:(nonnull id)thing;
 
-+(NSString *)generatePushFrom:(id)thing;
+/**
+ *  Not a valid initializer.
+ */
+- (nullable id)init NS_UNAVAILABLE;
 
 @end
 

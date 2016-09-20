@@ -10,7 +10,7 @@ import RealmSwift
 
 class ConversationItem: Object {
     dynamic var conversationId = ""
-    dynamic var info:NSData?
+    dynamic var info:Data?
     dynamic var members = ""
     
     dynamic var lastMessage:MessageItem?

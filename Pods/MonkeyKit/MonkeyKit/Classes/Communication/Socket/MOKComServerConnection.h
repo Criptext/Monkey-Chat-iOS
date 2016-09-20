@@ -20,8 +20,6 @@
 - (void) parseMessage:(NSDictionary *)dictionary;
 - (void) incomingMessage:(MOKMessage *)message;
 - (void) fileReceivedNotification:(MOKMessage *)message;
-- (void) notify:(MOKMessage *)message withCommand:(int)command;
-- (void) acknowledgeNotification:(MOKMessage *)message;
 - (void) getPendingMessages;
 
 @optional
@@ -66,7 +64,6 @@
        delegate:(id<MOKComServerConnectionDelegate, NSObject>)delegate;
 
 -(BOOL)sendMessage:(NSString *)jsonMessage;
--(void)parseMessage:(NSDictionary *)message;
 
 -(void)logOut;
 

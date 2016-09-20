@@ -7,7 +7,6 @@
 //
 
 #import "MOKSGSMessage.h"
-#import "MOKSGSProtocol.h"
 #import "MOKSGSId.h"
 #import "MOKSGSChannel.h"
 

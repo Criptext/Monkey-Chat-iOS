@@ -7,7 +7,6 @@
 //
 
 #import "MOKSGSSession.h"
-#import "MOKSGSConnection.h"
 #import "MOKSGSMessage.h"
 #import "MOKSGSProtocol.h"
 #import "MOKSGSContext.h"

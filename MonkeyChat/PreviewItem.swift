@@ -10,10 +10,10 @@ import Foundation
 import QuickLook
 
 class PreviewItem: NSObject, QLPreviewItem {
-    var previewItemURL: NSURL
+    var previewItemURL: URL?
     var previewItemTitle: String?
     
-    init (title:String?, url:NSURL){
+    init (title:String?, url:URL){
         self.previewItemURL = url
         self.previewItemTitle = title
     

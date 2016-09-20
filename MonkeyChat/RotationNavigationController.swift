@@ -12,7 +12,7 @@ class RotationNavigationController: UINavigationController {
     
     var lockAutorotate = false
     
-    override func shouldAutorotate() -> Bool {
+    override var shouldAutorotate : Bool {
         return !self.lockAutorotate
     }
 }
