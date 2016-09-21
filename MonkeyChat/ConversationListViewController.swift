@@ -138,11 +138,12 @@ class ConversationsListViewController: UITableViewController {
         self.conversationArray = DBManager.getConversations(nil, count: 10)
         
         /**
+         
          *  Initialize Monkey
          */
         
-        let user = ["name":"Gianni",
-                    "password": "53CR3TP455W0RD"]
+        let user = ["name":"",
+                    "monkeyId": ""]
         
         let ignoredParams = ["password"]
         
@@ -252,7 +253,7 @@ class ConversationsListViewController: UITableViewController {
                     DBManager.store(msg)
                 }
                 
-                users.formUnion(Set(conversation.members as! NSArray as! [String]))
+                users.formUnion(Set(conversation.members as NSArray as! [String]))
                 DBManager.store(conversation)
             }
             
@@ -597,7 +598,7 @@ extension ConversationsListViewController {
         
         guard let whisper = self.getWhisper() else {
             let notif = Message(title: text, textColor: UIColor.white, backgroundColor: color, images: nil)
-            show(whisper: notif, to: self.navigationController!, action: action)
+            Whisper.show(whisper: notif, to: self.navigationController!, action: action)
             return
         }
         
@@ -684,7 +685,7 @@ extension ConversationsListViewController {
                     print("finish presenting! \(message.plainText)")
                 })
                 
-                show(shout: announcement, to: self.navigationController!)
+                Whisper.show(shout: announcement, to: self.navigationController!)
             }
             
         }

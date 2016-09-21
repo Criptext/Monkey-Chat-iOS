@@ -168,7 +168,29 @@ typedef enum{
 /**
  *  Initialize a text message
  */
-- (nonnull instancetype)initTextMessage:(nonnull NSString*)text sender:(nonnull NSString *)sender recipient:(nonnull NSString *)recipient;
+- (nonnull instancetype)initTextMessage:(nonnull NSString*)text
+                                 sender:(nonnull NSString *)sender
+                              recipient:(nonnull NSString *)recipient;
+
+/**
+ *  Initialize a text message with optional params
+ */
+- (nonnull instancetype)initTextMessage:(nonnull NSString*)text
+                                 sender:(nonnull NSString *)sender
+                              recipient:(nonnull NSString *)recipient
+                                 params:(nullable NSDictionary *)params;
+
+/**
+ *  Initialize a text message with optional params and optional props
+ *
+ *	@discussion This is handy if you need to recreate the message after persisting it with another model.
+ *	If the message you're rebuilding is a file, make sure to send the file name as the `text` parameter
+ */
+- (nonnull instancetype)initMessage:(nonnull NSString*)text
+                             sender:(nonnull NSString *)sender
+                          recipient:(nonnull NSString *)recipient
+                             params:(nullable NSDictionary *)params
+                              props:(nullable NSDictionary *)props;
 
 /**
  *  Initialize a file message

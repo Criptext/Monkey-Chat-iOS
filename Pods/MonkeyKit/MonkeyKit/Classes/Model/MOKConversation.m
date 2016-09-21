@@ -31,4 +31,8 @@
     return [self.conversationId rangeOfString:@"G:"].location != NSNotFound;
 }
 
+-(NSString *)description {
+    return [NSString stringWithFormat:@"MOKConversation:%@\ninfo:%@\nlast modified: %f", self.conversationId, self.info, self.lastModified];
+}
+
 @end

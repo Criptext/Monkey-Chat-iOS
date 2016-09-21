@@ -204,7 +204,7 @@ extension ChatViewController {
       let announcement = Announcement(title: title, subtitle: (notification.userInfo!["message"] as! MOKMessage).plainText, image: view.image, duration: 2.0, action: {
         print("finish presenting!")
       })
-      show(shout: announcement, to: self.navigationController!, completion: { _ in })
+      Whisper.show(shout: announcement, to: self.navigationController!)
       
       return
     }
@@ -780,14 +780,15 @@ extension ChatViewController {
   func downloadFile(_ message:MOKMessage) {
     Monkey.sharedInstance().downloadFileMessage(message, fileDestination: self.documentsPath, success: { (data) in
       //reload collection
-      message.reloadMedia(data as NSData)
+        
+      message.reloadMedia(data)
       self.collectionView.reloadData()
       
     }) { (task, error) in
       //if file download is on progress do nothing
-      if error.code == -60 {
-        return
-      }
+//      if error.code == -60 {
+//        return
+//      }
       
       //set fail status to message and reload collection
       
@@ -930,21 +931,19 @@ extension ChatViewController {
     print("Tapped cell at \(touchLocation)")
   }
   
-  // MARK: JSQMessagesComposerTextViewPasteDelegate methods
-  func composerTextView(_ textView: JSQMessagesComposerTextView!, shouldPasteWithSender sender: AnyObject!) -> Bool {
-    if (UIPasteboard.general.image != nil) {
-      // If there's an image in the pasteboard, construct a media item with that image and `send` it.
-      
-      //            let item = JSQPhotoMediaItem(image: UIPasteboard.generalPasteboard().image)
-      //
-      //            let message = JSQMessage(senderId: self.senderId, senderDisplayName: self.senderDisplayName, date: NSDate(), media: item)
-      //            self.messageArray.append(message)
-      //            self.finishSendingMessage()
-      
-      return false
+    public func composerTextView(_ textView: JSQMessagesComposerTextView!, shouldPasteWithSender sender: Any!) -> Bool {
+        if (UIPasteboard.general.image != nil) {
+            // If there's an image in the pasteboard, construct a media item with that image and `send` it.
+            
+            //            let item = JSQPhotoMediaItem(image: UIPasteboard.generalPasteboard().image)
+            //
+            //            let message = JSQMessage(senderId: self.senderId, senderDisplayName: self.senderDisplayName, date: NSDate(), media: item)
+            //            self.messageArray.append(message)
+            //            self.finishSendingMessage()
+            
+            return false
+        }
+        
+        return true
     }
-    
-    return true
-  }
-  
 }

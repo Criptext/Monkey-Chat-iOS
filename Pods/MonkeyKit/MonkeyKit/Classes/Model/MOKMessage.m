@@ -137,6 +137,22 @@
 
 
 - (MOKMessage *)initTextMessage:(NSString*)text sender:(NSString *)sender recipient:(NSString *)recipient {
+    return [self initMessage:text sender:sender recipient:recipient params:[@{} mutableCopy] props:[@{} mutableCopy]];
+}
+
+- (MOKMessage *)initTextMessage:(NSString*)text
+                         sender:(NSString *)sender
+                      recipient:(NSString *)recipient
+                         params:(NSDictionary *)params{
+    
+    return [self initMessage:text sender:sender recipient:recipient params:params props:[@{} mutableCopy]];
+}
+
+- (MOKMessage *)initMessage:(NSString*)text
+                     sender:(NSString *)sender
+                  recipient:(NSString *)recipient
+                     params:(NSDictionary *)params
+                      props:(NSDictionary *)props{
     if (self = [super init]) {
         self.plainText = text;
         self.encryptedText = nil;
@@ -150,10 +166,13 @@
         self.protocolCommand = MOKProtocolMessage;
         self.protocolType = MOKText;
         self.monkeyType = 0;
-        self.props = [@{@"str":@"0",
-                        @"old_id": self.messageId,
-                        @"device":@"ios"} mutableCopy];
-        self.params = [@{} mutableCopy];
+        self.props = props;
+        
+        if (self.props[@"file_type"] != nil) {
+            self.protocolType = MOKFile;
+        }
+        
+        self.params = params;
         self.pushMessage = @"";
         self.readBy = [@[] mutableCopy];
     }
@@ -382,6 +401,10 @@ NSString* mok_fileMIMEType(NSString * extension) {
         return true;
     }
     return false;
+}
+
+-(NSString *)description{
+    return [NSString stringWithFormat:@"MOKMessage:%@\nplainText:%@\ntimestamp creation: %f", self.messageId, self.plainText, self.timestampCreated];
 }
 
 +(NSString *)generatePushFrom:(id)thing{

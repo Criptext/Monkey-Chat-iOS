@@ -39,7 +39,7 @@
 /**
  *	Number of unread messages
  */
-@property (nonatomic) uint unread;
+@property (nonatomic) int unread;
 
 /**
  *	Last time the conversation was altered
