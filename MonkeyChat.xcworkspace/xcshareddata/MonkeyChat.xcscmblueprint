@@ -13,8 +13,8 @@
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "5C84ACBA53EF6100BE4EBCC4B711EBD1AC5AF552" : "MonkeyKit-iOS\/",
     "3BB1634752BAA7E4E9876C51CC817FFF97705BC5" : "Monkey-SDK-iOS\/",
-    "FBCA00FDD07BBE25F9C77A5C8D5BBA838CF85CBD" : "MonkeyChat-iOS\/",
-    "90530B99EB0008E7A50951FDFBE02169118FA649" : "JSQMessagesViewController\/"
+    "FBCA00FDD07BBE25F9C77A5C8D5BBA838CF85CBD" : "Monkey-Chat-iOS\/",
+    "90530B99EB0008E7A50951FDFBE02169118FA649" : "Monkey-UI-iOS\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "MonkeyChat",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,

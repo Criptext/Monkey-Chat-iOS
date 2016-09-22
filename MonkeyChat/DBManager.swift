@@ -11,7 +11,7 @@ import MonkeyKit
 import RealmSwift
 
 class DBManager {
-    class func store(message:MOKMessage) {
+    class func store(_ message:MOKMessage) {
         
         let messageItem = DBManager.transform(message)
         
@@ -22,7 +22,7 @@ class DBManager {
         }
     }
     
-    class func store(conversation:MOKConversation) {
+    class func store(_ conversation:MOKConversation) {
         let conversationItem = DBManager.transform(conversation)
         
         let realm = try! Realm()
@@ -32,7 +32,7 @@ class DBManager {
         }
     }
     
-    class func transform(message:MOKMessage) -> MessageItem {
+    class func transform(_ message:MOKMessage) -> MessageItem {
         let messageItem = MessageItem()
         messageItem.messageId = message.messageId
         messageItem.oldMessageId = message.oldMessageId!
@@ -42,21 +42,19 @@ class DBManager {
         messageItem.timestampCreated = message.timestampCreated
         messageItem.plainText = message.plainText
         messageItem.encryptedText = message.encryptedText
-        
-        let bytesParams = try? NSJSONSerialization.dataWithJSONObject(message.params ?? NSMutableDictionary(), options: NSJSONWritingOptions.PrettyPrinted)
-        let bytesProps = try? NSJSONSerialization.dataWithJSONObject(message.props ?? NSMutableDictionary(), options: NSJSONWritingOptions.PrettyPrinted)
-        
-        messageItem.props = bytesProps
-        messageItem.params = bytesParams
+        if let params = message.params {
+            messageItem.params = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
+        }
+        messageItem.props = try? JSONSerialization.data(withJSONObject: message.props, options: .prettyPrinted)
         
         return messageItem
     }
     
-    class func transform(conversation:MOKConversation) -> ConversationItem {
+    class func transform(_ conversation:MOKConversation) -> ConversationItem {
         let conversationItem = ConversationItem()
         conversationItem.conversationId = conversation.conversationId
-        conversationItem.info = try? NSJSONSerialization.dataWithJSONObject(conversation.info ?? NSMutableDictionary(), options: NSJSONWritingOptions.PrettyPrinted)
-        conversationItem.members = conversation.members.componentsJoinedByString(",")
+      conversationItem.info = try? JSONSerialization.data(withJSONObject: conversation.info, options: .prettyPrinted)
+        conversationItem.members = conversation.members.componentsJoined(by: ",")
         
         if let lastMessage = conversation.lastMessage {
             conversationItem.lastMessage = DBManager.transform(lastMessage)
@@ -64,23 +62,23 @@ class DBManager {
         
         conversationItem.lastModified = conversation.lastModified
         conversationItem.lastSeen = conversation.lastSeen
-        conversationItem.unread = conversation.unread
+        conversationItem.unread = Int32(conversation.unread)
         
         return conversationItem
     }
     
-    class func transform(messageItem:MessageItem) -> MOKMessage {
-        var props = NSMutableDictionary()
-        var params = NSMutableDictionary()
+    class func transform(_ messageItem:MessageItem) -> MOKMessage {
+      var props = [AnyHashable: Any]()
+        var params = [AnyHashable: Any]()
         
         if let bytesParams = messageItem.params {
-            params = try! NSJSONSerialization.JSONObjectWithData(bytesParams, options: NSJSONReadingOptions.MutableContainers) as! NSMutableDictionary
+          params = try! JSONSerialization.jsonObject(with: bytesParams, options: .mutableContainers) as! [AnyHashable: Any]
         }
         if let bytesProps = messageItem.props {
-            props = try! NSJSONSerialization.JSONObjectWithData(bytesProps, options: NSJSONReadingOptions.MutableContainers) as! NSMutableDictionary
+          props = try! JSONSerialization.jsonObject(with: bytesProps, options: .mutableContainers) as! [AnyHashable: Any]
         }
         
-        let message = MOKMessage(message: messageItem.plainText, sender: messageItem.sender, recipient: messageItem.recipient, params: params as [NSObject:AnyObject], props: props as [NSObject:AnyObject])
+        let message = MOKMessage(message: messageItem.plainText, sender: messageItem.sender, recipient: messageItem.recipient, params: params, props: props)
         message.messageId = messageItem.messageId
         message.oldMessageId = messageItem.oldMessageId
         message.timestampOrder = messageItem.timestampOrder
@@ -90,15 +88,15 @@ class DBManager {
         return message
     }
     
-    class func transform(conversationItem:ConversationItem) -> MOKConversation {
+    class func transform(_ conversationItem:ConversationItem) -> MOKConversation {
         var info = NSMutableDictionary()
         
         if let bytesInfo = conversationItem.info {
-            info = try! NSJSONSerialization.JSONObjectWithData(bytesInfo, options: NSJSONReadingOptions.MutableContainers) as! NSMutableDictionary
+          info = try! JSONSerialization.jsonObject(with: bytesInfo, options: .mutableContainers) as! NSMutableDictionary
         }
         
         let conversation = MOKConversation(id: conversationItem.conversationId)
-        conversation.members = NSMutableArray(array: conversationItem.members.componentsSeparatedByString(","))
+        conversation.members = NSMutableArray(array: conversationItem.members.components(separatedBy: ","))
         conversation.lastSeen = conversationItem.lastSeen
         conversation.lastModified = conversationItem.lastModified
         conversation.unread = conversationItem.unread
@@ -110,44 +108,44 @@ class DBManager {
         
         return conversation
     }
-    
-    class func getMessage(id:String) -> MOKMessage? {
+  
+    class func getMessage(_ id:String) -> MOKMessage? {
         let realm = try! Realm()
         
-        if let messageItem = realm.objectForPrimaryKey(MessageItem.self, key: id){
+        if let messageItem = realm.object(ofType: MessageItem.self, forPrimaryKey: id) {
             return DBManager.transform(messageItem)
         }
         
         return nil
     }
     
-    class func getConversation(id:String) -> MOKConversation? {
+    class func getConversation(_ id:String) -> MOKConversation? {
         let realm = try! Realm()
         
-        if let conversationItem = realm.objectForPrimaryKey(ConversationItem.self, key: id){
+      if let conversationItem = realm.object(ofType: ConversationItem.self, forPrimaryKey: id){
             return DBManager.transform(conversationItem)
         }
         
         return nil
     }
     
-    class func exists(message:MOKMessage) -> Bool {
+    class func exists(_ message:MOKMessage) -> Bool {
         let realm = try! Realm()
         
         let results = realm.objects(MessageItem.self).filter("messageId = \(message.messageId) OR messageId = \(message.oldMessageId)")
         return results.count > 0
     }
     
-    class func existsMessage(id:String, oldId:String) -> Bool {
+    class func existsMessage(_ id:String, oldId:String) -> Bool {
         let realm = try! Realm()
         
-        let results = realm.objects(MessageItem).filter("messageId == %@ OR messageId == %@", id, oldId)
+        let results = realm.objects(MessageItem.self).filter("messageId == %@ OR messageId == %@", id, oldId)
         return results.count > 0
     }
     
-    class func updateMessage(id:String, oldId:String) {
+    class func updateMessage(_ id:String, oldId:String) {
         let realm = try! Realm()
-        guard let message = realm.objectForPrimaryKey(MessageItem.self, key: oldId) else {
+      guard let message = realm.object(ofType: MessageItem.self, forPrimaryKey: oldId) else {
             return
         }
         let newMessage = MessageItem()
@@ -159,44 +157,44 @@ class DBManager {
             realm.add(newMessage, update: true)
         }
     }
-    class func getMessages(sender:String, recipient:String, from:MOKMessage?, count:Int) -> [MOKMessage]{
+    class func getMessages(_ sender:String, recipient:String, from:MOKMessage?, count:Int) -> [MOKMessage]{
         let realm = try! Realm()
         
         let predicate = NSPredicate(format: "((sender == %@ AND recipient == %@) OR (sender == %@ AND recipient == %@)) AND timestampCreated < %f", sender, recipient, recipient, sender, from?.timestampCreated ?? 0)
-        let results = realm.objects(MessageItem).filter(predicate).sorted("timestampCreated", ascending: false)
+        let results = realm.objects(MessageItem.self).filter(predicate).sorted(byProperty: "timestampCreated", ascending: false)
         
         var messages = [MOKMessage]()
         
-        for (index, messageItem) in results.enumerate() {
+        for (index, messageItem) in results.enumerated() {
             if count <= index {
                 break
             }
 
-            guard let msg = from where msg.messageId != messageItem.messageId && messageItem.timestampCreated < msg.timestampCreated else {
+            guard let msg = from , msg.messageId != messageItem.messageId && messageItem.timestampCreated < msg.timestampCreated else {
                 continue
             }
             
             let message = DBManager.transform(messageItem)
             
-            messages.insert(message, atIndex: 0)
+            messages.insert(message, at: 0)
         }
         return messages
     }
     
-    class func getConversations(from:MOKConversation?, count:Int) -> [MOKConversation] {
+    class func getConversations(_ from:MOKConversation?, count:Int) -> [MOKConversation] {
         let realm = try! Realm()
         
         var predicate = NSPredicate(format: "lastModified > 0")
         
         if let conv = from {
-            predicate = NSPredicate(format: "lastModified < %f", conv.lastModified ?? 0)
+            predicate = NSPredicate(format: "lastModified < %f", conv.lastModified)
         }
         
-        let results = realm.objects(ConversationItem).filter(predicate).sorted("lastModified", ascending: true)
+        let results = realm.objects(ConversationItem.self).filter(predicate).sorted(byProperty: "lastModified", ascending: true)
         
         var conversations = [MOKConversation]()
         
-        for (index, conversationItem) in results.enumerate() {
+        for (index, conversationItem) in results.enumerated() {
             if count <= index {
                 break
             }
@@ -208,7 +206,7 @@ class DBManager {
                 }
             }
             
-            conversations.insert(DBManager.transform(conversationItem), atIndex: 0)
+            conversations.insert(DBManager.transform(conversationItem), at: 0)
         }
         return conversations
     }
@@ -220,11 +218,11 @@ class DBManager {
 
 
 extension DBManager {
-    class func getUser(id:String) -> MOKUser? {
+    class func getUser(_ id:String) -> MOKUser? {
         return DBManager.getUsers([id]).first
     }
     
-    class func getUsers(ids:[String]) -> [MOKUser]{
+    class func getUsers(_ ids:[String]) -> [MOKUser]{
         let realm = try! Realm()
         
         let results = realm.objects(User.self).filter("monkeyId IN %@", ids)
@@ -244,7 +242,7 @@ extension DBManager {
         return arrayUser
     }
     
-    class func storeUsers(users:[MOKUser]){
+    class func storeUsers(_ users:[MOKUser]){
         let realm = try! Realm()
         
         try! realm.write {
@@ -267,18 +265,18 @@ extension DBManager {
         }
     }
     
-    class func monkeyIdsNotStored(ids:Set<String>) -> [String]{
+    class func monkeyIdsNotStored(_ ids:Set<String>) -> [String]{
         let realm = try! Realm()
         
         //search among stored users
         let results = realm.objects(User.self).filter("monkeyId IN %@", ids)
         
         //monkey ids found
-        if let monkeyIds = results.valueForKey("monkeyId") as? [String] {
+        if let monkeyIds = results.value(forKey: "monkeyId") as? [String] {
             
 //            let realIds = Set(ids.allObjects as! [String])
             
-            return Array(ids.subtract(monkeyIds))
+            return Array(ids.subtracting(monkeyIds))
         }
         
         return []
