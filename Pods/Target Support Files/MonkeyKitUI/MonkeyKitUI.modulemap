@@ -1,6 +1,0 @@
-framework module MonkeyKitUI {
-  umbrella header "MonkeyKitUI-umbrella.h"
-
-  export *
-  module * { export * }
-}
