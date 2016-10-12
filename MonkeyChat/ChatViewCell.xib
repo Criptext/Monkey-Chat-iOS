@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11201" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <tableViewCell contentMode="scaleToFill" restorationIdentifier="ChatViewCell" selectionStyle="gray" indentationWidth="10" reuseIdentifier="ChatViewCell" rowHeight="75" id="4YX-xR-S8l" userLabel="ChatViewCell" customClass="ChatViewCell" customModule="MonkeyChat" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="75"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="4YX-xR-S8l" id="zfL-3t-9dG">
+                <frame key="frameInset" width="375" height="74"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" image="Profile_imgDefault.png" translatesAutoresizingMaskIntoConstraints="NO" id="tZa-0K-xUq" userLabel="Chat Avatar">
+                        <constraints>
+                            <constraint firstAttribute="height" constant="56" id="7FV-Mx-Hqb"/>
+                            <constraint firstAttribute="width" constant="56" id="9fE-DL-gJg"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="28"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </imageView>
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" misplaced="YES" text="Gianni" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rNw-ZF-xNF">
+                        <frame key="frameInset" minX="81" minY="10" width="423" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="21" id="Qna-v5-pBf"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                        <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </label>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="check-blue-icon.png" translatesAutoresizingMaskIntoConstraints="NO" id="rZV-mp-LVs">
+                        <constraints>
+                            <constraint firstAttribute="width" constant="12" id="7tc-E5-mQZ"/>
+                            <constraint firstAttribute="height" constant="9.5" id="8f2-eD-Xkh"/>
+                        </constraints>
+                    </imageView>
+                    <label hidden="YES" opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" misplaced="YES" text="Sent" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ECR-CI-hC0">
+                        <frame key="frameInset" minX="99" minY="31" width="436" height="35"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </label>
+                    <label hidden="YES" opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" misplaced="YES" text="02:50 PM" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WEO-Tu-slt">
+                        <frame key="frameInset" minX="504" minY="10" width="71" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="71" id="0Ll-da-0oJ"/>
+                            <constraint firstAttribute="height" constant="21" id="l0H-ez-UXp"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                        <color key="textColor" red="0.4941176471" green="0.54901960780000003" blue="0.55294117649999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </label>
+                    <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MNh-MM-qav" userLabel="ViewBadge">
+                        <frame key="frameInset" minX="545" minY="33" width="30" height="20"/>
+                        <subviews>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="123" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U2g-NS-J2g">
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="0.043137254899999998" green="0.38431372549999998" blue="0.99607843139999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="30" id="O43-Xw-k9W"/>
+                            <constraint firstAttribute="bottom" secondItem="U2g-NS-J2g" secondAttribute="bottom" id="SJT-Qq-YCJ"/>
+                            <constraint firstItem="U2g-NS-J2g" firstAttribute="top" secondItem="MNh-MM-qav" secondAttribute="top" id="Weu-Aa-jY9"/>
+                            <constraint firstItem="U2g-NS-J2g" firstAttribute="leading" secondItem="MNh-MM-qav" secondAttribute="leading" id="XJ0-9r-jRR"/>
+                            <constraint firstAttribute="trailing" secondItem="U2g-NS-J2g" secondAttribute="trailing" id="ZsB-lq-2UY"/>
+                            <constraint firstAttribute="centerY" secondItem="U2g-NS-J2g" secondAttribute="centerY" id="cK2-px-lA2"/>
+                            <constraint firstAttribute="centerX" secondItem="U2g-NS-J2g" secondAttribute="centerX" id="spN-v1-6Xu"/>
+                            <constraint firstAttribute="height" constant="20" id="ubI-eL-dMs"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="10"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" misplaced="YES" image="icon_more_right.png" translatesAutoresizingMaskIntoConstraints="NO" id="BJ5-Od-xUA">
+                        <frame key="frameInset" minX="584" minY="31" width="8" height="12"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="8" id="Bk5-h4-32A"/>
+                            <constraint firstAttribute="height" constant="12" id="dr3-tX-gk2"/>
+                        </constraints>
+                    </imageView>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="ECR-CI-hC0" firstAttribute="top" secondItem="rNw-ZF-xNF" secondAttribute="bottom" id="242-rs-W7a"/>
+                    <constraint firstAttribute="trailing" secondItem="BJ5-Od-xUA" secondAttribute="trailing" constant="8" id="4fy-kA-qJC"/>
+                    <constraint firstItem="rZV-mp-LVs" firstAttribute="leading" secondItem="rNw-ZF-xNF" secondAttribute="leading" constant="3" id="4zV-no-jcf"/>
+                    <constraint firstItem="MNh-MM-qav" firstAttribute="trailing" secondItem="WEO-Tu-slt" secondAttribute="trailing" id="7BM-uF-A8y"/>
+                    <constraint firstItem="MNh-MM-qav" firstAttribute="leading" secondItem="ECR-CI-hC0" secondAttribute="trailing" constant="10" id="Kgy-Be-Lrb"/>
+                    <constraint firstItem="rNw-ZF-xNF" firstAttribute="leading" secondItem="tZa-0K-xUq" secondAttribute="trailing" constant="15" id="LQ2-Yw-Koq"/>
+                    <constraint firstItem="rNw-ZF-xNF" firstAttribute="top" secondItem="WEO-Tu-slt" secondAttribute="top" id="S1O-pv-cot"/>
+                    <constraint firstItem="rZV-mp-LVs" firstAttribute="bottom" secondItem="ECR-CI-hC0" secondAttribute="bottom" constant="-12" id="Sgm-Aw-LCR"/>
+                    <constraint firstItem="tZa-0K-xUq" firstAttribute="top" secondItem="zfL-3t-9dG" secondAttribute="top" constant="10" id="Thf-By-stX"/>
+                    <constraint firstItem="ECR-CI-hC0" firstAttribute="bottom" secondItem="tZa-0K-xUq" secondAttribute="bottom" id="XWp-pw-Kdu"/>
+                    <constraint firstAttribute="trailing" secondItem="WEO-Tu-slt" secondAttribute="trailing" constant="25" id="aas-jj-FGm"/>
+                    <constraint firstAttribute="centerY" secondItem="BJ5-Od-xUA" secondAttribute="centerY" id="iA9-BV-98j"/>
+                    <constraint firstItem="MNh-MM-qav" firstAttribute="top" secondItem="WEO-Tu-slt" secondAttribute="bottom" constant="2" id="mTj-Wu-f93"/>
+                    <constraint firstItem="rNw-ZF-xNF" firstAttribute="top" secondItem="zfL-3t-9dG" secondAttribute="top" constant="10" id="sJa-zh-Vbg"/>
+                    <constraint firstItem="WEO-Tu-slt" firstAttribute="leading" secondItem="rNw-ZF-xNF" secondAttribute="trailing" id="t9B-hw-X0Z"/>
+                    <constraint firstItem="tZa-0K-xUq" firstAttribute="leading" secondItem="zfL-3t-9dG" secondAttribute="leading" constant="10" id="uLq-Dm-1qJ"/>
+                    <constraint firstItem="ECR-CI-hC0" firstAttribute="leading" secondItem="rNw-ZF-xNF" secondAttribute="leading" constant="18" id="z7N-Cn-SYU"/>
+                </constraints>
+            </tableViewCellContentView>
+            <inset key="separatorInset" minX="61" minY="0.0" maxX="0.0" maxY="0.0"/>
+            <connections>
+                <outlet property="avatarImageView" destination="tZa-0K-xUq" id="c33-fP-FSq"/>
+                <outlet property="badgeContainerView" destination="MNh-MM-qav" id="jSl-hB-FR3"/>
+                <outlet property="badgeLabel" destination="U2g-NS-J2g" id="Rht-m4-fq8"/>
+                <outlet property="badgeWidthConstraint" destination="O43-Xw-k9W" id="wjM-9c-9nk"/>
+                <outlet property="dateLabel" destination="WEO-Tu-slt" id="2G5-2l-dBE"/>
+                <outlet property="doveImageView" destination="rZV-mp-LVs" id="xze-EP-PH5"/>
+                <outlet property="moreImageView" destination="BJ5-Od-xUA" id="C8p-7H-8FE"/>
+                <outlet property="nameLabel" destination="rNw-ZF-xNF" id="z4O-Mj-zeK"/>
+                <outlet property="previewLabel" destination="ECR-CI-hC0" id="MCj-n2-cWH"/>
+                <outlet property="previewOffsetConstraint" destination="z7N-Cn-SYU" id="3v6-uk-TNf"/>
+            </connections>
+        </tableViewCell>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+    </objects>
+    <resources>
+        <image name="Profile_imgDefault.png" width="170" height="170"/>
+        <image name="check-blue-icon.png" width="24" height="19"/>
+        <image name="icon_more_right.png" width="16" height="25"/>
+    </resources>
+</document>

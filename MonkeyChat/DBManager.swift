@@ -68,19 +68,17 @@ class DBManager {
     }
     
     class func transform(_ messageItem:MessageItem) -> MOKMessage {
-      var props = [AnyHashable: Any]()
-      var params: NSMutableDictionary?
+        var props = [AnyHashable: Any]()
+        var params = [AnyHashable: Any]()
       
         if let bytesParams = messageItem.params {
-          params = (try? JSONSerialization.jsonObject(with: bytesParams, options: .mutableContainers)) as? NSMutableDictionary
+          params = try! JSONSerialization.jsonObject(with: bytesParams, options: .mutableContainers) as! [AnyHashable : Any]
         }
         if let bytesProps = messageItem.props {
           props = try! JSONSerialization.jsonObject(with: bytesProps, options: .mutableContainers) as! [AnyHashable: Any]
         }
-        let message = MOKMessage(textMessage: messageItem.plainText, sender: messageItem.sender, recipient: messageItem.recipient)
-        message.params = params
-//        message.setPr
-//        let message = MOKMessage(message: messageItem.plainText, sender: messageItem.sender, recipient: messageItem.recipient, params: params, props: props)
+
+        let message = MOKMessage(message: messageItem.plainText, sender: messageItem.sender, recipient: messageItem.recipient, params: params, props: props)
         message.messageId = messageItem.messageId
         message.oldMessageId = messageItem.oldMessageId
         message.timestampOrder = messageItem.timestampOrder
@@ -101,7 +99,7 @@ class DBManager {
         conversation.members = NSMutableArray(array: conversationItem.members.components(separatedBy: ","))
         conversation.lastSeen = conversationItem.lastSeen
         conversation.lastModified = conversationItem.lastModified
-        conversation.unread = uint(conversationItem.unread)
+        conversation.unread = conversationItem.unread
         conversation.info = info
         
         if let messageItem = conversationItem.lastMessage {

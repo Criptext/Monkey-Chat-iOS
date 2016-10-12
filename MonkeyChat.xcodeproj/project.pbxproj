@@ -10,6 +10,8 @@
 		412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FA81CF4A663009ACBE2 /* Assets.xcassets */; };
 		412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */; };
 		413C3ECB1D6F606500333BF2 /* PreviewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413C3ECA1D6F606500333BF2 /* PreviewItem.swift */; };
+		419B68611DAE993F00F10585 /* ChatViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 419B68601DAE993F00F10585 /* ChatViewCell.xib */; };
+		419B68631DAEA1C200F10585 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 419B68621DAEA1C200F10585 /* Main.storyboard */; };
 		419C36621D4FCEFA00B7F95D /* check-blue-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36601D4FCEFA00B7F95D /* check-blue-icon.png */; };
 		419C36631D4FCEFA00B7F95D /* check-grey-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36611D4FCEFA00B7F95D /* check-grey-icon.png */; };
 		419C36651D4FCF6700B7F95D /* Profile_imgDefault.png in Resources */ = {isa = PBXBuildFile; fileRef = 419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */; };
@@ -20,7 +22,6 @@
 		41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F51CFD4963006ED473 /* AppDelegate.swift */; };
 		41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */; };
 		41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF84FA1CFD4963006ED473 /* ChatViewController.swift */; };
-		41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 41AF85011CFD49F0006ED473 /* Main.storyboard */; };
 		41AF85051CFDE8F8006ED473 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85041CFDE8F8006ED473 /* User.swift */; };
 		41AF85081CFDE917006ED473 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85071CFDE917006ED473 /* DBManager.swift */; };
 		41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BC05391D67A0F7005A1C89 /* Conversation.swift */; };
@@ -46,6 +47,8 @@
 		412F8FAB1CF4A663009ACBE2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		412F8FAD1CF4A663009ACBE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		413C3ECA1D6F606500333BF2 /* PreviewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewItem.swift; sourceTree = "<group>"; };
+		419B68601DAE993F00F10585 /* ChatViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ChatViewCell.xib; sourceTree = "<group>"; };
+		419B68621DAEA1C200F10585 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		419C36601D4FCEFA00B7F95D /* check-blue-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check-blue-icon.png"; sourceTree = "<group>"; };
 		419C36611D4FCEFA00B7F95D /* check-grey-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check-grey-icon.png"; sourceTree = "<group>"; };
 		419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Profile_imgDefault.png; sourceTree = "<group>"; };
@@ -60,7 +63,6 @@
 		41AF84F51CFD4963006ED473 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationListViewController.swift; sourceTree = "<group>"; };
 		41AF84FA1CFD4963006ED473 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
-		41AF85011CFD49F0006ED473 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		41AF85041CFDE8F8006ED473 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		41AF85071CFDE917006ED473 /* DBManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
 		41BC05391D67A0F7005A1C89 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 		412F8FA01CF4A663009ACBE2 /* MonkeyChat */ = {
 			isa = PBXGroup;
 			children = (
+				419B68621DAEA1C200F10585 /* Main.storyboard */,
 				419C36661D4FCFAF00B7F95D /* icon_more_right.png */,
 				419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */,
 				419C36601D4FCEFA00B7F95D /* check-blue-icon.png */,
@@ -120,10 +123,10 @@
 				41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */,
 				41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */,
 				41AF84FA1CFD4963006ED473 /* ChatViewController.swift */,
-				41AF85011CFD49F0006ED473 /* Main.storyboard */,
 				412F8FA81CF4A663009ACBE2 /* Assets.xcassets */,
 				412F8FAA1CF4A663009ACBE2 /* LaunchScreen.storyboard */,
 				412F8FAD1CF4A663009ACBE2 /* Info.plist */,
+				419B68601DAE993F00F10585 /* ChatViewCell.xib */,
 			);
 			path = MonkeyChat;
 			sourceTree = "<group>";
@@ -222,8 +225,9 @@
 				TargetAttributes = {
 					412F8F9D1CF4A663009ACBE2 = {
 						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = S95WHWKHBE;
+						DevelopmentTeam = 65NU4336S4;
 						LastSwiftMigration = 0800;
+						ProvisioningStyle = Automatic;
 					};
 					41AF84E91CFD12A3006ED473 = {
 						CreatedOnToolsVersion = 7.3;
@@ -256,10 +260,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41AF85021CFD49F0006ED473 /* Main.storyboard in Resources */,
 				419C36651D4FCF6700B7F95D /* Profile_imgDefault.png in Resources */,
 				412F8FAC1CF4A663009ACBE2 /* LaunchScreen.storyboard in Resources */,
 				412F8FA91CF4A663009ACBE2 /* Assets.xcassets in Resources */,
+				419B68631DAEA1C200F10585 /* Main.storyboard in Resources */,
+				419B68611DAE993F00F10585 /* ChatViewCell.xib in Resources */,
 				419C36671D4FCFAF00B7F95D /* icon_more_right.png in Resources */,
 				419C36631D4FCEFA00B7F95D /* check-grey-icon.png in Resources */,
 				419C36621D4FCEFA00B7F95D /* check-blue-icon.png in Resources */,
@@ -288,7 +293,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		0F6621A1F24BF5FC6D22E91E /* [CP] Embed Pods Frameworks */ = {
@@ -466,7 +471,8 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = S95WHWKHBE;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 65NU4336S4;
 				INFOPLIST_FILE = MonkeyChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat;
@@ -481,7 +487,8 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = S95WHWKHBE;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 65NU4336S4;
 				INFOPLIST_FILE = MonkeyChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.criptext.monkeyChat;

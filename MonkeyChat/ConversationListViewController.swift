@@ -84,6 +84,9 @@ class ConversationsListViewController: UITableViewController {
     self.edgesForExtendedLayout = UIRectEdge.all
     self.extendedLayoutIncludesOpaqueBars = true
     
+    //register nib for table cell
+    self.tableView.register(UINib(nibName: "ChatViewCell", bundle: nil), forCellReuseIdentifier: "ChatViewCell")
+    
     //configure refresh control
     self.refreshControl = UIRefreshControl()
     self.refreshControl?.backgroundColor = UIColor(red:0.93, green:0.93, blue:0.93, alpha:1.0)

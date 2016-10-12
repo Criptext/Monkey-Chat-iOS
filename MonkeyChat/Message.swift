@@ -76,11 +76,15 @@ extension MOKMessage: JSQMessageData {
         let media:JSQMessageMediaData!
         switch self.mediaType() {
         case MOKAudio.rawValue:
-            let audio = try! Data(contentsOf: self.fileURL()!)
-            media = BLAudioMedia(audio: audio)
-            (media as! BLAudioMedia).setFilePath(self.filePath())
-            let asset = AVURLAsset(url: self.fileURL()!)
-            (media as! BLAudioMedia).setAudioDuration(CMTimeGetSeconds(asset.duration))
+            if let audio = try? Data(contentsOf: self.fileURL()!){
+                media = BLAudioMedia(audio: audio)
+                (media as! BLAudioMedia).setFilePath(self.filePath())
+                let asset = AVURLAsset(url: self.fileURL()!)
+                (media as! BLAudioMedia).setAudioDuration(CMTimeGetSeconds(asset.duration))
+            }else{
+                media = BLAudioMedia()
+            }
+            
             break
         case MOKPhoto.rawValue:
             let image = UIImage(contentsOfFile: self.filePath()!)
