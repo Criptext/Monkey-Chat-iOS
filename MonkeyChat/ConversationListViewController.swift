@@ -142,6 +142,11 @@ class ConversationsListViewController: UITableViewController {
      *  Load conversations
      */
     self.conversationArray = DBManager.getConversations(nil, count: 10)
+    if(self.conversationArray.count > 0){
+      for conversation in self.conversationArray{
+        self.conversationHash[conversation.conversationId] = conversation
+      }
+    }
     
     /**
      
