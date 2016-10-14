@@ -26,6 +26,7 @@
 		41AF85081CFDE917006ED473 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85071CFDE917006ED473 /* DBManager.swift */; };
 		41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BC05391D67A0F7005A1C89 /* Conversation.swift */; };
 		41CF6D1B1D870A0100900A2D /* RotationNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */; };
+		E7B256071DB1483500E2BA5E /* NSNotificationCenterKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B256061DB1483500E2BA5E /* NSNotificationCenterKeys.swift */; };
 		F42EA0B04B68361D24074F23 /* Pods_MonkeyChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 122B21EF25353A13FDD348C1 /* Pods_MonkeyChat.framework */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +69,7 @@
 		41BC05391D67A0F7005A1C89 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RotationNavigationController.swift; sourceTree = "<group>"; };
 		5B6983AA8E3ADE09EC6CBC88 /* Pods-MonkeyChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.debug.xcconfig"; sourceTree = "<group>"; };
+		E7B256061DB1483500E2BA5E /* NSNotificationCenterKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSNotificationCenterKeys.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 		412F8FA01CF4A663009ACBE2 /* MonkeyChat */ = {
 			isa = PBXGroup;
 			children = (
+				E7B256051DB1478900E2BA5E /* Utils */,
 				419B68621DAEA1C200F10585 /* Main.storyboard */,
 				419C36661D4FCFAF00B7F95D /* icon_more_right.png */,
 				419C36641D4FCF6700B7F95D /* Profile_imgDefault.png */,
@@ -170,6 +173,14 @@
 				3FA265B87EEDC7E987761ECB /* Pods-MonkeyChat.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		E7B256051DB1478900E2BA5E /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				E7B256061DB1483500E2BA5E /* NSNotificationCenterKeys.swift */,
+			);
+			name = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -293,7 +304,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		0F6621A1F24BF5FC6D22E91E /* [CP] Embed Pods Frameworks */ = {
@@ -339,6 +350,7 @@
 				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
 				41A575651D52376500D26EAD /* Message.swift in Sources */,
 				41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */,
+				E7B256071DB1483500E2BA5E /* NSNotificationCenterKeys.swift in Sources */,
 				413C3ECB1D6F606500333BF2 /* PreviewItem.swift in Sources */,
 				41AF84FB1CFD4963006ED473 /* AppDelegate.swift in Sources */,
 				41AF85081CFDE917006ED473 /* DBManager.swift in Sources */,

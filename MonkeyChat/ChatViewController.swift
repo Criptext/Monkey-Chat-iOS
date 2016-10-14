@@ -273,9 +273,7 @@ extension ChatViewController {
         self.collectionView.scrollToItem(at: IndexPath(item: newIndex, section: 0), at: .top, animated: false)
         
         let newoffset = CGPoint(x: 0, y: self.collectionView.contentOffset.y + oldOffset.y)
-        
         self.collectionView.setContentOffset(newoffset, animated: false)
-        
         self.isGettingMessages = false
       }
       
@@ -294,11 +292,7 @@ extension ChatViewController {
       }
       
       self.messageArray = messages + self.messageArray
-      
-      
-      
       let oldOffset = self.collectionView.contentOffset
-      
       self.collectionView.reloadData()
       
       if animated {
@@ -311,9 +305,7 @@ extension ChatViewController {
       self.collectionView.scrollToItem(at: IndexPath(item: newIndex, section: 0), at: .top, animated: false)
       
       let newoffset = CGPoint(x: 0, y: self.collectionView.contentOffset.y + oldOffset.y)
-      
       self.collectionView.setContentOffset(newoffset, animated: false)
-      
       self.isGettingMessages = false
       }, failure: { (task, error) in
         print(error.localizedDescription)
@@ -422,7 +414,6 @@ extension ChatViewController {
     let minutes = Int((recorder.currentTime.truncatingRemainder(dividingBy: 3600)) / 60)
     let secs = Int((recorder.currentTime.truncatingRemainder(dividingBy: 3600)).truncatingRemainder(dividingBy: 60))
     
-    
     self.timerLabel.text = String(format: "%02d:%02d", minutes, secs)
   }
   
@@ -503,8 +494,6 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
     self.messageArray.append(message)
     self.conversation.lastMessage = message
     self.finishSendingMessage()
-    
-    
   }
   
   func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -554,6 +543,8 @@ extension ChatViewController {
      */
     
     self.send(text ?? "", size: self.maxSize)
+    NotificationCenter.default.post(name: Notification.Name(rawValue: MonkeyChatNotification.messageSent), object: self)
+  
   }
   
   override func didPressAccessoryButton(_ sender: UIButton!) {

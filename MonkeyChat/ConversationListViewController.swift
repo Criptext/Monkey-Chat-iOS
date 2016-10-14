@@ -135,6 +135,9 @@ class ConversationsListViewController: UITableViewController {
     //register listener for acknowledges of opens I do
     NotificationCenter.default.addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: NSNotification.Name.MonkeyConversationStatus, object: nil)
     
+    //register listener for messages updated in last conversation open
+    NotificationCenter.default.addObserver(self, selector: #selector(ConversationsListViewController.updateConversationList), name: NSNotification.Name(rawValue: MonkeyChatNotification.messageSent), object: nil)
+    
     /**
      *  Load conversations
      */
@@ -554,6 +557,14 @@ extension ConversationsListViewController: UISearchControllerDelegate {
   }
 }
 
+//MARK: ViewController communications
+extension ConversationsListViewController {
+  func updateConversationList() {
+    self.sortConversations()
+    self.tableView.reloadData()
+  }
+}
+
 //MARK: Connection delegate
 extension ConversationsListViewController {
   
@@ -664,10 +675,7 @@ extension ConversationsListViewController {
       self.conversationHash[conversationId] = conversation
     }
     
-    
     conversation!.lastMessage = message
-    
-    
     
     if !Monkey.sharedInstance().isMessageOutgoing(message) {
       conversation!.unread += 1
@@ -694,7 +702,6 @@ extension ConversationsListViewController {
     
     self.sortConversations()
     self.tableView.reloadData()
-    
   }
   
   func acknowledgeReceived(_ notification:Foundation.Notification){
