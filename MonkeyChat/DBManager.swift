@@ -190,7 +190,7 @@ class DBManager {
             predicate = NSPredicate(format: "lastModified < %f", conv.lastModified)
         }
         
-        let results = realm.objects(ConversationItem.self).filter(predicate).sorted(byProperty: "lastModified", ascending: true)
+        let results = realm.objects(ConversationItem.self).filter(predicate).sorted(byProperty: "lastModified", ascending: false)
         
         var conversations = [MOKConversation]()
         
@@ -208,7 +208,7 @@ class DBManager {
             
             conversations.insert(DBManager.transform(conversationItem), at: 0)
         }
-        return conversations
+        return conversations.reversed()
     }
     
     class func getUser() -> MOKUser?{
