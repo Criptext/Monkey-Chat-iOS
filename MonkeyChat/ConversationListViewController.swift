@@ -106,7 +106,7 @@ class ConversationsListViewController: UITableViewController {
      */
     
     //register listener for changes in the socket connection
-    NotificationCenter.default.addObserver(self, selector: #selector(ConversationsListViewController.handleConnectionChange), name: NSNotification.Name.MonkeySocketStatusChange, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(self.handleConnectionChange), name: NSNotification.Name.MonkeySocketStatusChange, object: nil)
     
     //register listener for incoming messages
     NotificationCenter.default.addObserver(self, selector: #selector(self.messageReceived(_:)), name: NSNotification.Name.MonkeyMessage, object: nil)
@@ -135,13 +135,20 @@ class ConversationsListViewController: UITableViewController {
     //register listener for acknowledges of opens I do
     NotificationCenter.default.addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: NSNotification.Name.MonkeyConversationStatus, object: nil)
     
+    //register listener for messages updated in last conversation open
+    NotificationCenter.default.addObserver(self, selector: #selector(self.updateConversationList), name: NSNotification.Name.MonkeyChat.MessageSent, object: nil)
+    
     /**
      *  Load conversations
      */
     self.conversationArray = DBManager.getConversations(nil, count: 10)
+    if !self.conversationArray.isEmpty {
+      for conversation in self.conversationArray{
+        self.conversationHash[conversation.conversationId] = conversation
+      }
+    }
     
     /**
-     
      *  Initialize Monkey
      */
     
@@ -213,8 +220,6 @@ class ConversationsListViewController: UITableViewController {
     }
     
     self.isGettingConversations = true
-    
-    
     let conversations = DBManager.getConversations(self.conversationArray.last, count: 10)
     
     if conversations.count > 0 {
@@ -554,6 +559,14 @@ extension ConversationsListViewController: UISearchControllerDelegate {
   }
 }
 
+//MARK: ViewController communications
+extension ConversationsListViewController {
+  func updateConversationList() {
+    self.sortConversations()
+    self.tableView.reloadData()
+  }
+}
+
 //MARK: Connection delegate
 extension ConversationsListViewController {
   
@@ -652,6 +665,7 @@ extension ConversationsListViewController {
     
     //create conversation if it doesn't exist
     if conversation == nil {
+      
       conversation = MOKConversation(id: conversationId)
       conversation!.info = NSMutableDictionary()
       conversation!.members = [message.sender, message.recipient]
@@ -664,10 +678,7 @@ extension ConversationsListViewController {
       self.conversationHash[conversationId] = conversation
     }
     
-    
     conversation!.lastMessage = message
-    
-    
     
     if !Monkey.sharedInstance().isMessageOutgoing(message) {
       conversation!.unread += 1
@@ -694,7 +705,6 @@ extension ConversationsListViewController {
     
     self.sortConversations()
     self.tableView.reloadData()
-    
   }
   
   func acknowledgeReceived(_ notification:Foundation.Notification){

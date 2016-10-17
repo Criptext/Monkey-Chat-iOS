@@ -15,7 +15,7 @@ PODS:
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
   - JSQSystemSoundPlayer (2.0.1)
-  - MonkeyKit (1.0.1):
+  - MonkeyKit (1.0.5):
     - AFNetworking
     - UICKeyChainStore
   - MonkeyKitUI (7.4.0):
@@ -32,7 +32,7 @@ PODS:
   - Whisper (3.1.1)
 
 DEPENDENCIES:
-  - MonkeyKit
+  - MonkeyKit (~> 1.0.5)
   - MonkeyKitUI
   - RealmSwift (~> 1.1.0)
   - SDWebImage
@@ -51,7 +51,7 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
-  MonkeyKit: 991ff2e13de32bb813458c78a68764fd9fa21f98
+  MonkeyKit: 8e5b7678c330d12dbd1512bfc221dc6d86f5a9b7
   MonkeyKitUI: dd2042fbde1256efa413b3543de85c803d7718ac
   Realm: ceecf1a4540c4ce9efe196fe73fa9855bce05bd8
   RealmSwift: 838058b2db95b12cb86bd0cf209df642c33fb60a
@@ -59,6 +59,6 @@ SPEC CHECKSUMS:
   UICKeyChainStore: f1cbd42216a113f0165de1e733e62905b8823432
   Whisper: 74decae53daf8caff5acf8628e24b92d3f05a453
 
-PODFILE CHECKSUM: 0776722a287386b54b235e168706a7564b2a34c3
+PODFILE CHECKSUM: 63a8413cc1a92d2c503cc4f8a0ecc40a56beb1ee
 
-COCOAPODS: 1.1.0.rc.2
+COCOAPODS: 1.1.0.rc.3
