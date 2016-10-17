@@ -8,10 +8,12 @@
 
 import Foundation
 
-struct MonkeyChatNotification {
+let prefix = "com.monkeychat."
 
-  static let prefix = "com.monkeychat."
-  
-  static let messageSent = prefix + "messageSent"
-  
+extension Notification.Name {
+
+  public struct MonkeyChat {
+
+    public static let MessageSent = Notification.Name(rawValue: prefix + "messageSent")
+  }
 }

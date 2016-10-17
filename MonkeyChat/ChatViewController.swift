@@ -543,7 +543,7 @@ extension ChatViewController {
      */
     
     self.send(text ?? "", size: self.maxSize)
-    NotificationCenter.default.post(name: Notification.Name(rawValue: MonkeyChatNotification.messageSent), object: self)
+    NotificationCenter.default.post(name: Notification.Name.MonkeyChat.MessageSent, object: self)
   
   }
   
