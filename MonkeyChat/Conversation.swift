@@ -12,13 +12,9 @@ class ConversationItem: Object {
     dynamic var conversationId = ""
     dynamic var info:Data?
     dynamic var members = ""
-    
     dynamic var lastMessage:MessageItem?
-    
     dynamic var lastSeen = Double()
-    
     dynamic var unread:Int32 = 0
-    
     dynamic var lastModified = Double()
     
     override static func primaryKey() -> String? {
