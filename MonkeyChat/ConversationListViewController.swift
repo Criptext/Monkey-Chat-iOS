@@ -18,6 +18,7 @@ import MonkeyKit
 import SDWebImage
 import Whisper
 import RealmSwift
+import UserNotifications
 
 /**
  *  ViewController that lists your conversations
@@ -167,6 +168,20 @@ class ConversationsListViewController: UITableViewController {
                                         success: { (session) in
                                           print(session)
                                           
+                                          // push
+                                          if #available(iOS 10.0, *) {
+                                            //you need to import the UserNotifications framework
+                                            UNUserNotificationCenter.current().requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
+                                              // Enable or disable features based on authorization.
+                                            }
+                                          } else {
+                                            // Fallback on earlier versions
+                                            let settings = UIUserNotificationSettings(types: [UIUserNotificationType.badge, UIUserNotificationType.alert, UIUserNotificationType.sound], categories: nil)
+                                            UIApplication.shared.registerUserNotificationSettings(settings)
+                                          }
+                                          UIApplication.shared.registerForRemoteNotifications()
+                                          
+                                          
                                           //
                                           if self.conversationArray.count == 0 {
                                             self.getConversations(0)
@@ -206,19 +221,6 @@ class ConversationsListViewController: UITableViewController {
   deinit {
     //for iOS 8
     NotificationCenter.default.removeObserver(self)
-  }
-  
-  func handleTableRefresh(){
-    self.getConversations(0)
-  }
-  
-  func sortConversations() {
-    self.conversationArray.sort { (conv1, conv2) -> Bool in
-      if let lastMsg1 = conv1.lastMessage, let lastMsg2 = conv2.lastMessage {
-        return lastMsg1.timestampCreated > lastMsg2.timestampCreated
-      }
-      return conv1.lastModified > conv2.lastModified
-    }
   }
   
   //MARK: TableView DataSource
@@ -852,6 +854,19 @@ extension ConversationsListViewController {
       self.sortConversations()
       self.tableView.reloadData()
     }
+  }
+ 
+  func sortConversations() {
+    self.conversationArray.sort { (conv1, conv2) -> Bool in
+      if let lastMsg1 = conv1.lastMessage, let lastMsg2 = conv2.lastMessage {
+        return lastMsg1.timestampCreated > lastMsg2.timestampCreated
+      }
+      return conv1.lastModified > conv2.lastModified
+    }
+  }
+  
+  func handleTableRefresh(){
+    self.getConversations(0)
   }
   
 }

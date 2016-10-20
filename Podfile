@@ -6,7 +6,7 @@ target 'MonkeyChat' do
   pod 'RealmSwift', '~> 1.1.0'
   pod 'SDWebImage', '~> 3.8.1'
   pod 'Whisper', :git => 'https://github.com/hyperoslo/Whisper.git', :branch => 'swift-3'
-  pod 'MonkeyKit', '~> 1.0.5'
+  pod 'MonkeyKit', '~> 1.0.7'
 end
 
 post_install do |installer|
