@@ -11,6 +11,7 @@ import MonkeyKit
 import RealmSwift
 
 class DBManager {
+  
   class func store(_ message:MOKMessage) {
       let messageItem = DBManager.transform(message)
       let realm = try! Realm()
@@ -18,15 +19,6 @@ class DBManager {
       try! realm.write {
           realm.add(messageItem, update: true)
       }
-  }
-  
-  class func store(_ conversation:MOKConversation) {
-    let conversationItem = DBManager.transform(conversation)
-    let realm = try! Realm()
-    
-    try! realm.write {
-        realm.add(conversationItem, update: true)
-    }
   }
     
   class func transform(_ message:MOKMessage) -> MessageItem {
@@ -45,21 +37,6 @@ class DBManager {
     messageItem.props = try? JSONSerialization.data(withJSONObject: message.props, options: .prettyPrinted)
     
     return messageItem
-  }
-    
-  class func transform(_ conversation:MOKConversation) -> ConversationItem {
-    let conversationItem = ConversationItem()
-    conversationItem.conversationId = conversation.conversationId
-    conversationItem.info = try? JSONSerialization.data(withJSONObject: conversation.info, options: .prettyPrinted)
-    conversationItem.members = conversation.members.componentsJoined(by: ",")
-    if let lastMessage = conversation.lastMessage {
-        conversationItem.lastMessage = DBManager.transform(lastMessage)
-    }
-    conversationItem.lastModified = conversation.lastModified
-    conversationItem.lastSeen = conversation.lastSeen
-    conversationItem.unread = Int32(conversation.unread)
-    
-    return conversationItem
   }
     
   class func transform(_ messageItem:MessageItem) -> MOKMessage {
@@ -82,25 +59,6 @@ class DBManager {
     
     return message
   }
-  
-  class func transform(_ conversationItem:ConversationItem) -> MOKConversation {
-    var info = NSMutableDictionary()
-    if let bytesInfo = conversationItem.info {
-      info = try! JSONSerialization.jsonObject(with: bytesInfo, options: .mutableContainers) as! NSMutableDictionary
-    }
-    
-    let conversation = MOKConversation(id: conversationItem.conversationId)
-    conversation.members = NSMutableArray(array: conversationItem.members.components(separatedBy: ","))
-    conversation.lastSeen = conversationItem.lastSeen
-    conversation.lastModified = conversationItem.lastModified
-    conversation.unread = conversationItem.unread
-    conversation.info = info
-    if let messageItem = conversationItem.lastMessage {
-        conversation.lastMessage = DBManager.transform(messageItem)
-    }
-    
-    return conversation
-  }
 
   class func getMessage(_ id:String) -> MOKMessage? {
     let realm = try! Realm()
@@ -112,14 +70,27 @@ class DBManager {
     return nil
   }
   
-  class func getConversation(_ id:String) -> MOKConversation? {
+  class func getMessages(_ sender:String, recipient:String, from:MOKMessage?, count:Int) -> [MOKMessage]{
     let realm = try! Realm()
+    
+    let predicate = NSPredicate(format: "((sender == %@ AND recipient == %@) OR (sender == %@ AND recipient == %@)) AND timestampCreated < %f", sender, recipient, recipient, sender, from?.timestampCreated ?? 0)
+    let results = realm.objects(MessageItem.self).filter(predicate).sorted(byProperty: "timestampCreated", ascending: false)
+    
+    var messages = [MOKMessage]()
+    
+    for (index, messageItem) in results.enumerated() {
+      if count <= index {
+        break
+      }
       
-    if let conversationItem = realm.object(ofType: ConversationItem.self, forPrimaryKey: id){
-      return DBManager.transform(conversationItem)
+      guard let msg = from , msg.messageId != messageItem.messageId && messageItem.timestampCreated < msg.timestampCreated else {
+        continue
+      }
+      
+      let message = DBManager.transform(messageItem)
+      messages.insert(message, at: 0)
     }
-      
-    return nil
+    return messages
   }
   
   class func exists(_ message:MOKMessage) -> Bool {
@@ -152,63 +123,54 @@ class DBManager {
       realm.add(newMessage, update: true)
     }
   }
-
-  class func getMessages(_ sender:String, recipient:String, from:MOKMessage?, count:Int) -> [MOKMessage]{
-    let realm = try! Realm()
-    
-    let predicate = NSPredicate(format: "((sender == %@ AND recipient == %@) OR (sender == %@ AND recipient == %@)) AND timestampCreated < %f", sender, recipient, recipient, sender, from?.timestampCreated ?? 0)
-    let results = realm.objects(MessageItem.self).filter(predicate).sorted(byProperty: "timestampCreated", ascending: false)
-    
-    var messages = [MOKMessage]()
-    
-    for (index, messageItem) in results.enumerated() {
-      if count <= index {
-        break
-      }
-
-      guard let msg = from , msg.messageId != messageItem.messageId && messageItem.timestampCreated < msg.timestampCreated else {
-        continue
-      }
-      
-      let message = DBManager.transform(messageItem)
-      messages.insert(message, at: 0)
-    }
-    return messages
-  }
-  
-  class func getConversations(_ from:MOKConversation?, count:Int) -> [MOKConversation] {
-    let realm = try! Realm()
-    
-    var predicate = NSPredicate(format: "lastModified > 0")
-    if let conv = from {
-        predicate = NSPredicate(format: "lastModified < %f", conv.lastModified)
-    }
-    let results = realm.objects(ConversationItem.self).filter(predicate).sorted(byProperty: "lastModified", ascending: false)
-    
-    var conversations = [MOKConversation]()
-    for (index, conversationItem) in results.enumerated() {
-      if count <= index {
-          break
-      }
-      
-      if let conversation = from {
-        if conversation.conversationId == conversationItem.conversationId && conversationItem.lastModified <= conversation.lastModified {
-          continue
-        }
-      }
-      
-      conversations.insert(DBManager.transform(conversationItem), at: 0)
-    }
-    return conversations.reversed()
-  }
-  
-  class func getUser() -> MOKUser?{
-      return nil
-  }
 }
 
 
 extension DBManager {
+  
+  class func store(_ user:MOKUser){
+    let realm = try! Realm()
+    
+    try! realm.write {
+      
+      let userDB = User()
+      userDB.monkeyId = user.monkeyId
+      
+      let infoList = List<SimpleInfo>()
+      for info in user.info! {
+        let simple = SimpleInfo()
+        simple.key = info.key as! String
+        simple.value = info.value as! String
+        infoList.append(simple)
+      }
+      
+      userDB.info = infoList
+      realm.add(userDB, update: true)
+    }
+  }
+  
+  class func store(_ users:[MOKUser]){
+    let realm = try! Realm()
+    
+    try! realm.write {
+      for user in users {
+        let userDB = User()
+        userDB.monkeyId = user.monkeyId
+        
+        let infoList = List<SimpleInfo>()
+        for info in user.info! {
+          let simple = SimpleInfo()
+          simple.key = info.key as! String
+          simple.value = info.value as! String
+          infoList.append(simple)
+        }
+        
+        userDB.info = infoList
+        realm.add(userDB, update: true)
+      }
+    }
+  }
+  
   class func getUser(_ id:String) -> MOKUser? {
     return DBManager.getUsers([id]).first
   }
@@ -232,49 +194,6 @@ extension DBManager {
     
     return arrayUser
   }
-  
-  class func storeUsers(_ users:[MOKUser]){
-    let realm = try! Realm()
-    
-    try! realm.write {
-      for user in users {
-        let userDB = User()
-        userDB.monkeyId = user.monkeyId
-        
-        let infoList = List<SimpleInfo>()
-        for info in user.info! {
-          let simple = SimpleInfo()
-          simple.key = info.key as! String
-          simple.value = info.value as! String
-          infoList.append(simple)
-        }
-        
-        userDB.info = infoList
-        realm.add(userDB, update: true)
-      }
-    }
-  }
-  
-  class func storeUser(_ user:MOKUser){
-    let realm = try! Realm()
-  
-    try! realm.write {
-      
-    let userDB = User()
-    userDB.monkeyId = user.monkeyId
-        
-    let infoList = List<SimpleInfo>()
-    for info in user.info! {
-      let simple = SimpleInfo()
-      simple.key = info.key as! String
-      simple.value = info.value as! String
-      infoList.append(simple)
-    }
-      
-    userDB.info = infoList
-    realm.add(userDB, update: true)
-    }
-  }
     
   class func monkeyIdsNotStored(_ ids:Set<String>) -> [String]{
     let realm = try! Realm()
@@ -289,6 +208,89 @@ extension DBManager {
     }
     
     return []
+  }
+  
+}
+
+extension DBManager {
+  
+  class func store(_ conversation:MOKConversation) {
+    let conversationItem = DBManager.transform(conversation)
+    let realm = try! Realm()
+    
+    try! realm.write {
+      realm.add(conversationItem, update: true)
+    }
+  }
+  
+  class func transform(_ conversation:MOKConversation) -> ConversationItem {
+    let conversationItem = ConversationItem()
+    conversationItem.conversationId = conversation.conversationId
+    conversationItem.info = try? JSONSerialization.data(withJSONObject: conversation.info, options: .prettyPrinted)
+    conversationItem.members = conversation.members.componentsJoined(by: ",")
+    if let lastMessage = conversation.lastMessage {
+      conversationItem.lastMessage = DBManager.transform(lastMessage)
+    }
+    conversationItem.lastModified = conversation.lastModified
+    conversationItem.lastSeen = conversation.lastSeen
+    conversationItem.unread = Int32(conversation.unread)
+    
+    return conversationItem
+  }
+  
+  class func transform(_ conversationItem:ConversationItem) -> MOKConversation {
+    var info = NSMutableDictionary()
+    if let bytesInfo = conversationItem.info {
+      info = try! JSONSerialization.jsonObject(with: bytesInfo, options: .mutableContainers) as! NSMutableDictionary
+    }
+    
+    let conversation = MOKConversation(id: conversationItem.conversationId)
+    conversation.members = NSMutableArray(array: conversationItem.members.components(separatedBy: ","))
+    conversation.lastSeen = conversationItem.lastSeen
+    conversation.lastModified = conversationItem.lastModified
+    conversation.unread = conversationItem.unread
+    conversation.info = info
+    if let messageItem = conversationItem.lastMessage {
+      conversation.lastMessage = DBManager.transform(messageItem)
+    }
+    
+    return conversation
+  }
+  
+  class func getConversation(_ id:String) -> MOKConversation? {
+    let realm = try! Realm()
+    
+    if let conversationItem = realm.object(ofType: ConversationItem.self, forPrimaryKey: id){
+      return DBManager.transform(conversationItem)
+    }
+    
+    return nil
+  }
+  
+  class func getConversations(_ from:MOKConversation?, count:Int) -> [MOKConversation] {
+    let realm = try! Realm()
+    
+    var predicate = NSPredicate(format: "lastModified > 0")
+    if let conv = from {
+      predicate = NSPredicate(format: "lastModified < %f", conv.lastModified)
+    }
+    let results = realm.objects(ConversationItem.self).filter(predicate).sorted(byProperty: "lastModified", ascending: false)
+    
+    var conversations = [MOKConversation]()
+    for (index, conversationItem) in results.enumerated() {
+      if count <= index {
+        break
+      }
+      
+      if let conversation = from {
+        if conversation.conversationId == conversationItem.conversationId && conversationItem.lastModified <= conversation.lastModified {
+          continue
+        }
+      }
+      
+      conversations.insert(DBManager.transform(conversationItem), at: 0)
+    }
+    return conversations.reversed()
   }
   
 }
