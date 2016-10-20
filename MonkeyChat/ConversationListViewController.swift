@@ -406,6 +406,7 @@ class ConversationsListViewController: UITableViewController {
           Monkey.sharedInstance().removeMember(Monkey.sharedInstance().monkeyId()!, group: conversation.conversationId, success: { (data) in
             self.conversationHash.removeValue(forKey: conversation.conversationId)
             self.conversationArray.remove(at: indexPath.row)
+            DBManager.delete(conversation)
             
             tableView.beginUpdates()
             tableView.deleteRows(at: [indexPath], with: .none)
@@ -425,6 +426,7 @@ class ConversationsListViewController: UITableViewController {
           Monkey.sharedInstance().deleteConversation(conversation.conversationId, success: { (data) in
             self.conversationHash.removeValue(forKey: conversation.conversationId)
             self.conversationArray.remove(at: indexPath.row)
+            DBManager.delete(conversation)
             
             tableView.beginUpdates()
             tableView.deleteRows(at: [indexPath], with: .none)
@@ -564,6 +566,19 @@ extension ConversationsListViewController {
     
     return whisperView
   }
+  
+  func showInAppNotification(_ title:String?, avatarUrl:URL, description:String) {
+    if self.isViewLoaded && (self.view.window != nil) {
+      let view = UIImageView()
+      view.sd_setImage(with: avatarUrl)
+      
+      let announcement = Announcement(title: title ?? "Notification", subtitle: description, image: view.image, duration: 2.0, action: {
+        print("finish presenting! \(description)")
+      })
+      
+      Whisper.show(shout: announcement, to: self.navigationController!)
+    }
+  }
 }
 
 //MARK: Communications between view controllers
@@ -590,8 +605,9 @@ extension ConversationsListViewController {
     var conversation = self.conversationHash[conversationId]
     if (conversation == nil){
       conversation = DBManager.getConversation(conversationId)
-      if (conversation != nil){
+      if(conversation != nil){
         self.conversationHash[conversationId] = conversation
+        self.conversationArray.append(conversation!)
       }
     }
     
@@ -604,23 +620,10 @@ extension ConversationsListViewController {
         conversation!.unread += 1
         
         //Show In-app notification
-        if self.isViewLoaded && (self.view.window != nil) {
-          let view = UIImageView()
-          view.sd_setImage(with: conversation?.getAvatarURL())
-          
-          var title = "Notification"
-          if let user = DBManager.getUser(message.sender) {
-            title = (user.info!["name"] ?? "Notification") as! String
-          }
-          
-          let announcement = Announcement(title: title, subtitle: message.plainText, image: view.image, duration: 2.0, action: {
-            print("finish presenting! \(message.plainText)")
-          })
-          
-          Whisper.show(shout: announcement, to: self.navigationController!)
-        }
+        showInAppNotification(conversation?.info["name"] as! String? , avatarUrl: (conversation?.getAvatarURL())!, description: message.plainText)
       }
       
+      DBManager.store(conversation!)
       self.sortConversations()
       self.tableView.reloadData()
     }
@@ -762,7 +765,7 @@ extension ConversationsListViewController {
       let unknownUsers = DBManager.monkeyIdsNotStored(idUsers)
       if !unknownUsers.isEmpty {
         Monkey.sharedInstance().getInfoByIds(unknownUsers, success: { (users) in
-          DBManager.storeUsers(users)
+          DBManager.store(users)
           }, failure: { (task, error) in
             print(error)
         })
@@ -789,7 +792,7 @@ extension ConversationsListViewController {
       Monkey.sharedInstance().getInfo(conversationId, success: { (info) in
         if ((conversationId.range(of: "G:")) == nil) { // user
           user = MOKUser.init(id: info["monkeyId"] as! String, info: NSMutableDictionary(dictionary: info))
-          DBManager.storeUser(user!)
+          DBManager.store(user!)
           conversation.members = [message.sender, message.recipient]
         }else{
           conversation.members = info["members"] as! NSMutableArray
@@ -799,12 +802,11 @@ extension ConversationsListViewController {
           let unknownUsers = DBManager.monkeyIdsNotStored(idUsers)
           if !unknownUsers.isEmpty {
             Monkey.sharedInstance().getInfoByIds(unknownUsers, success: { (users) in
-              DBManager.storeUsers(users)
+              DBManager.store(users)
               }, failure: { (task, error) in
                 print(error)
             })
           }
-          
         }
         
         conversation.info = NSMutableDictionary(dictionary: info)
@@ -820,17 +822,7 @@ extension ConversationsListViewController {
         if !Monkey.sharedInstance().isMessageOutgoing(message) {
           
           //Show In-app notification
-          if self.isViewLoaded && (self.view.window != nil) {
-            let view = UIImageView()
-            view.sd_setImage(with: conversation.getAvatarURL())
-            
-            let title = (info["name"] ?? "Notification") as! String
-            let announcement = Announcement(title: title, subtitle: message.plainText, image: view.image, duration: 2.0, action: {
-              print("finish presenting! \(message.plainText)")
-            })
-            
-            Whisper.show(shout: announcement, to: self.navigationController!)
-          }
+          self.showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
         }
         
         self.sortConversations()
@@ -854,17 +846,7 @@ extension ConversationsListViewController {
       if !Monkey.sharedInstance().isMessageOutgoing(message) {
         
         //Show In-app notification
-        if self.isViewLoaded && (self.view.window != nil) {
-          let view = UIImageView()
-          view.sd_setImage(with: conversation.getAvatarURL())
-          
-          let title = (user?.info!["name"] ?? "Notification") as! String
-          let announcement = Announcement(title: title, subtitle: message.plainText, image: view.image, duration: 2.0, action: {
-            print("finish presenting! \(message.plainText)")
-          })
-          
-          Whisper.show(shout: announcement, to: self.navigationController!)
-        }
+        showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
       }
       
       self.sortConversations()
