@@ -293,4 +293,14 @@ extension DBManager {
     return conversations.reversed()
   }
   
+  class func delete(_ conversation:MOKConversation) {
+    let realm = try! Realm()
+    
+    if let conversationItem = realm.object(ofType: ConversationItem.self, forPrimaryKey: conversation.conversationId){
+      try! realm.write {
+        realm.delete(conversationItem)
+      }
+    }
+  }
+  
 }
