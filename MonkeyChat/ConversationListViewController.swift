@@ -613,22 +613,23 @@ extension ConversationsListViewController {
       }
     }
     
-    if conversation == nil { //create conversation if it doesn't exist
+    guard conversation != nil else { //create conversation if it doesn't exist
       createConversation(conversationId, message: message)
-    }else{
-      conversation!.lastMessage = message
-      
-      if !Monkey.sharedInstance().isMessageOutgoing(message) {
-        conversation!.unread += 1
-        
-        //Show In-app notification
-        showInAppNotification(conversation?.info["name"] as! String? , avatarUrl: (conversation?.getAvatarURL())!, description: message.plainText)
-      }
-      
-      DBManager.store(conversation!)
-      self.sortConversations()
-      self.tableView.reloadData()
+      return
     }
+    
+    conversation?.lastMessage = message
+    if !Monkey.sharedInstance().isMessageOutgoing(message) {
+      conversation!.unread += 1
+      
+      //Show In-app notification
+      showInAppNotification(conversation?.info["name"] as! String? , avatarUrl: (conversation?.getAvatarURL())!, description: message.plainText)
+    }
+    
+    DBManager.store(conversation!)
+    self.sortConversations()
+    self.tableView.reloadData()
+    
   }
   
   func acknowledgeReceived(_ notification:Foundation.Notification){
@@ -789,12 +790,13 @@ extension ConversationsListViewController {
   
   func createConversation(_ conversationId:String ,message:MOKMessage) {
     let conversation = MOKConversation(id: conversationId)
-    var user = DBManager.getUser(conversationId)
-    if (user == nil){
+    
+    guard let user = DBManager.getUser(conversationId) else {
+      //user doesn't exist
       Monkey.sharedInstance().getInfo(conversationId, success: { (info) in
         if ((conversationId.range(of: "G:")) == nil) { // user
-          user = MOKUser.init(id: info["monkeyId"] as! String, info: NSMutableDictionary(dictionary: info))
-          DBManager.store(user!)
+          let newUser = MOKUser.init(id: info["monkeyId"] as! String, info: NSMutableDictionary(dictionary: info))
+          DBManager.store(newUser)
           conversation.members = [message.sender, message.recipient]
         }else{
           conversation.members = info["members"] as! NSMutableArray
@@ -833,27 +835,28 @@ extension ConversationsListViewController {
         }, failure: { (task, error) in
           print(error)
       })
-    }else{
-      conversation.info = (user?.info!)!
-      conversation.members = [message.sender, message.recipient]
-      conversation.lastMessage = message
-      conversation.lastSeen = 0
-      conversation.lastModified = message.timestampCreated
-      conversation.unread = Monkey.sharedInstance().isMessageOutgoing(message) ? 0 : 1
-      
-      self.conversationArray.append(conversation)
-      self.conversationHash[conversationId] = conversation
-      DBManager.store(conversation)
-      
-      if !Monkey.sharedInstance().isMessageOutgoing(message) {
-        
-        //Show In-app notification
-        showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
-      }
-      
-      self.sortConversations()
-      self.tableView.reloadData()
+      return
     }
+    
+    conversation.info = (user.info!)
+    conversation.members = [message.sender, message.recipient]
+    conversation.lastMessage = message
+    conversation.lastSeen = 0
+    conversation.lastModified = message.timestampCreated
+    conversation.unread = Monkey.sharedInstance().isMessageOutgoing(message) ? 0 : 1
+    
+    self.conversationArray.append(conversation)
+    self.conversationHash[conversationId] = conversation
+    DBManager.store(conversation)
+    
+    if !Monkey.sharedInstance().isMessageOutgoing(message) {
+      
+      //Show In-app notification
+      showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
+    }
+    
+    self.sortConversations()
+    self.tableView.reloadData()
   }
  
   func sortConversations() {
