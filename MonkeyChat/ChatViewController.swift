@@ -100,6 +100,9 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingCellIdentifier)
     self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingMediaCellIdentifier)
     
+    // Update conversation counter unread
+    DBManager.store(self.conversation)
+    
     
     /**
      *  You MUST set your senderId and display name

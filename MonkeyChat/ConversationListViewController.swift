@@ -18,6 +18,7 @@ import MonkeyKit
 import SDWebImage
 import Whisper
 import RealmSwift
+import UserNotifications
 
 /**
  *  ViewController that lists your conversations
@@ -33,7 +34,6 @@ class ConversationsListViewController: UITableViewController {
   
   var conversationHash = [String:MOKConversation]()
   var conversationArray = [MOKConversation]()
-  
   var filteredConversationArray = [MOKConversation]()
   
   let searchController = UISearchController(searchResultsController: nil)
@@ -139,7 +139,7 @@ class ConversationsListViewController: UITableViewController {
     NotificationCenter.default.addObserver(self, selector: #selector(self.updateConversationList), name: NSNotification.Name.MonkeyChat.MessageSent, object: nil)
     
     /**
-     *  Load conversations
+     *  Load initial conversations
      */
     self.conversationArray = DBManager.getConversations(nil, count: 10)
     if !self.conversationArray.isEmpty {
@@ -167,6 +167,20 @@ class ConversationsListViewController: UITableViewController {
                                         lastTimestamp: nil,
                                         success: { (session) in
                                           print(session)
+                                          
+                                          // push
+                                          if #available(iOS 10.0, *) {
+                                            //you need to import the UserNotifications framework
+                                            UNUserNotificationCenter.current().requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
+                                              // Enable or disable features based on authorization.
+                                            }
+                                          } else {
+                                            // Fallback on earlier versions
+                                            let settings = UIUserNotificationSettings(types: [UIUserNotificationType.badge, UIUserNotificationType.alert, UIUserNotificationType.sound], categories: nil)
+                                            UIApplication.shared.registerUserNotificationSettings(settings)
+                                          }
+                                          UIApplication.shared.registerForRemoteNotifications()
+                                          
                                           
                                           //
                                           if self.conversationArray.count == 0 {
@@ -207,95 +221,6 @@ class ConversationsListViewController: UITableViewController {
   deinit {
     //for iOS 8
     NotificationCenter.default.removeObserver(self)
-  }
-  
-  func handleTableRefresh(){
-    self.getConversations(0)
-  }
-  
-  func getConversations(_ from:Double) {
-    
-    if self.isGettingConversations && !self.shouldRequestConversations {
-      return
-    }
-    
-    self.isGettingConversations = true
-    let conversations = DBManager.getConversations(self.conversationArray.last, count: 10)
-    
-    if conversations.count > 0 {
-      let delayTime = DispatchTime.now() + Double(Int64(0.5 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-      DispatchQueue.main.asyncAfter(deadline: delayTime) {
-        for conversation in conversations {
-          //do not replace if the conversation already exists
-          if let conv = self.conversationHash[conversation.conversationId] {
-            conv.info = conversation.info
-            conv.members = conversation.members
-          }else{
-            self.conversationHash[conversation.conversationId] = conversation
-            self.conversationArray.append(conversation)
-          }
-        }
-        
-        self.tableView?.reloadData()
-        self.isGettingConversations = false
-      }
-      
-      return
-    }
-    
-    Monkey.sharedInstance().getConversationsSince(from, quantity: 5, success: { (conversations) in
-      
-      var users = Set<String>()
-      for conversation in conversations {
-        
-        //do not replace if the conversation already exists
-        if let conv = self.conversationHash[conversation.conversationId] {
-          conv.info = conversation.info
-          conv.members = conversation.members
-        }else{
-          self.conversationHash[conversation.conversationId] = conversation
-          self.conversationArray.append(conversation)
-        }
-        
-        if let msg = conversation.lastMessage {
-          DBManager.store(msg)
-        }
-        
-        users.formUnion(Set(conversation.members as NSArray as! [String]))
-        DBManager.store(conversation)
-      }
-      
-      let unknownUsers = DBManager.monkeyIdsNotStored(users)
-      
-      if unknownUsers.count > 0 {
-        Monkey.sharedInstance().getInfoByIds(unknownUsers, success: { (users) in
-          DBManager.storeUsers(users)
-          }, failure: { (task, error) in
-            print(error)
-        })
-      }
-      
-      if conversations.count > 0 {
-        self.tableView?.reloadData()
-      }
-      
-      self.isGettingConversations = false
-      
-      self.refreshControl?.endRefreshing()
-      }, failure: { (task, error) in
-        self.isGettingConversations = false
-        self.refreshControl?.endRefreshing()
-        print(error)
-    })
-  }
-  
-  func sortConversations() {
-    self.conversationArray.sort { (conv1, conv2) -> Bool in
-      if let lastMsg1 = conv1.lastMessage, let lastMsg2 = conv2.lastMessage {
-        return lastMsg1.timestampCreated > lastMsg2.timestampCreated
-      }
-      return conv1.lastModified > conv2.lastModified
-    }
   }
   
   //MARK: TableView DataSource
@@ -481,7 +406,9 @@ class ConversationsListViewController: UITableViewController {
         alert.addAction(UIAlertAction(title:"Delete and Exit", style: .destructive, handler: { action in
           
           Monkey.sharedInstance().removeMember(Monkey.sharedInstance().monkeyId()!, group: conversation.conversationId, success: { (data) in
+            self.conversationHash.removeValue(forKey: conversation.conversationId)
             self.conversationArray.remove(at: indexPath.row)
+            DBManager.delete(conversation)
             
             tableView.beginUpdates()
             tableView.deleteRows(at: [indexPath], with: .none)
@@ -499,7 +426,9 @@ class ConversationsListViewController: UITableViewController {
       } else {
         alert.addAction(UIAlertAction(title:"Delete", style: .destructive, handler: { action in
           Monkey.sharedInstance().deleteConversation(conversation.conversationId, success: { (data) in
+            self.conversationHash.removeValue(forKey: conversation.conversationId)
             self.conversationArray.remove(at: indexPath.row)
+            DBManager.delete(conversation)
             
             tableView.beginUpdates()
             tableView.deleteRows(at: [indexPath], with: .none)
@@ -556,14 +485,6 @@ extension ConversationsListViewController: UISearchControllerDelegate {
   
   func willDismissSearchController(_ searchController: UISearchController) {
     self.filteredConversationArray = []
-  }
-}
-
-//MARK: ViewController communications
-extension ConversationsListViewController {
-  func updateConversationList() {
-    self.sortConversations()
-    self.tableView.reloadData()
   }
 }
 
@@ -647,6 +568,27 @@ extension ConversationsListViewController {
     
     return whisperView
   }
+  
+  func showInAppNotification(_ title:String?, avatarUrl:URL, description:String) {
+    if self.isViewLoaded && (self.view.window != nil) {
+      let view = UIImageView()
+      view.sd_setImage(with: avatarUrl)
+      
+      let announcement = Announcement(title: title ?? "Notification", subtitle: description, image: view.image, duration: 2.0, action: {
+        print("finish presenting! \(description)")
+      })
+      
+      Whisper.show(shout: announcement, to: self.navigationController!)
+    }
+  }
+}
+
+//MARK: Communications between view controllers
+extension ConversationsListViewController {
+  func updateConversationList() {
+    self.sortConversations()
+    self.tableView.reloadData()
+  }
 }
 
 //MARK: Monkey socket messages
@@ -657,54 +599,37 @@ extension ConversationsListViewController {
       return
     }
     
+    // save message
     DBManager.store(message)
     
     //check if conversation is already created
     let conversationId = message.conversationId(Monkey.sharedInstance().monkeyId())
     var conversation = self.conversationHash[conversationId]
-    
-    //create conversation if it doesn't exist
-    if conversation == nil {
-      
-      conversation = MOKConversation(id: conversationId)
-      conversation!.info = NSMutableDictionary()
-      conversation!.members = [message.sender, message.recipient]
-      conversation!.lastMessage = message
-      conversation!.lastSeen = 0
-      conversation!.lastModified = message.timestampCreated
-      conversation!.unread = 1
-      
-      self.conversationArray.append(conversation!)
-      self.conversationHash[conversationId] = conversation
+    if (conversation == nil){
+      conversation = DBManager.getConversation(conversationId)
+      if(conversation != nil){
+        self.conversationHash[conversationId] = conversation
+        self.conversationArray.append(conversation!)
+      }
     }
     
-    conversation!.lastMessage = message
+    guard conversation != nil else { //create conversation if it doesn't exist
+      createConversation(conversationId, message: message)
+      return
+    }
     
+    conversation?.lastMessage = message
     if !Monkey.sharedInstance().isMessageOutgoing(message) {
       conversation!.unread += 1
       
       //Show In-app notification
-      if self.isViewLoaded && (self.view.window != nil) {
-        let view = UIImageView()
-        view.sd_setImage(with: conversation?.getAvatarURL())
-        
-        var title = "Notification"
-        
-        if let user = DBManager.getUser(message.sender) {
-          title = (user.info!["name"] ?? "Notification") as! String
-        }
-        
-        let announcement = Announcement(title: title, subtitle: message.plainText, image: view.image, duration: 2.0, action: {
-          print("finish presenting! \(message.plainText)")
-        })
-        
-        Whisper.show(shout: announcement, to: self.navigationController!)
-      }
-      
+      showInAppNotification(conversation?.info["name"] as! String? , avatarUrl: (conversation?.getAvatarURL())!, description: message.plainText)
     }
     
+    DBManager.store(conversation!)
     self.sortConversations()
     self.tableView.reloadData()
+    
   }
   
   func acknowledgeReceived(_ notification:Foundation.Notification){
@@ -784,6 +709,169 @@ extension ConversationsListViewController {
     
     print(message)
   }
+}
+
+//MARK: MonkeyChat
+extension ConversationsListViewController {
+
+  // Conversation
+  func getConversations(_ from:Double) {
+    
+    if self.isGettingConversations && !self.shouldRequestConversations {
+      return
+    }
+    
+    self.isGettingConversations = true
+    let conversations = DBManager.getConversations(self.conversationArray.last, count: 10)
+    
+    // Load from local database
+    if !conversations.isEmpty {
+      let delayTime = DispatchTime.now() + Double(Int64(0.5 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+      DispatchQueue.main.asyncAfter(deadline: delayTime) {
+        for conversation in conversations {
+          //do not replace if the conversation already exists
+          if let conv = self.conversationHash[conversation.conversationId] {
+            conv.info = conversation.info
+            conv.members = conversation.members
+          }else{
+            self.conversationHash[conversation.conversationId] = conversation
+            self.conversationArray.append(conversation)
+          }
+        }
+        self.tableView?.reloadData()
+        self.isGettingConversations = false
+      }
+      return
+    }
+    
+    // Load from monkey store
+    Monkey.sharedInstance().getConversationsSince(from, quantity: 5, success: { (conversations) in
+      var idUsers = Set<String>()
+      for conversation in conversations {
+        //do not replace if the conversation already exists
+        if let conv = self.conversationHash[conversation.conversationId] {
+          conv.info = conversation.info
+          conv.members = conversation.members
+        }else{
+          self.conversationHash[conversation.conversationId] = conversation
+          self.conversationArray.append(conversation)
+        }
+        
+        if let msg = conversation.lastMessage {
+          DBManager.store(msg)
+        }
+        
+        idUsers.formUnion(Set(conversation.members as NSArray as! [String]))
+        DBManager.store(conversation)
+      }
+      
+      let unknownUsers = DBManager.monkeyIdsNotStored(idUsers)
+      if !unknownUsers.isEmpty {
+        Monkey.sharedInstance().getInfoByIds(unknownUsers, success: { (users) in
+          DBManager.store(users)
+          }, failure: { (task, error) in
+            print(error)
+        })
+      }
+      
+      if !conversations.isEmpty {
+        self.tableView?.reloadData()
+      }
+      
+      self.isGettingConversations = false
+      
+      self.refreshControl?.endRefreshing()
+      }, failure: { (task, error) in
+        self.isGettingConversations = false
+        self.refreshControl?.endRefreshing()
+        print(error)
+    })
+  }
+  
+  func createConversation(_ conversationId:String ,message:MOKMessage) {
+    let conversation = MOKConversation(id: conversationId)
+    
+    guard let user = DBManager.getUser(conversationId) else {
+      //user doesn't exist
+      Monkey.sharedInstance().getInfo(conversationId, success: { (info) in
+        if ((conversationId.range(of: "G:")) == nil) { // user
+          let newUser = MOKUser.init(id: info["monkeyId"] as! String, info: NSMutableDictionary(dictionary: info))
+          DBManager.store(newUser)
+          conversation.members = [message.sender, message.recipient]
+        }else{
+          conversation.members = info["members"] as! NSMutableArray
+          
+          var idUsers = Set<String>()
+          idUsers.formUnion(Set(conversation.members as NSArray as! [String]))
+          let unknownUsers = DBManager.monkeyIdsNotStored(idUsers)
+          if !unknownUsers.isEmpty {
+            Monkey.sharedInstance().getInfoByIds(unknownUsers, success: { (users) in
+              DBManager.store(users)
+              }, failure: { (task, error) in
+                print(error)
+            })
+          }
+        }
+        
+        conversation.info = NSMutableDictionary(dictionary: info)
+        conversation.lastMessage = message
+        conversation.lastSeen = 0
+        conversation.lastModified = message.timestampCreated
+        conversation.unread = Monkey.sharedInstance().isMessageOutgoing(message) ? 0 : 1
+        
+        self.conversationArray.append(conversation)
+        self.conversationHash[conversationId] = conversation
+        DBManager.store(conversation)
+        
+        if !Monkey.sharedInstance().isMessageOutgoing(message) {
+          
+          //Show In-app notification
+          self.showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
+        }
+        
+        self.sortConversations()
+        self.tableView.reloadData()
+        
+        }, failure: { (task, error) in
+          print(error)
+      })
+      return
+    }
+    
+    conversation.info = (user.info!)
+    conversation.members = [message.sender, message.recipient]
+    conversation.lastMessage = message
+    conversation.lastSeen = 0
+    conversation.lastModified = message.timestampCreated
+    conversation.unread = Monkey.sharedInstance().isMessageOutgoing(message) ? 0 : 1
+    
+    self.conversationArray.append(conversation)
+    self.conversationHash[conversationId] = conversation
+    DBManager.store(conversation)
+    
+    if !Monkey.sharedInstance().isMessageOutgoing(message) {
+      
+      //Show In-app notification
+      showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
+    }
+    
+    self.sortConversations()
+    self.tableView.reloadData()
+  }
+ 
+  func sortConversations() {
+    self.conversationArray.sort { (conv1, conv2) -> Bool in
+      if let lastMsg1 = conv1.lastMessage, let lastMsg2 = conv2.lastMessage {
+        return lastMsg1.timestampCreated > lastMsg2.timestampCreated
+      }
+      return conv1.lastModified > conv2.lastModified
+    }
+  }
+  
+  func handleTableRefresh(){
+    self.getConversations(0)
+  }
+  
 }
 
 class ChatViewCell: UITableViewCell {
