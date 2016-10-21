@@ -64,7 +64,12 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   let timerLabel = UILabel()
   var timerRecording:Timer!
   
-  // VIEW - navigation bar
+  // VIEW - navigation bar - title
+  var descriptionView = UIView()
+  var nameLabel = UILabel()
+  var statusLabel = UILabel()
+  
+  // VIEW - navigation bar - right button
   var negativeSpacerBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.fixedSpace, target: self, action: nil)
   var avatarBarButtonItem = UIBarButtonItem()
   var avatarButton = UIButton(type: UIButtonType.custom)
@@ -80,7 +85,23 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.timerLabel.frame = CGRect(x: 30, y: 0, width: self.inputToolbar.contentView.frame.size.width, height: self.inputToolbar.contentView.frame.size.height)
     self.inputToolbar.contentView.bringSubview(toFront: self.timerLabel)
     
-    // VIEW - navigation bar
+    // VIEW - navigation bar - title
+    self.descriptionView.frame = CGRect(x: 0, y: 0, width: self.view.frame.size.width/1.8, height: 44)
+    self.nameLabel.frame = CGRect(x: 0, y: self.descriptionView.frame.size.height - self.descriptionView.frame.size.height/2 - self.descriptionView.frame.size.height/2.5, width: self.descriptionView.frame.size.width, height: self.descriptionView.frame.size.height/2)
+    self.nameLabel.textColor = UIColor.black
+    self.nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
+    self.nameLabel.textAlignment = NSTextAlignment.center
+    self.nameLabel.text = self.conversation.info["name"] as? String
+    self.statusLabel.frame = CGRect(x: 0, y: self.descriptionView.frame.size.height - self.descriptionView.frame.size.height/2.4 - 2, width: self.descriptionView.frame.size.width, height: self.descriptionView.frame.size.height/2.4)
+    self.statusLabel.textColor = UIColor.gray
+    self.statusLabel.font = UIFont.systemFont(ofSize: 11)
+    self.statusLabel.textAlignment = NSTextAlignment.center
+    self.statusLabel.text = "status"
+    self.descriptionView.addSubview(self.nameLabel)
+    self.descriptionView.addSubview(self.statusLabel)
+    self.navigationItem.titleView = self.descriptionView
+    
+    // VIEW - navigation bar - right button
     self.negativeSpacerBarButtonItem.width = -12
     self.avatarButton.bounds = CGRect(x:0, y:0, width:36, height:36)
     self.avatarImageView.sd_setImage(with: self.conversation.getAvatarURL(), placeholderImage: UIImage(named: "Profile_imgDefault.png"))
@@ -102,8 +123,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     //Start by opening the conversation in Monkey
     Monkey.sharedInstance().openConversation(self.conversation.conversationId)
-    
-    self.title = self.conversation.info.object(forKey: "name") as? String
     
     //set your cell identifiers
     self.outgoingCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.cellReuseIdentifier()
