@@ -9,6 +9,7 @@
 import UIKit
 import MonkeyKitUI
 import MonkeyKit
+import SDWebImage
 import Whisper
 import RealmSwift
 import QuickLook
@@ -63,6 +64,12 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   let timerLabel = UILabel()
   var timerRecording:Timer!
   
+  // VIEW - navigation bar
+  var negativeSpacerBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.fixedSpace, target: self, action: nil)
+  var avatarBarButtonItem = UIBarButtonItem()
+  var avatarButton = UIButton(type: UIButtonType.custom)
+  var avatarImageView = UIImageView()
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -72,6 +79,17 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.inputToolbar.contentView.addSubview(self.timerLabel)
     self.timerLabel.frame = CGRect(x: 30, y: 0, width: self.inputToolbar.contentView.frame.size.width, height: self.inputToolbar.contentView.frame.size.height)
     self.inputToolbar.contentView.bringSubview(toFront: self.timerLabel)
+    
+    // VIEW - navigation bar
+    self.negativeSpacerBarButtonItem.width = -12
+    self.avatarButton.bounds = CGRect(x:0, y:0, width:36, height:36)
+    self.avatarImageView.sd_setImage(with: self.conversation.getAvatarURL(), placeholderImage: UIImage(named: "Profile_imgDefault.png"))
+    self.avatarButton.setImage(self.avatarImageView.image, for: UIControlState.normal)
+    self.avatarButton.layer.cornerRadius = 18
+    self.avatarButton.layer.masksToBounds = true
+    self.avatarBarButtonItem.customView = self.avatarButton
+    let rightBarButtonItems: [UIBarButtonItem] = [self.negativeSpacerBarButtonItem, self.avatarBarButtonItem]
+    self.navigationItem.rightBarButtonItems = rightBarButtonItems
     
     /**
      *	Register monkey listeners
