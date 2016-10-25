@@ -126,7 +126,6 @@ class DBManager {
   }
 }
 
-
 extension DBManager {
   
   class func store(_ user:MOKUser){
