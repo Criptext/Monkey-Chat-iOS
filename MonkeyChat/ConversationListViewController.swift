@@ -52,6 +52,7 @@ class ConversationsListViewController: UITableViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    
     /**
      *  Hides empty cells
      */
@@ -92,13 +93,12 @@ class ConversationsListViewController: UITableViewController {
     self.refreshControl?.backgroundColor = UIColor(red:0.93, green:0.93, blue:0.93, alpha:1.0)
     self.refreshControl?.addTarget(self, action: #selector(ConversationsListViewController.handleTableRefresh), for: .valueChanged)
     
+    // screen info whr conversation list is empty
     let messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
-    
     messageLabel.text = "No conversations are currently available. Please pull down to refresh."
     messageLabel.numberOfLines = 0
     messageLabel.textAlignment = .center
     messageLabel.sizeToFit()
-    
     self.tableView.backgroundView = messageLabel
     
     /**
@@ -181,12 +181,11 @@ class ConversationsListViewController: UITableViewController {
                                           }
                                           UIApplication.shared.registerForRemoteNotifications()
                                           
-                                          
+                                      
                                           //
                                           if self.conversationArray.count == 0 {
                                             self.getConversations(0)
                                           }
-                                          
       },
                                         failure: {(task, error) in
                                           print(error.localizedDescription)
@@ -343,7 +342,8 @@ class ConversationsListViewController: UITableViewController {
     }
     
     for user in DBManager.getUsers(conversation.members as NSArray as! [String]) {
-      vc.members[user.monkeyId] = user
+      vc.memberHash[user.monkeyId] = user
+      vc.nameMembers.append(user.info?["name"] as? String ?? "Unknown")
     }
     
     //set all messages to read

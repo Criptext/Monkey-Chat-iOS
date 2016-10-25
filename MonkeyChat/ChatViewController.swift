@@ -29,7 +29,13 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   
   let maxSize = 8500
   
+  // DATA - conversation
   var conversation: MOKConversation!
+  var memberHash = [String:MOKUser]() // monkeyId: MOKUser
+  var nameMembers = [String]()
+  var nameMembersDescription: String?
+  
+  // DATA - conversation - messages
   var messageHash = [String:MOKMessage]()
   var messageArray = [MOKMessage]()
   
@@ -42,8 +48,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   
   //identifier for header of collection view
   var headerViewIdentifier = JSQMessagesActivityIndicatorHeaderView.headerReuseIdentifier()
-  
-  var members = [String:MOKUser]()
   
   var outgoingBubbleImageData: JSQMessagesBubbleImage!
   var incomingBubbleImageData: JSQMessagesBubbleImage!
@@ -78,6 +82,11 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    // DATA - conversation
+    if self.conversation.isGroup() {
+      self.nameMembersDescription = (self.nameMembers as NSArray).componentsJoined(by: ", ")
+    }
+    
     //
     self.timerLabel.text = "00:00"
     self.timerLabel.isHidden = true
@@ -96,7 +105,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.statusLabel.textColor = UIColor.gray
     self.statusLabel.font = UIFont.systemFont(ofSize: 11)
     self.statusLabel.textAlignment = NSTextAlignment.center
-    self.statusLabel.text = ""
+    self.statusLabel.text = self.nameMembersDescription ?? ""
     self.descriptionView.addSubview(self.nameLabel)
     self.descriptionView.addSubview(self.statusLabel)
     self.navigationItem.titleView = self.descriptionView
@@ -571,7 +580,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     }
     
     if self.conversation.isGroup() {
-      let user = self.members[currentMessage.sender]
+      let user = self.memberHash[currentMessage.sender]
       return NSAttributedString(string: (user?.info!["name"] ?? "Unknown") as! String)
     }
     
@@ -881,18 +890,21 @@ extension ChatViewController {
       return
     }
     
-    if self.conversation.isGroup() {
-      self.statusLabel.text = "Group"
-    }else{
-      self.conversation.lastSeen = response["lastSeen"] as? TimeInterval ?? self.conversation.lastSeen
-      
-      let online = response["online"] as! String
-      if online == "1" {
-        self.statusLabel.text = "Online"
-      }else {
-        DBManager.store(self.conversation)
-        self.statusLabel.text = "Last Seen " + self.conversation.getLastSeenDate()
+    if !self.conversation.isGroup() {
+      guard let lastSeen = response["lastSeen"] as? String else {
+        
+        let online = response["online"] as! String
+        if online == "1" {
+          self.statusLabel.text = "Online"
+        }
+        return
       }
+      print(lastSeen)
+      self.conversation.lastSeen = (lastSeen as NSString).doubleValue as TimeInterval
+      print(self.conversation.lastSeen)
+      DBManager.store(self.conversation)
+      self.statusLabel.text = "Last Seen " + self.conversation.getLastSeenDate()
+      
     }
   }
 }
