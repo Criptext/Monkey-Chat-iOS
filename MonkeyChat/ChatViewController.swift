@@ -442,13 +442,13 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     if !message.isMediaMessage() {
       
       if isOutgoing {
-        cell.textView.textColor = .white
+        cell.textView.textColor = UIColor.white
+        cell.textView.linkTextAttributes = [NSForegroundColorAttributeName : UIColor.white, NSUnderlineStyleAttributeName : NSUnderlineStyle.styleSingle.rawValue]
+
       } else {
-        cell.textView.textColor = .black
+        cell.textView.textColor = UIColor.black
+        cell.textView.linkTextAttributes = [NSForegroundColorAttributeName : UIColor.black, NSUnderlineStyleAttributeName : NSUnderlineStyle.styleSingle.rawValue]
       }
-      
-      let attributes : [String:Any] = [NSForegroundColorAttributeName:cell.textView.textColor!, NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle]
-      cell.textView.linkTextAttributes = attributes
       
       return cell
     }
@@ -899,9 +899,8 @@ extension ChatViewController {
         }
         return
       }
-      print(lastSeen)
+
       self.conversation.lastSeen = (lastSeen as NSString).doubleValue as TimeInterval
-      print(self.conversation.lastSeen)
       DBManager.store(self.conversation)
       self.statusLabel.text = "Last Seen " + self.conversation.getLastSeenDate()
       
