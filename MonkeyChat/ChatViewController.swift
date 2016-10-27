@@ -39,6 +39,9 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var messageHash = [String:MOKMessage]()
   var messageArray = [MOKMessage]()
   
+  // DATA - converastion - messages - message
+  var currentTimestamp: TimeInterval = 0.0
+  
   //messageId : AFHTTPRequestOperation
   var downloadOperations = [String:AnyObject]()
   
@@ -82,17 +85,24 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    // DATA - user session
+    self.senderId = Monkey.sharedInstance().session["monkeyId"] as! String
+    self.senderDisplayName = ((Monkey.sharedInstance().session["user"] as! [String:AnyObject])["name"] as? String) ?? "Unknown"
+    
     // DATA - conversation
     if self.conversation.isGroup() {
       self.nameMembersDescription = (self.nameMembers as NSArray).componentsJoined(by: ", ")
     }
     
-    //
-    self.timerLabel.text = "00:00"
-    self.timerLabel.isHidden = true
-    self.inputToolbar.contentView.addSubview(self.timerLabel)
-    self.timerLabel.frame = CGRect(x: 30, y: 0, width: self.inputToolbar.contentView.frame.size.width, height: self.inputToolbar.contentView.frame.size.height)
-    self.inputToolbar.contentView.bringSubview(toFront: self.timerLabel)
+    // DATA - conversation - messages
+    if let lastMessage = self.conversation.lastMessage  { // load messages
+      self.messageArray = DBManager.getMessages(self.senderId, recipient: self.conversation.conversationId, from: lastMessage, count: 10)
+      if self.messageArray.index(of: lastMessage) == nil { // include last message
+        self.messageArray.append(lastMessage)
+      }
+    }else{
+      self.shouldRequestMessages = false
+    }
     
     // VIEW - navigation bar - title
     self.descriptionView.frame = CGRect(x: 0, y: 0, width: self.view.frame.size.width/1.8, height: 44)
@@ -121,6 +131,30 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     let rightBarButtonItems: [UIBarButtonItem] = [self.negativeSpacerBarButtonItem, self.avatarBarButtonItem]
     self.navigationItem.rightBarButtonItems = rightBarButtonItems
     
+    // VIEW - bubble
+    // set your cell identifiers
+    self.outgoingCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.cellReuseIdentifier()
+    self.outgoingMediaCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.mediaCellReuseIdentifier()
+    
+    self.collectionView.register(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingCellIdentifier)
+    self.collectionView.register(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingMediaCellIdentifier)
+    
+    self.incomingCellIdentifier = JSQMessagesCollectionViewCellIncoming2.cellReuseIdentifier()
+    self.incomingMediaCellIdentifier = JSQMessagesCollectionViewCellIncoming2.mediaCellReuseIdentifier()
+    
+    self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingCellIdentifier)
+    self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingMediaCellIdentifier)
+    
+    
+    
+    
+    //
+    self.timerLabel.text = "00:00"
+    self.timerLabel.isHidden = true
+    self.inputToolbar.contentView.addSubview(self.timerLabel)
+    self.timerLabel.frame = CGRect(x: 30, y: 0, width: self.inputToolbar.contentView.frame.size.width, height: self.inputToolbar.contentView.frame.size.height)
+    self.inputToolbar.contentView.bringSubview(toFront: self.timerLabel)
+    
     /**
      *	Register monkey listeners
      */
@@ -136,28 +170,9 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     //Start by opening the conversation in Monkey
     Monkey.sharedInstance().openConversation(self.conversation.conversationId)
     
-    //set your cell identifiers
-    self.outgoingCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.cellReuseIdentifier()
-    self.outgoingMediaCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.mediaCellReuseIdentifier()
-    
-    self.collectionView.register(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingCellIdentifier)
-    self.collectionView.register(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingMediaCellIdentifier)
-    
-    self.incomingCellIdentifier = JSQMessagesCollectionViewCellIncoming2.cellReuseIdentifier()
-    self.incomingMediaCellIdentifier = JSQMessagesCollectionViewCellIncoming2.mediaCellReuseIdentifier()
-    
-    self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingCellIdentifier)
-    self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingMediaCellIdentifier)
-    
     // Update conversation counter unread
     DBManager.store(self.conversation)
     
-    
-    /**
-     *  You MUST set your senderId and display name
-     */
-    self.senderId = Monkey.sharedInstance().session["monkeyId"] as! String
-    self.senderDisplayName = ((Monkey.sharedInstance().session["user"] as! [String:AnyObject])["name"] as? String) ?? "Unknown"
     
     self.inputToolbar.contentView.textView.pasteDelegate = self
     
@@ -213,19 +228,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.outgoingBubbleImageData = bubbleFactory?.outgoingMessagesBubbleImage(with: .jsq_messageBubbleBlue())
     self.incomingBubbleImageData = bubbleFactory?.incomingMessagesBubbleImage(with: .jsq_messageBubbleLightGray())
     
-    /**
-     *	Load messages for this conversation
-     */
-    
-    guard let lastMessage = self.conversation.lastMessage else {
-      return
-    }
-    
-    self.messageArray = DBManager.getMessages(self.senderId, recipient: self.conversation.conversationId, from: lastMessage, count: 10)
-    
-    if self.messageArray.index(of: lastMessage) == nil {
-      self.messageArray.append(lastMessage)
-    }
     
     self.collectionView.reloadData()
   }
@@ -531,7 +533,11 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     let previousMessage = self.messageArray[indexPath.item - 1]
     
+    
     if (currentMessage.timestampCreated - previousMessage.timestampCreated) > 7200 {
+      print(currentMessage.timestampCreated)
+      print(previousMessage.timestampCreated)
+      print(currentMessage.timestampCreated - previousMessage.timestampCreated)
       return JSQMessagesTimestampFormatter.shared().attributedTimestamp(for: currentMessage.date())
     }
     
@@ -932,9 +938,7 @@ extension ChatViewController {
         }
         
         self.messageArray = messages + self.messageArray
-        
         let oldOffset = self.collectionView.contentOffset
-        
         self.collectionView.reloadData()
         
         if animated {
@@ -1007,13 +1011,9 @@ extension ChatViewController {
     self.messageArray.append(message)
     self.messageHash[message.messageId] = message
     self.conversation.lastMessage = message
-    
     JSQSystemSoundPlayer.jsq_playMessageSentSound()
-    
     self.finishSendingMessage(animated: true)
-    
     let remainingText = wordArray.joined(separator: " ")
     self.send(remainingText, size: size)
-    
   }
 }
