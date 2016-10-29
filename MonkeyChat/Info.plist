@@ -31,6 +31,14 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Snap &amp; share photos with any chat</string>
+    <key>NSContactsUsageDescription</key>
+    <string>To make it easier to connect with people you know and improve suggestions</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Enable microphone access so you can record audio</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Add photos to any chat</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
