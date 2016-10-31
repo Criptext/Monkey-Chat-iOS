@@ -73,7 +73,8 @@ class DBManager {
   class func getMessages(_ sender:String, recipient:String, from:MOKMessage?, count:Int) -> [MOKMessage]{
     let realm = try! Realm()
     
-    let predicate = NSPredicate(format: "((sender == %@ AND recipient == %@) OR (sender == %@ AND recipient == %@)) AND timestampCreated < %f", sender, recipient, recipient, sender, from?.timestampCreated ?? 0)
+    let condition = "((sender == %@ AND recipient == %@) OR" + (recipient.contains("G:") ? "(sender != %@ AND recipient == %@))" : "(recipient == %@ AND sender == %@))")
+    let predicate = NSPredicate(format: "\(condition) AND timestampCreated < %f", sender, recipient, sender, recipient, from?.timestampCreated ?? 0)
     let results = realm.objects(MessageItem.self).filter(predicate).sorted(byProperty: "timestampCreated", ascending: false)
     
     var messages = [MOKMessage]()
