@@ -39,9 +39,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var messageHash = [String:MOKMessage]()
   var messageArray = [MOKMessage]()
   
-  // DATA - converastion - messages - message
-  var currentTimestamp: TimeInterval = 0.0
-  
   //messageId : AFHTTPRequestOperation
   var downloadOperations = [String:AnyObject]()
   
@@ -508,13 +505,14 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
       return kJSQMessagesCollectionViewCellLabelHeightDefault
     }
     
-    let currentMessage = self.messageArray[indexPath.item]
-    let previousMessage = self.messageArray[indexPath.item - 1]
+    let currentDateMessage = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: self.messageArray[indexPath.item].timestampCreated))
+    let previousDateMessage = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: self.messageArray[indexPath.item - 1].timestampCreated))
     
-    if (currentMessage.timestampCreated - previousMessage.timestampCreated) > 7200 {
+    let qtyDay = Calendar.current.dateComponents([.day], from:previousDateMessage , to:currentDateMessage ).day!
+    if( qtyDay >= 1){
       return kJSQMessagesCollectionViewCellLabelHeightDefault
     }
-    
+
     return 0.0
   }
   
@@ -531,13 +529,11 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
       return JSQMessagesTimestampFormatter.shared().attributedTimestamp(for: currentMessage.date())
     }
     
-    let previousMessage = self.messageArray[indexPath.item - 1]
+    let currentDateMessage = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: self.messageArray[indexPath.item].timestampCreated))
+    let previousDateMessage = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: self.messageArray[indexPath.item - 1].timestampCreated))
     
-    
-    if (currentMessage.timestampCreated - previousMessage.timestampCreated) > 7200 {
-      print(currentMessage.timestampCreated)
-      print(previousMessage.timestampCreated)
-      print(currentMessage.timestampCreated - previousMessage.timestampCreated)
+    let qtyDay = Calendar.current.dateComponents([.day], from: previousDateMessage, to: currentDateMessage).day!
+    if( qtyDay >= 1){
       return JSQMessagesTimestampFormatter.shared().attributedTimestamp(for: currentMessage.date())
     }
     
