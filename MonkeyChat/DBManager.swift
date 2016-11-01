@@ -14,20 +14,20 @@ class DBManager {
   
   class func store(_ message:MOKMessage) {
     
-    if let messageItem = DBManager.transform(message) {
-      let realm = try! Realm()
-      
-      try! realm.write {
-        realm.add(messageItem, update: true)
-      }
+    if(message.messageId == ""){
+      return
     }
+    
+    let messageItem = DBManager.transform(message)
+    let realm = try! Realm()
+    
+    try! realm.write {
+      realm.add(messageItem, update: true)
+    }
+    
   }
     
-  class func transform(_ message:MOKMessage) -> MessageItem? {
-    
-    if(message.messageId == ""){
-      return nil
-    }
+  class func transform(_ message:MOKMessage) -> MessageItem {
     
     let messageItem = MessageItem()
     messageItem.messageId = message.messageId
