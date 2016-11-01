@@ -87,8 +87,12 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.senderDisplayName = ((Monkey.sharedInstance().session["user"] as! [String:AnyObject])["name"] as? String) ?? "Unknown"
     
     // DATA - conversation
+    for user in DBManager.getUsers(self.conversation.members as NSArray as! [String]) {
+      self.memberHash[user.monkeyId] = user
+      self.nameMembers.append(user.info?["name"] as? String ?? "Unknown")
+    }
     if self.conversation.isGroup() {
-      self.nameMembersDescription = (self.nameMembers as NSArray).componentsJoined(by: ", ")
+      self.nameMembersDescription = self.nameMembers.joined(separator: ", ")
     }
     
     // DATA - conversation - messages

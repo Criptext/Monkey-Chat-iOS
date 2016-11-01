@@ -345,11 +345,6 @@ class ConversationsListViewController: UITableViewController {
       conversation = self.conversationArray[indexPath.row]
     }
     
-    for user in DBManager.getUsers(conversation.members as NSArray as! [String]) {
-      vc.memberHash[user.monkeyId] = user
-      vc.nameMembers.append(user.info?["name"] as? String ?? "Unknown")
-    }
-    
     //set all messages to read
     conversation.unread = 0
     
