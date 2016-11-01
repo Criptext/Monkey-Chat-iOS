@@ -58,6 +58,10 @@ class ConversationsListViewController: UITableViewController {
      */
     self.tableView.tableFooterView = UIView()
     
+    // VIEW - navigation bar
+    self.navigationItem.title = "Chat"
+    self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: UIBarButtonItemStyle.plain, target: nil, action: nil)
+    
     //customize In-app
     ColorList.Shout.background = UIColor.black
     ColorList.Shout.title = UIColor.white
@@ -861,10 +865,11 @@ extension ConversationsListViewController {
  
   func sortConversations() {
     self.conversationArray.sort { (conv1, conv2) -> Bool in
-      if let lastMsg1 = conv1.lastMessage, let lastMsg2 = conv2.lastMessage {
-        return lastMsg1.timestampCreated > lastMsg2.timestampCreated
-      }
-      return conv1.lastModified > conv2.lastModified
+      
+      let time1 = conv1.lastMessage?.timestampCreated ?? conv1.lastModified
+      let time2 = conv2.lastMessage?.timestampCreated ?? conv2.lastModified
+
+      return time1 > time2
     }
   }
   
