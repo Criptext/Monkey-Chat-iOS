@@ -13,15 +13,22 @@ import RealmSwift
 class DBManager {
   
   class func store(_ message:MOKMessage) {
-      let messageItem = DBManager.transform(message)
-      let realm = try! Realm()
-      
-      try! realm.write {
-          realm.add(messageItem, update: true)
-      }
+    
+    if(message.messageId == ""){
+      return
+    }
+    
+    let messageItem = DBManager.transform(message)
+    let realm = try! Realm()
+    
+    try! realm.write {
+      realm.add(messageItem, update: true)
+    }
+    
   }
     
   class func transform(_ message:MOKMessage) -> MessageItem {
+    
     let messageItem = MessageItem()
     messageItem.messageId = message.messageId
     messageItem.oldMessageId = message.oldMessageId!
@@ -40,6 +47,7 @@ class DBManager {
   }
     
   class func transform(_ messageItem:MessageItem) -> MOKMessage {
+    
     var props = [AnyHashable: Any]()
     var params = [AnyHashable: Any]()
   
@@ -125,7 +133,6 @@ class DBManager {
     }
   }
 }
-
 
 extension DBManager {
   
@@ -244,7 +251,7 @@ extension DBManager {
     if let bytesInfo = conversationItem.info {
       info = try! JSONSerialization.jsonObject(with: bytesInfo, options: .mutableContainers) as! NSMutableDictionary
     }
-    
+
     let conversation = MOKConversation(id: conversationItem.conversationId)
     conversation.members = NSMutableArray(array: conversationItem.members.components(separatedBy: ","))
     conversation.lastSeen = conversationItem.lastSeen

@@ -52,10 +52,15 @@ class ConversationsListViewController: UITableViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    
     /**
      *  Hides empty cells
      */
     self.tableView.tableFooterView = UIView()
+    
+    // VIEW - navigation bar
+    self.navigationItem.title = "Chat"
+    self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: UIBarButtonItemStyle.plain, target: nil, action: nil)
     
     //customize In-app
     ColorList.Shout.background = UIColor.black
@@ -92,13 +97,12 @@ class ConversationsListViewController: UITableViewController {
     self.refreshControl?.backgroundColor = UIColor(red:0.93, green:0.93, blue:0.93, alpha:1.0)
     self.refreshControl?.addTarget(self, action: #selector(ConversationsListViewController.handleTableRefresh), for: .valueChanged)
     
+    // screen info whr conversation list is empty
     let messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
-    
     messageLabel.text = "No conversations are currently available. Please pull down to refresh."
     messageLabel.numberOfLines = 0
     messageLabel.textAlignment = .center
     messageLabel.sizeToFit()
-    
     self.tableView.backgroundView = messageLabel
     
     /**
@@ -181,12 +185,11 @@ class ConversationsListViewController: UITableViewController {
                                           }
                                           UIApplication.shared.registerForRemoteNotifications()
                                           
-                                          
+                                      
                                           //
                                           if self.conversationArray.count == 0 {
                                             self.getConversations(0)
                                           }
-                                          
       },
                                         failure: {(task, error) in
                                           print(error.localizedDescription)
@@ -340,10 +343,6 @@ class ConversationsListViewController: UITableViewController {
       conversation = self.filteredConversationArray[indexPath.row]
     }else{
       conversation = self.conversationArray[indexPath.row]
-    }
-    
-    for user in DBManager.getUsers(conversation.members as NSArray as! [String]) {
-      vc.members[user.monkeyId] = user
     }
     
     //set all messages to read
@@ -861,10 +860,11 @@ extension ConversationsListViewController {
  
   func sortConversations() {
     self.conversationArray.sort { (conv1, conv2) -> Bool in
-      if let lastMsg1 = conv1.lastMessage, let lastMsg2 = conv2.lastMessage {
-        return lastMsg1.timestampCreated > lastMsg2.timestampCreated
-      }
-      return conv1.lastModified > conv2.lastModified
+      
+      let time1 = conv1.lastMessage?.timestampCreated ?? conv1.lastModified
+      let time2 = conv2.lastMessage?.timestampCreated ?? conv2.lastModified
+
+      return time1 > time2
     }
   }
   
