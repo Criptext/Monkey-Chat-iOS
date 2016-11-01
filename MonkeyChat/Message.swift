@@ -130,5 +130,25 @@ extension MOKMessage: JSQMessageData {
         
         self.cachedMedia = media
     }
+  
+  public func preview() -> String {
+    var result = ""
     
+    if !self.isMediaMessage() {
+      result = self.plainText
+    }else{
+      switch self.mediaType() {
+      case MOKAudio.rawValue:
+        result = "Audio"
+        break
+      case MOKPhoto.rawValue:
+        result = "Image"
+        break
+      default:
+        result = "Media"
+        break
+      }
+    }
+    return result
+  }
 }
