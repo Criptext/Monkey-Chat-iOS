@@ -295,22 +295,8 @@ class ConversationsListViewController: UITableViewController {
     cell.dateLabel.text = lastMessage.relativeDate()
     
     var previewText:String!
+    previewText = lastMessage.preview()
     
-    if lastMessage.isMediaMessage() {
-      switch lastMessage.mediaType() {
-      case MOKAudio.rawValue:
-        previewText = "Audio"
-        break
-      case MOKPhoto.rawValue:
-        previewText = "Image"
-        break
-      default:
-        previewText = "Media"
-        break
-      }
-    }else{
-      previewText = lastMessage.plainText
-    }
     
     //message is outgoing
     if Monkey.sharedInstance().isMessageOutgoing(lastMessage) {
@@ -622,7 +608,7 @@ extension ConversationsListViewController {
       conversation!.unread += 1
       
       //Show In-app notification
-      showInAppNotification(conversation?.info["name"] as! String? , avatarUrl: (conversation?.getAvatarURL())!, description: message.plainText)
+      showInAppNotification(conversation?.info["name"] as! String? , avatarUrl: (conversation?.getAvatarURL())!, description: message.preview())
     }
     
     DBManager.store(conversation!)
@@ -825,7 +811,7 @@ extension ConversationsListViewController {
         if !Monkey.sharedInstance().isMessageOutgoing(message) {
           
           //Show In-app notification
-          self.showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
+          self.showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.preview())
         }
         
         self.sortConversations()
@@ -851,7 +837,7 @@ extension ConversationsListViewController {
     if !Monkey.sharedInstance().isMessageOutgoing(message) {
       
       //Show In-app notification
-      showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.plainText)
+      showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.preview())
     }
     
     self.sortConversations()
