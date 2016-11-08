@@ -2,7 +2,7 @@ platform :ios, '8.0'
 use_frameworks!
 
 target 'MonkeyChat' do
-  pod 'MonkeyKitUI', '~> 7.4.0'
+  pod 'MonkeyKitUI', :git => 'https://github.com/Criptext/Monkey-UI-iOS.git', :branch => '7.4.1'
   pod 'RealmSwift', '~> 1.1.0'
   pod 'SDWebImage', '~> 3.8.1'
   pod 'Whisper', :git => 'https://github.com/hyperoslo/Whisper.git', :branch => 'swift-3'

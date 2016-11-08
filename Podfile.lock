@@ -33,7 +33,7 @@ PODS:
 
 DEPENDENCIES:
   - MonkeyKit (from `https://github.com/Criptext/Monkey-SDK-iOS.git`, branch `1.0.8`)
-  - MonkeyKitUI (~> 7.4.0)
+  - MonkeyKitUI (from `https://github.com/Criptext/Monkey-UI-iOS.git`, branch `7.4.1`)
   - RealmSwift (~> 1.1.0)
   - SDWebImage (~> 3.8.1)
   - Whisper (from `https://github.com/hyperoslo/Whisper.git`, branch `swift-3`)
@@ -42,6 +42,9 @@ EXTERNAL SOURCES:
   MonkeyKit:
     :branch: 1.0.8
     :git: https://github.com/Criptext/Monkey-SDK-iOS.git
+  MonkeyKitUI:
+    :branch: 7.4.1
+    :git: https://github.com/Criptext/Monkey-UI-iOS.git
   Whisper:
     :branch: swift-3
     :git: https://github.com/hyperoslo/Whisper.git
@@ -50,6 +53,9 @@ CHECKOUT OPTIONS:
   MonkeyKit:
     :commit: 97341dc9d3afa25e4cdd23b7d5e0c86c6d72dc3e
     :git: https://github.com/Criptext/Monkey-SDK-iOS.git
+  MonkeyKitUI:
+    :commit: 3967cd8cc410281eef1c6ae3512a7d4ca0b8005f
+    :git: https://github.com/Criptext/Monkey-UI-iOS.git
   Whisper:
     :commit: f1c976b2eb896971532f5b1da62f58843de2bc3f
     :git: https://github.com/hyperoslo/Whisper.git
@@ -65,6 +71,6 @@ SPEC CHECKSUMS:
   UICKeyChainStore: f1cbd42216a113f0165de1e733e62905b8823432
   Whisper: 74decae53daf8caff5acf8628e24b92d3f05a453
 
-PODFILE CHECKSUM: 78b26cc9c39a1ce55a90a73987142a572f4d2520
+PODFILE CHECKSUM: e82c818ccd5aadd89913d7b553f21ec20ee3ff59
 
 COCOAPODS: 1.1.0.rc.3
