@@ -1021,62 +1021,38 @@ extension ChatViewController {
   
   func createPush(_ messageType:MOKMessageType, fileType:MOKFileType?) -> [String: Any] {
     var locArgs: [String]
-    var locKey = ""
+    var locKey = "push"
     
     if(self.conversation.isGroup()){
       locArgs = [self.senderDisplayName, self.conversation.info["name"] as! String]
-      
-      switch messageType {
-      case Text:
-        locKey = "grouppushtextKey"
-        break
-      case File:
-        switch fileType {
-        case Audio?:
-          locKey = "grouppushaudioKey"
-          break
-        case Image?:
-          locKey = "grouppushimageKey"
-          break
-        case Archive?:
-          locKey = "grouppushfileKey"
-          break
-        default:
-          locKey = "grouppushtextKey"
-          break
-        }
-        break
-      default:
-        locKey = "grouppushtextKey"
-        break
-      }
+      locKey = "group" + locKey
     }else{
       locArgs = [self.senderDisplayName]
-      
-      switch messageType {
-      case Text:
-        locKey = "pushtextKey"
+    }
+    
+    switch messageType {
+    case Text:
+      locKey = locKey + "textKey"
+      break
+    case File:
+      switch fileType {
+      case Audio?:
+        locKey = locKey + "audioKey"
         break
-      case File:
-        switch fileType {
-        case Audio?:
-          locKey = "pushaudioKey"
-          break
-        case Image?:
-          locKey = "pushimageKey"
-          break
-        case Archive?:
-          locKey = "pushfileKey"
-          break
-        default:
-          locKey = "pushtextKey"
-          break
-        }
+      case Image?:
+        locKey = locKey + "imageKey"
+        break
+      case Archive?:
+        locKey = locKey + "fileKey"
         break
       default:
-        locKey = "pushtextKey"
+        locKey = locKey + "textKey"
         break
       }
+      break
+    default:
+      locKey = locKey + "textKey"
+      break
     }
     
     let push = ["iosData":["alert":["loc-key":locKey,
