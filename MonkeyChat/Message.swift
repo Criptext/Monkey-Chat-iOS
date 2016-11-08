@@ -50,7 +50,7 @@ extension MOKMessage: JSQMessageData {
         let media = self.media()
         
         switch self.mediaType() {
-        case MOKPhoto.rawValue:
+        case Image.rawValue:
             (media as! JSQPhotoMediaItem).appliesMediaViewMaskAsOutgoing = flag
             break
         default:
@@ -75,7 +75,7 @@ extension MOKMessage: JSQMessageData {
         
         let media:JSQMessageMediaData!
         switch self.mediaType() {
-        case MOKAudio.rawValue:
+        case Audio.rawValue:
             if let audio = try? Data(contentsOf: self.fileURL()!){
                 media = BLAudioMedia(audio: audio)
                 (media as! BLAudioMedia).setFilePath(self.filePath())
@@ -86,7 +86,7 @@ extension MOKMessage: JSQMessageData {
             }
             
             break
-        case MOKPhoto.rawValue:
+        case Image.rawValue:
             let image = UIImage(contentsOfFile: self.filePath()!)
             media = JSQPhotoMediaItem(image: image)
             break
@@ -105,7 +105,7 @@ extension MOKMessage: JSQMessageData {
         self.cachedMedia = nil
         let media:JSQMessageMediaData!
         switch self.mediaType() {
-        case MOKAudio.rawValue:
+        case Audio.rawValue:
             print("audio!")
             
             let audio = data
@@ -116,7 +116,7 @@ extension MOKMessage: JSQMessageData {
             let asset = AVURLAsset(url: self.fileURL()!)
             (media as! BLAudioMedia).setAudioDuration(CMTimeGetSeconds(asset.duration))
             break
-        case MOKPhoto.rawValue:
+        case Image.rawValue:
             print("photo!")
             
             media = JSQPhotoMediaItem(image: UIImage(data: data))
@@ -138,10 +138,10 @@ extension MOKMessage: JSQMessageData {
       result = self.plainText
     }else{
       switch self.mediaType() {
-      case MOKAudio.rawValue:
+      case Audio.rawValue:
         result = "Audio"
         break
-      case MOKPhoto.rawValue:
+      case Image.rawValue:
         result = "Image"
         break
       default:

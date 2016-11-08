@@ -111,7 +111,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.nameLabel.textColor = UIColor.black
     self.nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
     self.nameLabel.textAlignment = NSTextAlignment.center
-    self.nameLabel.text = self.conversation.info["name"] as? String
+    self.nameLabel.text = self.conversation.info["name"] as? String ?? "Unknown"
     self.statusLabel.frame = CGRect(x: 0, y: self.descriptionView.frame.size.height - self.descriptionView.frame.size.height/2.4 - 2, width: self.descriptionView.frame.size.width, height: self.descriptionView.frame.size.height/2.4)
     self.statusLabel.textColor = UIColor.gray
     self.statusLabel.font = UIFont.systemFont(ofSize: 11)
@@ -766,8 +766,8 @@ extension ChatViewController {
         return
       }
       
-      //            let push = Monkey.sharedInstance()
-      let message = Monkey.sharedInstance().sendFile(data, type: MOKAudio, filename: recorder.url.lastPathComponent, encrypted: true, compressed: true, to: self.conversation.conversationId, params: ["length":Int(seconds)], push: "You received an audio", success: { (message) in
+      let push = self.createPush(File, fileType: Audio)
+      let message = Monkey.sharedInstance().sendFile(data, type: Audio, filename: recorder.url.lastPathComponent, encrypted: true, compressed: true, to: self.conversation.conversationId, params: ["length":Int(seconds)], push: push, success: { (message) in
         
         //refresh collectionView?
         
@@ -808,7 +808,8 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
     
     //        let message = MOKMessage(fileMessage: dirpath, type: MOKPhoto, sender: self.senderId, recipient: self.conversation.conversationId)
     
-    let message = Monkey.sharedInstance().sendFile(data, type: MOKPhoto, filename: filename, encrypted: true, compressed: true, to: self.conversation.conversationId, params: nil, push: nil, success: { (message) in
+    let push = self.createPush(File, fileType: Image)
+    let message = Monkey.sharedInstance().sendFile(data, type: Image, filename: filename, encrypted: true, compressed: true, to: self.conversation.conversationId, params: nil, push: push, success: { (message) in
       
       //refresh collectionView?
       
@@ -1005,7 +1006,8 @@ extension ChatViewController {
       textCopy += " \(wordArray.removeFirst())"
     }
     
-    let message = Monkey.sharedInstance().sendText(textCopy, to: self.conversation.conversationId, params: nil, push: "You received a text")
+    let push = self.createPush(Text, fileType: nil)
+    let message = Monkey.sharedInstance().sendText(textCopy, to: self.conversation.conversationId, params: nil, push: push)
     
     DBManager.store(message)
     self.messageArray.append(message)
@@ -1015,5 +1017,74 @@ extension ChatViewController {
     self.finishSendingMessage(animated: true)
     let remainingText = wordArray.joined(separator: " ")
     self.send(remainingText, size: size)
+  }
+  
+  func createPush(_ messageType:MOKMessageType, fileType:MOKFileType?) -> [String: Any] {
+    var locArgs: [String]
+    var locKey = ""
+    
+    if(self.conversation.isGroup()){
+      locArgs = [self.senderDisplayName, self.conversation.info["name"] as! String]
+      
+      switch messageType {
+      case Text:
+        locKey = "grouppushtextKey"
+        break
+      case File:
+        switch fileType {
+        case Audio?:
+          locKey = "grouppushaudioKey"
+          break
+        case Image?:
+          locKey = "grouppushimageKey"
+          break
+        case Archive?:
+          locKey = "grouppushfileKey"
+          break
+        default:
+          locKey = "grouppushtextKey"
+          break
+        }
+        break
+      default:
+        locKey = "grouppushtextKey"
+        break
+      }
+    }else{
+      locArgs = [self.senderDisplayName]
+      
+      switch messageType {
+      case Text:
+        locKey = "pushtextKey"
+        break
+      case File:
+        switch fileType {
+        case Audio?:
+          locKey = "pushaudioKey"
+          break
+        case Image?:
+          locKey = "pushimageKey"
+          break
+        case Archive?:
+          locKey = "pushfileKey"
+          break
+        default:
+          locKey = "pushtextKey"
+          break
+        }
+        break
+      default:
+        locKey = "pushtextKey"
+        break
+      }
+    }
+    
+    let push = ["iosData":["alert":["loc-key":locKey,
+                                    "loc-args":locArgs],
+                           "sound":"default"],
+                "andData":["loc-key":locKey,
+                          "loc-args":locArgs]
+                ] as [String : Any]
+    return push
   }
 }
