@@ -733,18 +733,19 @@ extension ConversationsListViewController {
     Monkey.sharedInstance().getConversationsSince(from, quantity: 5, success: { (conversations) in
       var idUsers = Set<String>()
       for conversation in conversations {
-        //do not replace if the conversation already exists
-        if let conv = self.conversationHash[conversation.conversationId] {
-          conv.info = conversation.info
-          conv.members = conversation.members
+        
+        // define last message
+        if(conversation.lastMessage?.messageId == ""){
+          conversation.lastMessage = nil
         }else{
-          self.conversationHash[conversation.conversationId] = conversation
-          self.conversationArray.append(conversation)
+          DBManager.store(conversation.lastMessage!)
         }
         
-        if let msg = conversation.lastMessage {
-          DBManager.store(msg)
+        //do not replace if the conversation already exists
+        if ((self.conversationHash[conversation.conversationId]) == nil) {
+          self.conversationArray.append(conversation)
         }
+        self.conversationHash[conversation.conversationId] = conversation
         
         idUsers.formUnion(Set(conversation.members as NSArray as! [String]))
         DBManager.store(conversation)
@@ -857,7 +858,6 @@ extension ConversationsListViewController {
   func handleTableRefresh(){
     self.getConversations(0)
   }
-  
 }
 
 class ChatViewCell: UITableViewCell {
