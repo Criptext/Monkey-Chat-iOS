@@ -81,7 +81,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var avatarImageView = UIImageView()
   
   // VIEW - messages - audio bubble
-  var audioBubbleOnPlay: RGCircularSlider!
+  var audioBubbleOnPlay: RGCircularSlider?
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -248,12 +248,13 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     
-    if(self.audioBubbleOnPlay != nil){
-      self.audioBubbleOnPlay.stopAudio()
+    if let player = self.audioBubbleOnPlay {
+      player.stopAudio()
       try! AVAudioSession.sharedInstance().setActive(false, with: AVAudioSessionSetActiveOptions.notifyOthersOnDeactivation)
       self.audioBubbleOnPlay = nil
       UIDevice.current.isProximityMonitoringEnabled = false
     }
+  
   }
   
   // MARK: - JSQMessagesViewController method overrides
@@ -825,37 +826,37 @@ extension ChatViewController {
 
 // MARK: - Audio Recording delegate
 extension ChatViewController: RGCircularSliderDelegate {
-  func audioDidBeginPlaying(_ audioSlider: Any?) -> Bool {
+  func audioDidBeginPlaying(_ audioSlider: Any) {
     try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
-    if (self.audioBubbleOnPlay != nil){
-      self.audioBubbleOnPlay.pauseAudio()
+    
+    if let player = self.audioBubbleOnPlay {
+     player.pauseAudio()
     }
-    self.audioBubbleOnPlay = audioSlider as! RGCircularSlider
+    
+    self.audioBubbleOnPlay = audioSlider as? RGCircularSlider
     UIDevice.current.isProximityMonitoringEnabled = true
-    return true
   }
   
-  func audioDidFinishPlaying(_ audioSlider: Any?) -> Bool {
+  func audioDidFinishPlaying(_ audioSlider: Any) {
     self.audioBubbleOnPlay = nil
     self.handleProximityChange()
     try! AVAudioSession.sharedInstance().setActive(false, with: .notifyOthersOnDeactivation)
-    return true
   }
   
-  func  audioDidBeginPause(_ audioSlider: Any?) -> Bool {
+  func  audioDidBeginPause(_ audioSlider: Any) {
     UIDevice.current.isProximityMonitoringEnabled = false
-    self.audioBubbleOnPlay = audioSlider as! RGCircularSlider
+    self.audioBubbleOnPlay = audioSlider as? RGCircularSlider
     try! AVAudioSession.sharedInstance().setActive(false, with: .notifyOthersOnDeactivation)
-    return true
   }
   
   func handleProximityChange() {
-    if(UIDevice.current.proximityState == true) {
+    if(UIDevice.current.proximityState) {
       try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
     }else{
-      if (self.audioBubbleOnPlay != nil){
-        self.audioBubbleOnPlay.pauseAudio()
+      if let player = self.audioBubbleOnPlay {
+        player.pauseAudio()
       }
+      
       try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
       UIDevice.current.isProximityMonitoringEnabled = false
     }
