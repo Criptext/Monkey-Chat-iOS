@@ -22,6 +22,7 @@
 		41AF85081CFDE917006ED473 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AF85071CFDE917006ED473 /* DBManager.swift */; };
 		41BC053A1D67A0F7005A1C89 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BC05391D67A0F7005A1C89 /* Conversation.swift */; };
 		41CF6D1B1D870A0100900A2D /* RotationNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */; };
+		E79CF7CF1DD3B7D70093F931 /* InfoConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79CF7CE1DD3B7D70093F931 /* InfoConversationViewController.swift */; };
 		E7B256071DB1483500E2BA5E /* NSNotificationCenterKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B256061DB1483500E2BA5E /* NSNotificationCenterKeys.swift */; };
 		F42EA0B04B68361D24074F23 /* Pods_MonkeyChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 122B21EF25353A13FDD348C1 /* Pods_MonkeyChat.framework */; };
 /* End PBXBuildFile section */
@@ -61,6 +62,7 @@
 		41BC05391D67A0F7005A1C89 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RotationNavigationController.swift; sourceTree = "<group>"; };
 		5B6983AA8E3ADE09EC6CBC88 /* Pods-MonkeyChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonkeyChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MonkeyChat/Pods-MonkeyChat.debug.xcconfig"; sourceTree = "<group>"; };
+		E79CF7CE1DD3B7D70093F931 /* InfoConversationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoConversationViewController.swift; sourceTree = "<group>"; };
 		E7B256061DB1483500E2BA5E /* NSNotificationCenterKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSNotificationCenterKeys.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -175,6 +177,7 @@
 				41CF6D1A1D870A0100900A2D /* RotationNavigationController.swift */,
 				41AF84F91CFD4963006ED473 /* ConversationListViewController.swift */,
 				41AF84FA1CFD4963006ED473 /* ChatViewController.swift */,
+				E79CF7CE1DD3B7D70093F931 /* InfoConversationViewController.swift */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 			files = (
 				41CF6D1B1D870A0100900A2D /* RotationNavigationController.swift in Sources */,
 				41AF84FF1CFD4963006ED473 /* ConversationListViewController.swift in Sources */,
+				E79CF7CF1DD3B7D70093F931 /* InfoConversationViewController.swift in Sources */,
 				41AF85051CFDE8F8006ED473 /* User.swift in Sources */,
 				41AF85001CFD4963006ED473 /* ChatViewController.swift in Sources */,
 				41A575651D52376500D26EAD /* Message.swift in Sources */,

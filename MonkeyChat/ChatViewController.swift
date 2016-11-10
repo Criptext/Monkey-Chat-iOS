@@ -72,6 +72,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var descriptionView = UIView()
   var nameLabel = UILabel()
   var statusLabel = UILabel()
+  var descriptionViewTapRecognizer: UITapGestureRecognizer!
   
   // VIEW - navigation bar - right button
   var negativeSpacerBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.fixedSpace, target: self, action: nil)
@@ -120,6 +121,9 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.descriptionView.addSubview(self.nameLabel)
     self.descriptionView.addSubview(self.statusLabel)
     self.navigationItem.titleView = self.descriptionView
+    self.descriptionViewTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.showInfoConversation(_:)))
+    self.descriptionViewTapRecognizer.numberOfTapsRequired = 1
+    self.descriptionView.addGestureRecognizer(self.descriptionViewTapRecognizer)
     
     // VIEW - navigation bar - right button
     self.negativeSpacerBarButtonItem.width = -12
@@ -228,7 +232,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     self.outgoingBubbleImageData = bubbleFactory?.outgoingMessagesBubbleImage(with: .jsq_messageBubbleBlue())
     self.incomingBubbleImageData = bubbleFactory?.incomingMessagesBubbleImage(with: .jsq_messageBubbleLightGray())
-    
     
     self.collectionView.reloadData()
   }
@@ -409,6 +412,14 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     return header
   }
   
+  override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    if !self.shouldRequestMessages {
+      return .zero
+    }
+    
+    return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
+  }
+  
   // MARK: UICollectionView DataSource
   override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return self.messageArray.count
@@ -502,7 +513,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
      *  This logic should be consistent with what you return from `attributedTextForCellTopLabelAtIndexPath:`
      *  The other label height delegate methods should follow similarly
      *
-     *  Show a timestamp for every 3rd message
+     *  Show a timestamp for every DAY
      */
     
     if indexPath.item == 0 {
@@ -525,7 +536,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
      *  This logic should be consistent with what you return from `heightForCellTopLabelAtIndexPath:`
      *  The other label text delegate methods should follow a similar pattern.
      *
-     *  Show a timestamp for every 3rd message
+     *  Show a timestamp for every DAY
      */
     let currentMessage = self.messageArray[indexPath.item]
     
@@ -610,7 +621,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
       return
     }
     
-    print(message.fileURL())
     self.previewItem = PreviewItem(title: "", url: message.fileURL()!)
     
     let vc = QLPreviewController()
@@ -619,7 +629,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     vc.reloadData()
     
     self.present(vc, animated: true, completion: nil)
-    
   }
   
   override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapCellAt indexPath: IndexPath!, touchLocation: CGPoint) {
@@ -682,7 +691,7 @@ extension ChatViewController {
   }
 }
 
-// MARK: - Audio delegate
+// MARK: - Audio Recording delegate
 extension ChatViewController {
   func startRecording(){
     
@@ -787,7 +796,6 @@ extension ChatViewController {
     try! AVAudioSession.sharedInstance().setActive(false, with: AVAudioSessionSetActiveOptions.notifyOthersOnDeactivation)
     AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
   }
-  
 }
 
 // MARK: - Image delegate
@@ -899,7 +907,6 @@ extension ChatViewController {
     
     if !self.conversation.isGroup() {
       guard let lastSeen = response["lastSeen"] as? String else {
-        
         let online = response["online"] as! String
         if online == "1" {
           self.statusLabel.text = "Online"
@@ -915,9 +922,19 @@ extension ChatViewController {
   }
 }
 
+//MARK: - Chat
+
 extension ChatViewController {
   
   // Conversation
+  func showInfoConversation(_ gestureRecognizer: UITapGestureRecognizer) {
+    print("conversation info")
+    
+    let vc = InfoConversationViewController()
+    
+    vc.conversation = self.conversation
+    self.navigationController?.pushViewController(vc, animated: true)
+  }
   
   // Message
   func loadMessages(_ animated:Bool) {
