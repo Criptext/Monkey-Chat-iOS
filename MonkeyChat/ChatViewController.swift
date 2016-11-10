@@ -80,6 +80,9 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var avatarButton = UIButton(type: UIButtonType.custom)
   var avatarImageView = UIImageView()
   
+  // VIEW - messages - audio bubble
+  var audioBubbleOnPlay: RGCircularSlider!
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -172,6 +175,12 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     //register listener for acknowledges of opens I do
     NotificationCenter.default.addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: NSNotification.Name.MonkeyConversationStatus, object: nil)
     
+    //register listener for UIDeviceProximityStateDidChangeNotification
+    NotificationCenter.default.addObserver(self, selector: #selector(self.handleProximityChange), name: NSNotification.Name(rawValue: "UIDeviceProximityStateDidChangeNotification"), object: nil)
+    
+    
+    
+    
     //Start by opening the conversation in Monkey
     Monkey.sharedInstance().openConversation(self.conversation.conversationId)
     
@@ -234,6 +243,17 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.incomingBubbleImageData = bubbleFactory?.incomingMessagesBubbleImage(with: .jsq_messageBubbleLightGray())
     
     self.collectionView.reloadData()
+  }
+  
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    
+    if(self.audioBubbleOnPlay != nil){
+      self.audioBubbleOnPlay.stopAudio()
+      try! AVAudioSession.sharedInstance().setActive(false, with: AVAudioSessionSetActiveOptions.notifyOthersOnDeactivation)
+      self.audioBubbleOnPlay = nil
+      UIDevice.current.isProximityMonitoringEnabled = false
+    }
   }
   
   // MARK: - JSQMessagesViewController method overrides
@@ -458,7 +478,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
       if isOutgoing {
         cell.textView.textColor = UIColor.white
         cell.textView.linkTextAttributes = [NSForegroundColorAttributeName : UIColor.white, NSUnderlineStyleAttributeName : NSUnderlineStyle.styleSingle.rawValue]
-
       } else {
         cell.textView.textColor = UIColor.black
         cell.textView.linkTextAttributes = [NSForegroundColorAttributeName : UIColor.black, NSUnderlineStyleAttributeName : NSUnderlineStyle.styleSingle.rawValue]
@@ -475,6 +494,12 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     if media!.needsDownload!() {
       print("Download!!!")
       self.downloadFile(message)
+    }
+    
+    if(message.mediaType() == Audio.rawValue){
+      var mediaSubviews:[UIView] = (message.media() as! BLAudioMedia).mediaView().subviews
+      let player = mediaSubviews[0] as! RGCircularSlider
+      player.delegate = self
     }
     
     return cell
@@ -795,6 +820,45 @@ extension ChatViewController {
     try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
     try! AVAudioSession.sharedInstance().setActive(false, with: AVAudioSessionSetActiveOptions.notifyOthersOnDeactivation)
     AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
+  }
+}
+
+// MARK: - Audio Recording delegate
+extension ChatViewController: RGCircularSliderDelegate {
+  func audioDidBeginPlaying(_ audioSlider: Any?) -> Bool {
+    try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
+    if (self.audioBubbleOnPlay != nil){
+      self.audioBubbleOnPlay.pauseAudio()
+    }
+    self.audioBubbleOnPlay = audioSlider as! RGCircularSlider
+    UIDevice.current.isProximityMonitoringEnabled = true
+    return true
+  }
+  
+  func audioDidFinishPlaying(_ audioSlider: Any?) -> Bool {
+    self.audioBubbleOnPlay = nil
+    self.handleProximityChange()
+    try! AVAudioSession.sharedInstance().setActive(false, with: .notifyOthersOnDeactivation)
+    return true
+  }
+  
+  func  audioDidBeginPause(_ audioSlider: Any?) -> Bool {
+    UIDevice.current.isProximityMonitoringEnabled = false
+    self.audioBubbleOnPlay = audioSlider as! RGCircularSlider
+    try! AVAudioSession.sharedInstance().setActive(false, with: .notifyOthersOnDeactivation)
+    return true
+  }
+  
+  func handleProximityChange() {
+    if(UIDevice.current.proximityState == true) {
+      try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+    }else{
+      if (self.audioBubbleOnPlay != nil){
+        self.audioBubbleOnPlay.pauseAudio()
+      }
+      try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
+      UIDevice.current.isProximityMonitoringEnabled = false
+    }
   }
 }
 

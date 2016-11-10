@@ -213,14 +213,6 @@ class ConversationsListViewController: UITableViewController {
     }
   }
   
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    
-    if let conversationController = segue.destination as? ChatViewController, let row = sender as? Int {
-      let conversation = conversationArray[row]
-      conversationController.conversation = conversation
-    }
-  }
-  
   deinit {
     //for iOS 8
     NotificationCenter.default.removeObserver(self)
