@@ -346,11 +346,13 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       print("Download!!!")
       self.downloadFile(message)
     }
-    
+
     if(message.mediaType() == Audio.rawValue){
-      var mediaSubviews:[UIView] = (message.media() as! BLAudioMedia).mediaView().subviews
-      let player = mediaSubviews[0] as! RGCircularSlider
-      player.delegate = self
+        if let mediaSubviews:[UIView] = (message.media() as! BLAudioMedia).mediaView()?.subviews{
+          if let player = mediaSubviews[0] as? RGCircularSlider {
+            player.delegate = self
+          }
+        }
     }
     
     return cell
