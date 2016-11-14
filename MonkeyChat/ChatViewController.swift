@@ -25,7 +25,7 @@ import Photos
  *  Look at the properties on `JSQMessagesCollectionViewFlowLayout` to see what is possible.
  */
 
-class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextViewPasteDelegate {
+class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPasteDelegate {
   
   let maxSize = 8500
   
@@ -46,12 +46,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var isGettingMessages = false
   var shouldRequestMessages = true
   
-  //identifier for header of collection view
-  var headerViewIdentifier = JSQMessagesActivityIndicatorHeaderView.headerReuseIdentifier()
-  
-  var outgoingBubbleImageData: JSQMessagesBubbleImage!
-  var incomingBubbleImageData: JSQMessagesBubbleImage!
-  
   let readDove = JSQMessagesAvatarImageFactory.avatarImage(with: UIImage(named: "check-blue-icon.png"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault))
   let sentDove = JSQMessagesAvatarImageFactory.avatarImage(with: UIImage(named: "check-grey-icon.png"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault))
   
@@ -65,7 +59,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
   var recorder:AVAudioRecorder?
   
   //timer
-  let timerLabel = UILabel()
   var timerRecording:Timer!
   
   // VIEW - navigation bar - title
@@ -139,30 +132,6 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     let rightBarButtonItems: [UIBarButtonItem] = [self.negativeSpacerBarButtonItem, self.avatarBarButtonItem]
     self.navigationItem.rightBarButtonItems = rightBarButtonItems
     
-    // VIEW - bubble
-    // set your cell identifiers
-    self.outgoingCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.cellReuseIdentifier()
-    self.outgoingMediaCellIdentifier = JSQMessagesCollectionViewCellOutgoing2.mediaCellReuseIdentifier()
-    
-    self.collectionView.register(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingCellIdentifier)
-    self.collectionView.register(JSQMessagesCollectionViewCellOutgoing2.nib(), forCellWithReuseIdentifier: self.outgoingMediaCellIdentifier)
-    
-    self.incomingCellIdentifier = JSQMessagesCollectionViewCellIncoming2.cellReuseIdentifier()
-    self.incomingMediaCellIdentifier = JSQMessagesCollectionViewCellIncoming2.mediaCellReuseIdentifier()
-    
-    self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingCellIdentifier)
-    self.collectionView.register(JSQMessagesCollectionViewCellIncoming2.nib(), forCellWithReuseIdentifier: self.incomingMediaCellIdentifier)
-    
-    
-    
-    
-    //
-    self.timerLabel.text = "00:00"
-    self.timerLabel.isHidden = true
-    self.inputToolbar.contentView.addSubview(self.timerLabel)
-    self.timerLabel.frame = CGRect(x: 30, y: 0, width: self.inputToolbar.contentView.frame.size.width, height: self.inputToolbar.contentView.frame.size.height)
-    self.inputToolbar.contentView.bringSubview(toFront: self.timerLabel)
-    
     /**
      *	Register monkey listeners
      */
@@ -197,12 +166,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     self.collectionView.collectionViewLayout.outgoingAvatarViewSize = CGSize(width: 12, height: 9.5)
     
     self.showLoadEarlierMessagesHeader = true
-    
-    /**
-     *  Register custom header view
-     */
-    self.collectionView.register(JSQMessagesActivityIndicatorHeaderView.nib(), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: JSQMessagesActivityIndicatorHeaderView.headerReuseIdentifier())
-    
+
     /**
      *  OPT-IN: allow cells to be deleted
      */
@@ -230,18 +194,7 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
      *  self.collectionView.collectionViewLayout.springinessEnabled = true
      */
     
-    /**
-     *  Create message bubble images objects.
-     *
-     *  Be sure to create your bubble images one time and reuse them for good performance.
-     *
-     */
-    
-    let bubbleFactory = JSQMessagesBubbleImageFactory(bubble: .jsq_bubbleCompactTailless(), capInsets: .zero)
-    
-    self.outgoingBubbleImageData = bubbleFactory?.outgoingMessagesBubbleImage(with: .jsq_messageBubbleBlue())
-    self.incomingBubbleImageData = bubbleFactory?.incomingMessagesBubbleImage(with: .jsq_messageBubbleLightGray())
-    
+
     self.collectionView.reloadData()
   }
   
@@ -432,6 +385,14 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     
     return header
   }
+
+  override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    if !self.shouldRequestMessages {
+      return .zero
+    }
+    
+    return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
+  }
   
   override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
     if !self.shouldRequestMessages {
@@ -473,6 +434,8 @@ class ChatViewController: JSQMessagesViewController, JSQMessagesComposerTextView
     if message.sender != self.senderId {
       isOutgoing = false
     }
+    
+    cell.dateLabel.text = self.getDate(message.timestampCreated, format: nil)
     
     if !message.isMediaMessage() {
       
