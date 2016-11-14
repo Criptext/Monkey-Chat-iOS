@@ -62,16 +62,7 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
   var timerRecording:Timer!
   
   // VIEW - navigation bar - title
-  var descriptionView = UIView()
-  var nameLabel = UILabel()
-  var statusLabel = UILabel()
   var descriptionViewTapRecognizer: UITapGestureRecognizer!
-  
-  // VIEW - navigation bar - right button
-  var negativeSpacerBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.fixedSpace, target: self, action: nil)
-  var avatarBarButtonItem = UIBarButtonItem()
-  var avatarButton = UIButton(type: UIButtonType.custom)
-  var avatarImageView = UIImageView()
   
   // VIEW - messages - audio bubble
   var audioBubbleOnPlay: RGCircularSlider?
@@ -103,35 +94,18 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     }
     
     // VIEW - navigation bar - title
-    self.descriptionView.frame = CGRect(x: 0, y: 0, width: self.view.frame.size.width/1.8, height: 44)
-    self.nameLabel.frame = CGRect(x: 0, y: self.descriptionView.frame.size.height - self.descriptionView.frame.size.height/2 - self.descriptionView.frame.size.height/2.5, width: self.descriptionView.frame.size.width, height: self.descriptionView.frame.size.height/2)
-    self.nameLabel.textColor = UIColor.black
-    self.nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
-    self.nameLabel.textAlignment = NSTextAlignment.center
     self.nameLabel.text = self.conversation.info["name"] as? String ?? "Unknown"
-    self.statusLabel.frame = CGRect(x: 0, y: self.descriptionView.frame.size.height - self.descriptionView.frame.size.height/2.4 - 2, width: self.descriptionView.frame.size.width, height: self.descriptionView.frame.size.height/2.4)
-    self.statusLabel.textColor = UIColor.gray
-    self.statusLabel.font = UIFont.systemFont(ofSize: 11)
-    self.statusLabel.textAlignment = NSTextAlignment.center
     self.statusLabel.text = self.nameMembersDescription ?? ""
-    self.descriptionView.addSubview(self.nameLabel)
-    self.descriptionView.addSubview(self.statusLabel)
-    self.navigationItem.titleView = self.descriptionView
+    
     self.descriptionViewTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.showInfoConversation(_:)))
     self.descriptionViewTapRecognizer.numberOfTapsRequired = 1
     self.descriptionView.addGestureRecognizer(self.descriptionViewTapRecognizer)
     
     // VIEW - navigation bar - right button
-    self.negativeSpacerBarButtonItem.width = -12
-    self.avatarButton.bounds = CGRect(x:0, y:0, width:36, height:36)
     self.avatarImageView.sd_setImage(with: self.conversation.getAvatarURL(), placeholderImage: UIImage(named: "Profile_imgDefault.png"))
     self.avatarButton.setImage(self.avatarImageView.image, for: UIControlState.normal)
-    self.avatarButton.layer.cornerRadius = 18
-    self.avatarButton.layer.masksToBounds = true
-    self.avatarBarButtonItem.customView = self.avatarButton
-    let rightBarButtonItems: [UIBarButtonItem] = [self.negativeSpacerBarButtonItem, self.avatarBarButtonItem]
-    self.navigationItem.rightBarButtonItems = rightBarButtonItems
     
+    self.mediaDataDelegate = self
     /**
      *	Register monkey listeners
      */
@@ -224,86 +198,7 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     NotificationCenter.default.post(name: Notification.Name.MonkeyChat.MessageSent, object: self)
     
   }
-  
-  override func didPressAccessoryButton(_ sender: UIButton!) {
-    self.inputToolbar.contentView.textView.resignFirstResponder()
     
-    let sheet = UIAlertController(title: "Media messages", message: nil, preferredStyle: .actionSheet)
-    
-    if UIImagePickerController.isSourceTypeAvailable(.camera) {
-      sheet.addAction(
-        UIAlertAction(title: "Take Picture", style: .default) { (action) in
-          
-          AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (granted) in
-            DispatchQueue.main.async(execute: {
-              if !granted {
-                let alertcontroller = UIAlertController(title: nil, message: "Maduro", preferredStyle: .alert)
-                alertcontroller.addAction(UIAlertAction(title: "Settings", style: .default, handler: { (action) in
-                  UIApplication.shared.openURL(URL(string: UIApplicationOpenSettingsURLString)!)
-                }))
-                alertcontroller.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-                
-                alertcontroller.popoverPresentationController?.sourceView = self.view
-                alertcontroller.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.size.width / 2.0, y: self.view.bounds.size.height-45, width: 1.0, height: 1.0)
-                self.present(alertcontroller, animated: true, completion: nil)
-                return
-              }
-              
-              let picker = UIImagePickerController()
-              picker.delegate = self
-              picker.sourceType = .camera
-              
-              self.present(picker, animated: true, completion: nil)
-            })
-          })
-      })
-    }
-    
-    let photoButton = UIAlertAction(title: "Choose existing picture", style: .default) { (action) in
-      
-      PHPhotoLibrary.requestAuthorization({ (status) in
-        DispatchQueue.main.async(execute: {
-          switch status {
-          case .authorized:
-            let picker = UIImagePickerController()
-            picker.delegate = self
-            picker.sourceType = .photoLibrary
-            
-            self.present(picker, animated: true, completion: nil)
-            break
-          case .denied, .restricted:
-            fallthrough
-          default:
-            let alertcontroller = UIAlertController(title: nil, message: "Maduro", preferredStyle: .alert)
-            alertcontroller.addAction(UIAlertAction(title: "Settings", style: .default, handler: { (action) in
-              UIApplication.shared.openURL(URL(string: UIApplicationOpenSettingsURLString)!)
-            }))
-            alertcontroller.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            
-            alertcontroller.popoverPresentationController?.sourceView = self.view
-            alertcontroller.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.size.width / 2.0, y: self.view.bounds.size.height-45, width: 1.0, height: 1.0)
-            self.present(alertcontroller, animated: true, completion: nil)
-            break
-          }
-        })
-      })
-      //            let photoItem = JSQPhotoMediaItem(image: UIImage(named: "goldengate"))
-      //            let photoMessage = JSQMessage(senderId: self.senderId, displayName: self.senderDisplayName, media: photoItem)
-      //
-      //            self.messageArray.append(photoMessage)
-      //
-      //            JSQSystemSoundPlayer.jsq_playMessageSentSound()
-      //            self.finishSendingMessageAnimated(true)
-    }
-    
-    let cancelButton = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-    
-    sheet.addAction(photoButton)
-    sheet.addAction(cancelButton)
-    
-    self.present(sheet, animated: true, completion: nil)
-  }
-  
   // MARK: JSQMessages CollectionView DataSource
   override func collectionView(_ collectionView: JSQMessagesCollectionView?, messageDataForItemAt indexPath: IndexPath) -> JSQMessageData? {
     let message = self.messageArray[indexPath.item]
@@ -386,14 +281,6 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     return header
   }
 
-  override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-    if !self.shouldRequestMessages {
-      return .zero
-    }
-    
-    return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
-  }
-  
   override func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
     if !self.shouldRequestMessages {
       return .zero
@@ -827,22 +714,12 @@ extension ChatViewController: RGCircularSliderDelegate {
 }
 
 // MARK: - Image delegate
-extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-  func imagePickerController(_ picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
-    
+extension ChatViewController: MOKMediaDataDelegate {
+  func selectedImage(_ data: Data!) {
     let filename = "photo\(UInt64(Date().timeIntervalSince1970)).png"
     let dirpath = self.documentsPath + filename
     
-    guard let representation = UIImageJPEGRepresentation(image, 0.6) else {
-      return
-    }
-    
-    let data = NSData.init(data: representation) as Data
     try? data.write(to: URL(fileURLWithPath: dirpath), options: [.atomic])
-    
-    self.dismiss(animated: true, completion: nil)
-    
-    //        let message = MOKMessage(fileMessage: dirpath, type: MOKPhoto, sender: self.senderId, recipient: self.conversation.conversationId)
     
     let push = self.createPush(File, fileType: Image)
     let message = Monkey.sharedInstance().sendFile(data, type: Image, filename: filename, encrypted: true, compressed: true, to: self.conversation.conversationId, params: nil, push: push, success: { (message) in
@@ -861,8 +738,8 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
     self.finishSendingMessage()
   }
   
-  func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-    self.dismiss(animated: true, completion: nil)
+  func recordedAudio(_ data: Data!) {
+    
   }
 }
 

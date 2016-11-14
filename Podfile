@@ -5,7 +5,7 @@ target 'MonkeyChat' do
   pod 'MonkeyKitUI', :git => 'https://github.com/Criptext/Monkey-UI-iOS.git', :branch => '7.4.1'
   pod 'RealmSwift', '~> 1.1.0'
   pod 'SDWebImage', '~> 3.8.1'
-  pod 'Whisper', :git => 'https://github.com/hyperoslo/Whisper.git', :branch => 'swift-3'
+  pod 'Whisper', :git => 'https://github.com/hyperoslo/Whisper.git'
   pod 'MonkeyKit', :git => 'https://github.com/Criptext/Monkey-SDK-iOS.git', :branch => '1.0.8'
 end
 
