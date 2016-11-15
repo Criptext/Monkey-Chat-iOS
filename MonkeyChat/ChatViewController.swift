@@ -256,10 +256,13 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       return nil
     }
     
+    if !self.conversation.isGroup() && self.conversation.lastSeen >= message.timestampCreated {
+      return self.readDove
+    }
+    
     if message.wasSent() {
       return self.sentDove
     }
-    
     
     return nil
   }
@@ -346,11 +349,13 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       print("Download!!!")
       self.downloadFile(message)
     }
-    
+
     if(message.mediaType() == Audio.rawValue){
-      var mediaSubviews:[UIView] = (message.media() as! BLAudioMedia).mediaView().subviews
-      let player = mediaSubviews[0] as! RGCircularSlider
-      player.delegate = self
+      if let mediaSubviews:[UIView] = (message.media() as! BLAudioMedia).mediaView()?.subviews{
+        if let player = mediaSubviews[0] as? RGCircularSlider {
+          player.delegate = self
+        }
+      }
     }
     
     return cell
@@ -653,19 +658,20 @@ extension ChatViewController {
       
       let push = self.createPush(File, fileType: Audio)
       let message = Monkey.sharedInstance().sendFile(data, type: Audio, filename: recorder.url.lastPathComponent, encrypted: true, compressed: true, to: self.conversation.conversationId, params: ["length":Int(seconds)], push: push, success: { (message) in
-        
         //refresh collectionView?
         
       }) { (task, error) in
         //mark message as failed
-        
       }
       
       DBManager.store(message)
-      self.messageHash[message.messageId] = message
       self.messageArray.append(message)
+      self.messageHash[message.messageId] = message
       self.conversation.lastMessage = message
+//      DBManager.store(self.conversation)
       self.finishSendingMessage()
+      
+      NotificationCenter.default.post(name: Notification.Name.MonkeyChat.MessageSent, object: self)
     }
     
     try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
