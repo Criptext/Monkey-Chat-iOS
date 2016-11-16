@@ -106,9 +106,11 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     self.avatarButton.setImage(self.avatarImageView.image, for: UIControlState.normal)
     
     self.mediaDataDelegate = self
+    
     /**
      *	Register monkey listeners
      */
+    
     //register listener for incoming messages
     NotificationCenter.default.addObserver(self, selector: #selector(self.messageReceived), name: NSNotification.Name.MonkeyMessage, object: nil)
     
@@ -118,10 +120,18 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     //register listener for acknowledges of opens I do
     NotificationCenter.default.addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: NSNotification.Name.MonkeyConversationStatus, object: nil)
     
+    //register listener for open received
+    NotificationCenter.default.addObserver(self, selector: #selector(self.openReceived(_:)), name: NSNotification.Name.MonkeyConversationOpen, object: nil)
+    
+    //register listener for open received
+    NotificationCenter.default.addObserver(self, selector: #selector(self.closeReceived(_:)), name: NSNotification.Name.MonkeyConversationClose, object: nil)
+    
+    /**
+     *	Register chat listeners
+     */
+    
     //register listener for UIDeviceProximityStateDidChangeNotification
     NotificationCenter.default.addObserver(self, selector: #selector(self.handleProximityChange), name: NSNotification.Name(rawValue: "UIDeviceProximityStateDidChangeNotification"), object: nil)
-    
-    
     
     
     //Start by opening the conversation in Monkey
@@ -182,6 +192,7 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       UIDevice.current.isProximityMonitoringEnabled = false
     }
   
+    self.conversation.unread = 0;
   }
   
   // MARK: - JSQMessagesViewController method overrides
@@ -256,7 +267,7 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       return nil
     }
     
-    if !self.conversation.isGroup() && self.conversation.lastSeen >= message.timestampCreated {
+    if !self.conversation.isGroup() && self.conversation.lastRead >= message.timestampCreated {
       return self.readDove
     }
     
@@ -800,9 +811,15 @@ extension ChatViewController {
         return
     }
     
+    if Int(acknowledge["status"] as! String) == 52 {
+      if message.timestampCreated > self.conversation.lastRead {
+        self.conversation.lastRead = message.timestampCreated
+        DBManager.store(self.conversation)
+      }
+    }
+    
     message.messageId = newId
     message.oldMessageId = oldId
-    
     self.collectionView.reloadData()
   }
   
@@ -825,12 +842,55 @@ extension ChatViewController {
         return
       }
 
-      self.conversation.lastSeen = (lastSeen as NSString).doubleValue as TimeInterval
+      self.conversation.lastSeen = Double(lastSeen)! as TimeInterval
+      if let lastOpenMeTmp = response["lastOpenMe"] as? String {
+        let lastOpenMe = Double(lastOpenMeTmp)! as TimeInterval
+        if (lastOpenMe > self.conversation.lastRead) {
+          self.conversation.lastRead = lastOpenMe
+        }
+      }
+      
       DBManager.store(self.conversation)
       self.statusLabel.text = "Last Seen " + self.conversation.getLastSeenDate()
       
     }
   }
+  
+  func openReceived(_ notification:Foundation.Notification) {
+    guard let response = (notification as NSNotification).userInfo else {
+      return
+    }
+
+    let conversationId = response["sender"] as! String
+    let timestamp = Date().timeIntervalSince1970
+    if conversationId == self.conversation.conversationId {
+      self.conversation.lastRead = timestamp
+      self.statusLabel.text = "Online"
+      DBManager.store(self.conversation)
+      self.collectionView.reloadData()
+    }else {
+      guard let conversation = DBManager.getConversation(conversationId) else {
+        return
+      }
+      conversation.lastRead = timestamp
+      DBManager.store(conversation)
+    }
+  }
+  
+  func closeReceived(_ notification:Foundation.Notification) {
+    guard let response = (notification as NSNotification).userInfo else {
+      return
+    }
+    
+    let conversationId = response["sender"] as! String
+    let timestamp = Date().timeIntervalSince1970
+    if conversationId == self.conversation.conversationId {
+      self.conversation.lastSeen = timestamp
+      self.statusLabel.text = "Last Seen " + self.conversation.getLastSeenDate()
+      DBManager.store(self.conversation)
+    }
+  }
+  
 }
 
 //MARK: - Chat
@@ -839,10 +899,8 @@ extension ChatViewController {
   
   // Conversation
   func showInfoConversation(_ gestureRecognizer: UITapGestureRecognizer) {
-    print("conversation info")
     
     let vc = InfoConversationViewController()
-    
     vc.conversation = self.conversation
     self.navigationController?.pushViewController(vc, animated: true)
   }

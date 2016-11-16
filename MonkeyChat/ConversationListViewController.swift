@@ -134,7 +134,7 @@ class ConversationsListViewController: UITableViewController {
     NotificationCenter.default.addObserver(self, selector: #selector(self.groupList(_:)), name: NSNotification.Name.MonkeyGroupCreate, object: nil)
     
     //register listener for opens
-    NotificationCenter.default.addObserver(self, selector: #selector(self.openReceived(_:)), name: NSNotification.Name.MonkeyOpen, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(self.openReceived(_:)), name: NSNotification.Name.MonkeyConversationOpen, object: nil)
     
     //register listener for acknowledges of opens I do
     NotificationCenter.default.addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: NSNotification.Name.MonkeyConversationStatus, object: nil)
@@ -151,6 +151,7 @@ class ConversationsListViewController: UITableViewController {
         self.conversationHash[conversation.conversationId] = conversation
       }
     }
+    self.updateConversationList()
     
     /**
      *  Initialize Monkey
@@ -604,8 +605,7 @@ extension ConversationsListViewController {
     }
     
     DBManager.store(conversation!)
-    self.sortConversations()
-    self.tableView.reloadData()
+    self.updateConversationList()
     
   }
   
@@ -807,8 +807,7 @@ extension ConversationsListViewController {
           self.showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.preview())
         }
         
-        self.sortConversations()
-        self.tableView.reloadData()
+        self.updateConversationList()
         
         }, failure: { (task, error) in
           print(error)
@@ -833,8 +832,7 @@ extension ConversationsListViewController {
       showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.preview())
     }
     
-    self.sortConversations()
-    self.tableView.reloadData()
+    self.updateConversationList()
   }
  
   func sortConversations() {

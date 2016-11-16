@@ -239,9 +239,10 @@ extension DBManager {
     if let lastMessage = conversation.lastMessage {
       conversationItem.lastMessage = DBManager.transform(lastMessage)
     }
+    conversationItem.unread = Int32(conversation.unread)
     conversationItem.lastModified = conversation.lastModified
     conversationItem.lastSeen = conversation.lastSeen
-    conversationItem.unread = Int32(conversation.unread)
+    conversationItem.lastRead = conversation.lastRead
     
     return conversationItem
   }
@@ -254,13 +255,14 @@ extension DBManager {
 
     let conversation = MOKConversation(id: conversationItem.conversationId)
     conversation.members = NSMutableArray(array: conversationItem.members.components(separatedBy: ","))
-    conversation.lastSeen = conversationItem.lastSeen
-    conversation.lastModified = conversationItem.lastModified
-    conversation.unread = conversationItem.unread
     conversation.info = info
     if let messageItem = conversationItem.lastMessage {
       conversation.lastMessage = DBManager.transform(messageItem)
     }
+    conversation.unread = conversationItem.unread
+    conversation.lastModified = conversationItem.lastModified
+    conversation.lastSeen = conversationItem.lastSeen
+    conversation.lastRead = conversationItem.lastRead
     
     return conversation
   }
