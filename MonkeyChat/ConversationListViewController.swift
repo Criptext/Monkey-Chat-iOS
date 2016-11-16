@@ -134,13 +134,10 @@ class ConversationsListViewController: UITableViewController {
     NotificationCenter.default.addObserver(self, selector: #selector(self.groupList(_:)), name: NSNotification.Name.MonkeyGroupCreate, object: nil)
     
     //register listener for opens
-    NotificationCenter.default.addObserver(self, selector: #selector(self.openReceived(_:)), name: NSNotification.Name.MonkeyOpen, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(self.openReceived(_:)), name: NSNotification.Name.MonkeyConversationOpen, object: nil)
     
     //register listener for acknowledges of opens I do
     NotificationCenter.default.addObserver(self, selector: #selector(self.openResponseReceived(_:)), name: NSNotification.Name.MonkeyConversationStatus, object: nil)
-    
-    //register listener for messages updated in last conversation open
-    NotificationCenter.default.addObserver(self, selector: #selector(self.updateConversationList), name: NSNotification.Name.MonkeyChat.MessageSent, object: nil)
     
     /**
      *  Load initial conversations
@@ -151,6 +148,7 @@ class ConversationsListViewController: UITableViewController {
         self.conversationHash[conversation.conversationId] = conversation
       }
     }
+    self.updateConversationList()
     
     /**
      *  Initialize Monkey
@@ -199,7 +197,7 @@ class ConversationsListViewController: UITableViewController {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
-    self.tableView?.reloadData()
+    self.updateConversationList()
     
     guard let index = self.tableView.indexPathsForVisibleRows?.first else {
       //hide search bar on empty list
@@ -325,6 +323,7 @@ class ConversationsListViewController: UITableViewController {
     
     //set all messages to read
     conversation.unread = 0
+    DBManager.store(conversation)
     
     vc.conversation = conversation
     self.navigationController?.pushViewController(vc, animated: true)
@@ -427,6 +426,12 @@ class ConversationsListViewController: UITableViewController {
     
     return [deleteAction]
   }
+  
+  func updateConversationList() {
+    self.sortConversations()
+    self.tableView.reloadData()
+  }
+  
 }
 
 //MARK: SearchController Delegate
@@ -560,19 +565,23 @@ extension ConversationsListViewController {
   }
 }
 
-//MARK: Communications between view controllers
-extension ConversationsListViewController {
-  func updateConversationList() {
-    self.sortConversations()
-    self.tableView.reloadData()
-  }
-}
-
 //MARK: Monkey socket messages
 extension ConversationsListViewController {
   func messageReceived(_ notification:Foundation.Notification){
     //do nothing if there's no valid message
     guard let userInfo = (notification as NSNotification).userInfo, let message = userInfo["message"] as? MOKMessage else {
+      return
+    }
+    
+    // validate if the message conversation is open
+    if let cv = self.navigationController?.topViewController as? ChatViewController {
+      if cv.conversation.conversationId == message.conversationId(Monkey.sharedInstance().monkeyId()){
+        return
+      }
+    }
+    
+    // validate if message exists
+    if DBManager.existsMessage(message.messageId, oldId: message.oldMessageId!) {
       return
     }
     
@@ -604,8 +613,7 @@ extension ConversationsListViewController {
     }
     
     DBManager.store(conversation!)
-    self.sortConversations()
-    self.tableView.reloadData()
+    self.updateConversationList()
     
   }
   
@@ -807,8 +815,7 @@ extension ConversationsListViewController {
           self.showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.preview())
         }
         
-        self.sortConversations()
-        self.tableView.reloadData()
+        self.updateConversationList()
         
         }, failure: { (task, error) in
           print(error)
@@ -833,8 +840,7 @@ extension ConversationsListViewController {
       showInAppNotification(conversation.info["name"] as! String?, avatarUrl: conversation.getAvatarURL(), description: message.preview())
     }
     
-    self.sortConversations()
-    self.tableView.reloadData()
+    self.updateConversationList()
   }
  
   func sortConversations() {

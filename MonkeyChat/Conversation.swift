@@ -16,6 +16,7 @@ class ConversationItem: Object {
     dynamic var lastSeen = Double()
     dynamic var unread:Int32 = 0
     dynamic var lastModified = Double()
+    dynamic var lastRead = Double()
     
     override static func primaryKey() -> String? {
         return "conversationId"
