@@ -192,7 +192,6 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       UIDevice.current.isProximityMonitoringEnabled = false
     }
   
-    self.conversation.unread = 0;
   }
   
   // MARK: - JSQMessagesViewController method overrides
@@ -206,7 +205,6 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
      */
     
     self.send(text ?? "", size: self.maxSize)
-    NotificationCenter.default.post(name: Notification.Name.MonkeyChat.MessageSent, object: self)
     
   }
     
@@ -682,7 +680,6 @@ extension ChatViewController {
 //      DBManager.store(self.conversation)
       self.finishSendingMessage()
       
-      NotificationCenter.default.post(name: Notification.Name.MonkeyChat.MessageSent, object: self)
     }
     
     try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
@@ -773,9 +770,7 @@ extension ChatViewController {
       
       let view = UIImageView()
       view.sd_setImage(with: conversation?.getAvatarURL())
-      
       var title = "Notification"
-      
       if let user = DBManager.getUser(message.sender) {
         title = (user.info!["name"] ?? "Notification") as! String
         view.sd_setImage(with: user.getAvatarURL())
@@ -789,11 +784,12 @@ extension ChatViewController {
       return
     }
     
-    conversation!.lastMessage = message
+    // save message
+    DBManager.store(message)
     
+    conversation!.lastMessage = message
     self.messageHash[message.messageId] = message
     self.messageArray.append(message)
-    
     self.finishReceivingMessage()
   }
   
@@ -886,7 +882,6 @@ extension ChatViewController {
     let timestamp = Date().timeIntervalSince1970
     if conversationId == self.conversation.conversationId {
       self.conversation.lastSeen = timestamp
-      self.statusLabel.text = "Last Seen " + self.conversation.getLastSeenDate()
       DBManager.store(self.conversation)
     }
   }
