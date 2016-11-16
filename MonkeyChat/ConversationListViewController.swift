@@ -580,6 +580,11 @@ extension ConversationsListViewController {
       }
     }
     
+    // validate if message exists
+    if DBManager.existsMessage(message.messageId, oldId: message.oldMessageId!) {
+      return
+    }
+    
     // save message
     DBManager.store(message)
     
