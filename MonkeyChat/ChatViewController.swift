@@ -123,9 +123,6 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     //register listener for open received
     NotificationCenter.default.addObserver(self, selector: #selector(self.openReceived(_:)), name: NSNotification.Name.MonkeyConversationOpen, object: nil)
     
-    //register listener for open received
-    NotificationCenter.default.addObserver(self, selector: #selector(self.closeReceived(_:)), name: NSNotification.Name.MonkeyConversationClose, object: nil)
-    
     /**
      *	Register chat listeners
      */
@@ -834,6 +831,10 @@ extension ChatViewController {
         let online = response["online"] as! String
         if online == "1" {
           self.statusLabel.text = "Online"
+          let timestamp = Date().timeIntervalSince1970
+          self.conversation.lastRead = timestamp
+          DBManager.store(self.conversation)
+          self.collectionView.reloadData()
         }
         return
       }
@@ -870,19 +871,6 @@ extension ChatViewController {
       }
       conversation.lastRead = timestamp
       DBManager.store(conversation)
-    }
-  }
-  
-  func closeReceived(_ notification:Foundation.Notification) {
-    guard let response = (notification as NSNotification).userInfo else {
-      return
-    }
-    
-    let conversationId = response["sender"] as! String
-    let timestamp = Date().timeIntervalSince1970
-    if conversationId == self.conversation.conversationId {
-      self.conversation.lastSeen = timestamp
-      DBManager.store(self.conversation)
     }
   }
   
