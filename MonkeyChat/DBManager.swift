@@ -82,7 +82,7 @@ class DBManager {
     let realm = try! Realm()
     
     let condition = "((sender == %@ AND recipient == %@) OR" + (recipient.contains("G:") ? "(sender != %@ AND recipient == %@))" : "(recipient == %@ AND sender == %@))")
-    let predicate = NSPredicate(format: "\(condition) AND timestampCreated < %f", sender, recipient, sender, recipient, from?.timestampCreated ?? 0)
+    let predicate = NSPredicate(format: "\(condition) AND timestampCreated < \(floor(from?.timestampCreated ?? 0))", sender, recipient, sender, recipient)
     let results = realm.objects(MessageItem.self).filter(predicate).sorted(byProperty: "timestampCreated", ascending: false)
     
     var messages = [MOKMessage]()
@@ -126,6 +126,14 @@ class DBManager {
     let newMessage = MessageItem()
     newMessage.messageId = id
     newMessage.oldMessageId = oldId
+    newMessage.sender = message.sender
+    newMessage.recipient = message.recipient
+    newMessage.plainText = message.plainText
+    newMessage.encryptedText = message.encryptedText
+    newMessage.timestampOrder = message.timestampOrder
+    newMessage.timestampCreated = message.timestampCreated
+    newMessage.props = message.props
+    newMessage.params = message.params
     
     try! realm.write {
       realm.delete(message)

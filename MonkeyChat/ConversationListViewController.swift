@@ -284,9 +284,7 @@ class ConversationsListViewController: UITableViewController {
     
     cell.dateLabel.text = lastMessage.relativeDate()
     
-    var previewText:String!
-    previewText = lastMessage.preview()
-    
+    var previewText = lastMessage.preview()
     
     //message is outgoing
     if Monkey.sharedInstance().isMessageOutgoing(lastMessage) {
@@ -618,12 +616,13 @@ extension ConversationsListViewController {
   }
   
   func acknowledgeReceived(_ notification:Foundation.Notification){
+    guard let acknowledge = (notification as NSNotification).userInfo else {
+      return
+    }
     
-    //unwrap Ids
-    guard let acknowledge = (notification as NSNotification).userInfo,
-      let oldId = acknowledge["oldId"] as? String,
-      let newId = acknowledge["newId"] as? String
-      else {
+    // get message to update id
+    guard let oldId = acknowledge["oldId"] as? String,
+      let newId = acknowledge["newId"] as? String else {
         return
     }
     
