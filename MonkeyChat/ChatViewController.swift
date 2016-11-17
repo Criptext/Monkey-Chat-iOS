@@ -85,6 +85,7 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     
     // DATA - conversation - messages
     if let lastMessage = self.conversation.lastMessage  { // load messages
+      
       self.messageArray = DBManager.getMessages(self.senderId, recipient: self.conversation.conversationId, from: lastMessage, count: 10)
       if self.messageArray.index(of: lastMessage) == nil { // include last message
         self.messageArray.append(lastMessage)
@@ -674,7 +675,7 @@ extension ChatViewController {
       self.messageArray.append(message)
       self.messageHash[message.messageId] = message
       self.conversation.lastMessage = message
-//      DBManager.store(self.conversation)
+      DBManager.store(self.conversation)
       self.finishSendingMessage()
       
     }
@@ -795,24 +796,31 @@ extension ChatViewController {
       return
     }
     
-    //update last message if necessary
+    // get message to update id
     guard let oldId = acknowledge["oldId"] as? String,
       let newId = acknowledge["newId"] as? String,
-      let message = self.messageHash[oldId]
-      , message.messageId == oldId || message.messageId == newId else {
-        //nothing to do
+      let message = self.messageHash[oldId],
+      message.messageId == oldId || message.messageId == newId else {
+        // nothing to do
         return
     }
     
+    message.messageId = newId
+    message.oldMessageId = oldId
+    
+    // update last message
+    if self.conversation.lastMessage?.messageId == oldId {
+      self.conversation.lastMessage = message
+    }
+    
+    // update last read
     if Int(acknowledge["status"] as! String) == 52 {
       if message.timestampCreated > self.conversation.lastRead {
         self.conversation.lastRead = message.timestampCreated
         DBManager.store(self.conversation)
       }
     }
-    
-    message.messageId = newId
-    message.oldMessageId = oldId
+
     self.collectionView.reloadData()
   }
   
@@ -982,6 +990,7 @@ extension ChatViewController {
     self.messageArray.append(message)
     self.messageHash[message.messageId] = message
     self.conversation.lastMessage = message
+    DBManager.store(self.conversation)
     JSQSystemSoundPlayer.jsq_playMessageSentSound()
     self.finishSendingMessage(animated: true)
     let remainingText = wordArray.joined(separator: " ")
