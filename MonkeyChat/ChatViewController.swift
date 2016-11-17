@@ -795,7 +795,7 @@ extension ChatViewController {
       return
     }
     
-    //update last message if necessary
+    // get message to update id
     guard let oldId = acknowledge["oldId"] as? String,
       let newId = acknowledge["newId"] as? String,
       let message = self.messageHash[oldId]
@@ -804,15 +804,22 @@ extension ChatViewController {
         return
     }
     
+    message.messageId = newId
+    message.oldMessageId = oldId
+    
+    // update last message
+    if self.conversation.lastMessage?.messageId == oldId {
+      self.conversation.lastMessage = message
+    }
+    
+    // update last read
     if Int(acknowledge["status"] as! String) == 52 {
       if message.timestampCreated > self.conversation.lastRead {
         self.conversation.lastRead = message.timestampCreated
         DBManager.store(self.conversation)
       }
     }
-    
-    message.messageId = newId
-    message.oldMessageId = oldId
+
     self.collectionView.reloadData()
   }
   
@@ -982,6 +989,7 @@ extension ChatViewController {
     self.messageArray.append(message)
     self.messageHash[message.messageId] = message
     self.conversation.lastMessage = message
+    DBManager.store(self.conversation)
     JSQSystemSoundPlayer.jsq_playMessageSentSound()
     self.finishSendingMessage(animated: true)
     let remainingText = wordArray.joined(separator: " ")

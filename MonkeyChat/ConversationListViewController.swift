@@ -632,21 +632,23 @@ extension ConversationsListViewController {
       Monkey.sharedInstance().getPendingMessages()
       return
     }
-    
+
     //update local message
     DBManager.updateMessage(newId, oldId: oldId)
-    
-    //update last message if necessary
+
+    // get message to update id
     guard let conversation = self.conversationHash[acknowledge["conversationId"] as! String],
       let lastMessage = conversation.lastMessage
       , lastMessage.messageId == oldId else {
         //nothing to do
         return
-        
     }
     
     lastMessage.messageId = newId
     lastMessage.oldMessageId = oldId
+    
+    // update last message
+    DBManager.store(conversation)
     
     self.tableView.reloadData()
   }
