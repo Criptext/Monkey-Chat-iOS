@@ -263,6 +263,10 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
       return nil
     }
     
+    if message.needsResend() {
+      return nil
+    }
+    
     if !self.conversation.isGroup() && self.conversation.lastRead >= message.timestampCreated {
       return self.readDove
     }
@@ -326,11 +330,16 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     
     let message = self.messageArray[indexPath.item]
     
-    var isOutgoing = true
+    var isOutgoing = false
     
-    if message.sender != self.senderId {
-      isOutgoing = false
+    if message.sender == self.senderId {
+      isOutgoing = true
+      
+      (cell as! MonkeyCollectionViewCellOutgoing).resendButton.isHidden = !message.needsResend()
+      (cell as! MonkeyCollectionViewCellOutgoing).monkeyDelegate = self
     }
+    
+    
     
     cell.dateLabel.text = self.getDate(message.timestampCreated, format: nil)
     
@@ -537,6 +546,28 @@ class ChatViewController: MOKChatViewController, JSQMessagesComposerTextViewPast
     }
     
     return true
+  }
+}
+
+// MARK: - Resend Delegate
+extension ChatViewController: MonkeyCollectionViewCellOutgoingDelegate {
+  func didPressResend(_ cell: JSQMessagesCollectionViewCellOutgoing!) {
+    print("resend")
+    let indexPath = self.collectionView.indexPath(for: cell)
+    let message = self.messageArray[(indexPath?.item)!]
+    
+    if message.isMediaMessage() {
+      Monkey.sharedInstance().sendFileMessage(message, success: { (filemessage) in
+        
+      }, failure: { (task, error) in
+        
+      })
+    }else{
+      Monkey.sharedInstance().sendTextMessage(message)
+    }
+    
+    self.collectionView.collectionViewLayout.invalidateLayout()
+    self.collectionView.reloadData()
   }
 }
 
@@ -777,7 +808,11 @@ extension ChatViewController {
       let announcement = Announcement(title: title, subtitle: (notification.userInfo!["message"] as! MOKMessage).plainText, image: view.image, duration: 2.0, action: {
         print("finish presenting!")
       })
-      Whisper.show(shout: announcement, to: self.navigationController!)
+      guard let navigationVC = self.navigationController else{
+        return
+      }
+      
+      Whisper.show(shout: announcement, to: navigationVC)
       
       return
     }
