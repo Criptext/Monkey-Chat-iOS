@@ -12,6 +12,13 @@ import RealmSwift
 
 class DBManager {
   
+  class func deleteAll(){
+    let realm = try! Realm()
+    try! realm.write {
+      realm.deleteAll()
+    }
+  }
+  
   class func store(_ message:MOKMessage) {
     
     if(message.messageId == ""){
@@ -118,7 +125,7 @@ class DBManager {
     return results.count > 0
   }
   
-  class func updateMessage(_ id:String, oldId:String) {
+  class func updateMessage(_ id:String, oldId:String, conversation: MOKConversation?) {
     let realm = try! Realm()
     guard let message = realm.object(ofType: MessageItem.self, forPrimaryKey: oldId) else {
       return
@@ -138,6 +145,12 @@ class DBManager {
     try! realm.write {
       realm.delete(message)
       realm.add(newMessage, update: true)
+      
+      guard let mokconv = conversation, let conv = realm.object(ofType: ConversationItem.self, forPrimaryKey: mokconv.conversationId) else {
+        return
+      }
+      conv.lastMessage = newMessage
+      realm.add(conv, update: true)
     }
   }
 }
@@ -290,7 +303,7 @@ extension DBManager {
     
     var predicate = NSPredicate(format: "lastModified > 0")
     if let conv = from {
-      predicate = NSPredicate(format: "lastModified < %f", conv.lastModified)
+      predicate = NSPredicate(format: "lastModified < \(conv.lastModified)")
     }
     let results = realm.objects(ConversationItem.self).filter(predicate).sorted(byProperty: "lastModified", ascending: false)
     

@@ -843,6 +843,9 @@ extension ChatViewController {
     message.messageId = newId
     message.oldMessageId = oldId
     
+    //update local message
+    DBManager.updateMessage(newId, oldId: oldId, conversation: self.conversation)
+    
     // update last message
     if self.conversation.lastMessage?.messageId == oldId {
       self.conversation.lastMessage = message

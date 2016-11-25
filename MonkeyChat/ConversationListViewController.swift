@@ -632,17 +632,19 @@ extension ConversationsListViewController {
       return
     }
 
-    //update local message
-    DBManager.updateMessage(newId, oldId: oldId)
-
     // get message to update id
-    guard let conversation = self.conversationHash[acknowledge["conversationId"] as! String],
-      let lastMessage = conversation.lastMessage
-      , lastMessage.messageId == oldId else {
+    guard let conversation = self.conversationHash[acknowledge["conversationId"] as! String] else {
         //nothing to do
         return
     }
     
+    //update local message
+    DBManager.updateMessage(newId, oldId: oldId, conversation: conversation)
+    
+    
+    guard let lastMessage = conversation.lastMessage, lastMessage.messageId == oldId else {
+        return
+    }
     lastMessage.messageId = newId
     lastMessage.oldMessageId = oldId
     
@@ -786,7 +788,7 @@ extension ConversationsListViewController {
           DBManager.store(newUser)
           conversation.members = [message.sender, message.recipient]
         }else{
-          conversation.members = info["members"] as! NSMutableArray
+          conversation.members = NSMutableArray(array: info["members"] as! Array)
           
           var idUsers = Set<String>()
           idUsers.formUnion(Set(conversation.members as NSArray as! [String]))
@@ -800,7 +802,7 @@ extension ConversationsListViewController {
           }
         }
         
-        conversation.info = NSMutableDictionary(dictionary: info)
+        conversation.info = NSMutableDictionary(dictionary: info["info"] as! Dictionary)
         conversation.lastMessage = message
         conversation.lastSeen = 0
         conversation.lastModified = message.timestampCreated
@@ -855,6 +857,10 @@ extension ConversationsListViewController {
   }
   
   func handleTableRefresh(){
+    self.conversationArray = []
+    self.conversationHash = [:]
+    self.tableView.reloadData()
+    DBManager.deleteAll()
     self.getConversations(0)
   }
 }
